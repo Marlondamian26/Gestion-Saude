@@ -28,13 +28,29 @@ from rest_framework_simplejwt.views import (  # <-- NUEVAS IMPORTACIONES
 from usuarios.views import CustomTokenObtainPairView
 
 from django.http import JsonResponse
+from django.db import connection
 
 def health_check(request):
     return JsonResponse({"status": "ok"})
 
+
+def db_keepalive(request):
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT 1")
+            cursor.fetchone()
+        return JsonResponse({"status": "ok", "db": "connected"})
+    except Exception as e:
+        return JsonResponse(
+            {"status": "error", "db": "disconnected", "detail": str(e)},
+            status=500,
+        )
+
+
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('health/', health_check),
+    path('health/db/', db_keepalive),
     
     # Rutas JWT (autenticación)
     path('api/token/', CustomTokenObtainPairView.as_view(), name='token_obtain_pair'),
