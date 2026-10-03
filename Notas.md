@@ -5,7 +5,7 @@
 | Endpoint | Descripción |
 |----------|-------------|
 | `https://gestion-saude-backend.onrender.com/` | Sitio principal |
-| `https://gestion-saude-backend.onrender.com/health/` | Health check (para UptimeRobot) |
+| `https://gestion-saude-backend.onrender.com/health/db/` | Health check (para UptimeRobot) |
 | `https://gestion-saude-backend.onrender.com/admin/` | Panel de administración |
 | `https://gestion-saude-backend.onrender.com/api/token/` | Obtener JWT |
 
@@ -20,7 +20,7 @@ El plan gratuito de Render apaga el servidor después de 15 minutos de inactivid
    - Click en "Add New Monitor"
    - **Monitor Type**: HTTP(s)
    - **Friendly Name**: Backend Belkis
-   - **URL (or IP)**: `https://gestion-saude-backend.onrender.com/health/`
+   - **URL (or IP)**: `https://gestion-saude-backend.onrender.com/health/db/`
    - **Monitoring Interval**: 5 minutes (el mínimo gratuito)
    - **Timeout**: 30 seconds
 
