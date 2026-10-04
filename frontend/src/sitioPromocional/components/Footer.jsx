@@ -1,12 +1,13 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { FaFacebook, FaInstagram, FaWhatsapp, FaStethoscope, FaArrowRight } from 'react-icons/fa';
-import { useLanguage } from '../../context/LanguageContext';
+import { useLanguage } from '../../context/PromoLanguageContext';
 import { CLINIC_NAME, CLINIC_ADDRESS, CLINIC_PHONE, CLINIC_EMAIL, PLATFORM_URL, REGISTRO_URL } from '../config/constants';
 
 function Footer() {
-  const { tPromo, language } = useLanguage();
+  const { tPromo } = useLanguage();
   const currentYear = new Date().getFullYear();
+  const _ = currentYear;
   
   const formatWhatsApp = (phone) => {
     return phone.replace(/\s/g, '');
@@ -39,14 +40,14 @@ function Footer() {
         <div className="promo-footer-section">
           <h4>{tPromo('navInicio')}</h4>
           <div className="promo-footer-links">
-            <Link to={PLATFORM_URL}>
+            <a href={PLATFORM_URL}>
               <FaArrowRight style={{ marginRight: '0.5rem', fontSize: '0.75rem' }} />
               {tPromo('navLogin')}
-            </Link>
-            <Link to={REGISTRO_URL}>
+            </a>
+            <a href={REGISTRO_URL}>
               <FaArrowRight style={{ marginRight: '0.5rem', fontSize: '0.75rem' }} />
               {tPromo('ctaRegister')}
-            </Link>
+            </a>
             <a href="#servicios">
               <FaArrowRight style={{ marginRight: '0.5rem', fontSize: '0.75rem' }} />
               {tPromo('navServicos')}

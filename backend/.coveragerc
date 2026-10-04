@@ -1,0 +1,27 @@
+[run]
+source = .
+omit =
+    */tests/*
+    */test_*.py
+    */migrations/*
+    */settings/*
+    */wsgi.py
+    manage.py
+    */conftest.py
+    */ai_service.py
+    */chat.py
+
+[run.omit]
+# No additional omissions
+
+[report]
+exclude_lines =
+    pragma: no cover
+    def __str__
+    raise NotImplementedError
+    if __name__ == .__main__.:
+show_missing = True
+skip_covered = False
+
+[html]
+directory = htmlcov

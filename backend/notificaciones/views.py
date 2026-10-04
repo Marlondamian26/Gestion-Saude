@@ -26,7 +26,9 @@ class NotificacionViewSet(viewsets.ModelViewSet):
     
     def get_queryset(self):
         """Cada usuario solo ve sus propias notificaciones"""
-        return Notificacion.objects.filter(usuario=self.request.user)
+        return Notificacion.objects.filter(
+            usuario=self.request.user
+        ).select_related('usuario')
     
     @action(detail=False, methods=['post'])
     def marcar_todas_leidas(self, request):

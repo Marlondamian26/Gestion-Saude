@@ -1,4 +1,5 @@
 import axios from 'axios'
+import { showError } from './errorHandler'
 
 const getApiUrl = () => {
   if (typeof import.meta !== 'undefined' && import.meta.env) {
@@ -127,6 +128,33 @@ axiosInstance.interceptors.response.use(
     }
     
     return Promise.reject(error)
+  }
+)
+
+// [FASE 4 §4.4.3] Manejo centralizado de errores para códigos no-401.
+// - 403 → "Sin permisos"
+// - 5xx → "Error del servidor"
+// - Network → "Sin conexión"
+// - 404 → dejado para el caller (algunos endpoints usan 404 como "no existe")
+axiosInstance.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.code === 'ERR_NETWORK' || error.code === 'ECONNABORTED') {
+      showError('No se pudo conectar con el servidor. Verifique su conexión.', 'network');
+      return Promise.reject(error);
+    }
+
+    if (error.response?.status === 403) {
+      showError('No tienes permisos para acceder a este recurso.', 'forbidden');
+      return Promise.reject(error);
+    }
+
+    if (error.response?.status >= 500) {
+      showError('Error del servidor. Por favor intenta más tarde.', 'server');
+      return Promise.reject(error);
+    }
+
+    return Promise.reject(error);
   }
 )
 

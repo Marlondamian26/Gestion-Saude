@@ -1,32 +1,32 @@
 import React from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { FaGlobe, FaHome } from 'react-icons/fa';
 import { useLanguage } from '../context/LanguageContext';
 
 const PromocionalToggle = () => {
-  const navigate = useNavigate();
   const location = useLocation();
   const { t } = useLanguage();
-  
+
   const isPromocional = location.pathname === '/' || location.pathname === '/promocional';
+  const promoUrl = import.meta.env.VITE_PROMO_URL || 'https://gestion-saude-promo.onrender.com';
 
   const handleClick = () => {
     if (isPromocional) {
-      navigate('/dashboard');
+      window.location.href = window.location.origin + '/dashboard';
     } else {
-      navigate('/promocional');
+      window.location.href = promoUrl;
     }
   };
 
   return (
-    <button 
+    <button
       onClick={handleClick}
       style={styles.button}
       title={isPromocional ? t('backToDashboard') : 'Ver sitio web promocional'}
       aria-label={isPromocional ? t('backToDashboard') : 'Ver sitio web promocional'}
     >
       <span style={styles.icon}>
-        <FaHome />
+        <FaGlobe />
       </span>
     </button>
   );

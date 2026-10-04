@@ -1,5 +1,6 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
+from django.core.validators import MinValueValidator, MaxValueValidator
 
 class Usuario(AbstractUser):
     """
@@ -37,8 +38,8 @@ class Usuario(AbstractUser):
         null=True,
         verbose_name='Fecha de nacimiento'
     )
-    # Hacer email opcional (aunque AbstractUser lo requiere, podemos permitir blank)
-    email = models.EmailField(blank=True, verbose_name='Correo electrónico')
+    # Hacer email opcional pero único (null=True para DB, blank=True para formularios)
+    email = models.EmailField(unique=True, null=True, blank=True, verbose_name='Correo electrónico')
     
     # ✅ Solucionar conflictos de related_name
     groups = models.ManyToManyField(
@@ -63,42 +64,37 @@ class Usuario(AbstractUser):
         return f"{nombre} - {self.get_rol_display()}"
 
     def save(self, *args, **kwargs):
-        # Forzar rol 'admin' para el usuario genérico 'admin'
-        if self.username == 'admin':
-            self.rol = 'admin'
-        
-        # si el rol es 'admin' forzar flags de superuser/staff
-        if self.rol == 'admin':
-            self.is_superuser = True
-            self.is_staff = True
-        else:
-            # si no es admin y no es el usuario genérico, dejar de ser superuser
-            if self.username != 'admin':
-                self.is_superuser = False
         super().save(*args, **kwargs)
     
     class Meta:
         verbose_name = 'Usuario'
         verbose_name_plural = 'Usuarios'
+        # [FASE 7 §7.1.4] Índice en rol para queries frecuentes de filtrado por rol
+        indexes = [
+            models.Index(fields=['rol'], name='usuario_rol_idx'),
+        ]
 
 
 # Señales
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 
+
 @receiver(post_save, sender='usuarios.Usuario')
-def crear_perfil_paciente(sender, instance, created, **kwargs):
-    """Crea automáticamente un perfil de Paciente para usuarios con rol 'patient'.
-
-    Esto asegura que los pacientes registrados manualmente o via API siempre tengan
-    un registro en la tabla Paciente, lo que facilita su gestión tanto en el
-    panel de administración de Django como en el dashboard de React.
+def sincronizar_perfil_paciente(sender, instance, created, **kwargs):
     """
-    # evitamos importar Paciente al principio para romper posibles dependencias
-    from .models import Paciente
+    Sincroniza el perfil de Paciente con el rol del Usuario.
 
+    Políticas (§3.4):
+    - P1 (Creación): Si rol == 'patient', crea Paciente.
+      Idempotente: get_or_create evita duplicados.
+    - P2 (Cambio de rol): No elimina Paciente al cambiar rol 'patient' → otro.
+      Mantiene historial de citas. Si vuelve a 'patient', el Paciente ya existe.
+      El Paciente 'huérfano' permanece en BD (invisibilidad gestionada en frontend).
+    - P3 (Eliminación): Usuario→Paciente es CASCADE (heredado).
+      Cita.paciente/cita.doctor también son CASCADE — pendiente decisión negocio (FASE 7).
+    """
     if instance.rol == 'patient' and instance.username != 'admin':
-        # get_or_create evita errores si ya existe
         Paciente.objects.get_or_create(usuario=instance)
 
 class Especialidad(models.Model):
@@ -285,6 +281,16 @@ class Horario(models.Model):
         ordering = ['doctor', 'dia_semana', 'hora_inicio']
         verbose_name = 'Horario'
         verbose_name_plural = 'Horarios'
+        constraints = [
+            models.CheckConstraint(
+                condition=~models.Q(hora_fin__lte=models.F('hora_inicio')),
+                name='horario_hora_fin_mayor_inicio',
+            ),
+        ]
+        # [FASE 7 §7.1.4] Índice compuesto para consulta de horarios disponibles por doctor + día
+        indexes = [
+            models.Index(fields=['doctor', 'dia_semana', 'activo'], name='horario_doc_dia_activo_idx'),
+        ]
     
     def __str__(self):
         dias = dict(self.DIAS_SEMANA)
@@ -331,6 +337,12 @@ class Cita(models.Model):
         blank=True,
         verbose_name='Notas internas (solo staff)'
     )
+    duracion_minutos = models.PositiveIntegerField(
+        default=30,
+        validators=[MinValueValidator(10), MaxValueValidator(240)],
+        verbose_name='Duración en minutos',
+        help_text='Duración de la cita. Default: 30 minutos.',
+    )
     fecha_creacion = models.DateTimeField(
         auto_now_add=True,
         verbose_name='Fecha de creación'
@@ -341,10 +353,22 @@ class Cita(models.Model):
     )
     
     class Meta:
-        unique_together = ['doctor', 'fecha', 'hora']  # Evita dobles reservas
         ordering = ['fecha', 'hora']
         verbose_name = 'Cita'
         verbose_name_plural = 'Citas'
+        constraints = [
+            # Unique para citas activas (no canceladas) — permite rebooking de slots liberados
+            models.UniqueConstraint(
+                fields=['doctor', 'fecha', 'hora'],
+                condition=~models.Q(estado='cancelada'),
+                name='cita_unique_activa',
+            ),
+        ]
+        # [FASE 7 §7.1.4] Índices para queries frecuentes: overlap check, filtrado por doctor/paciente/fecha
+        indexes = [
+            models.Index(fields=['doctor', 'fecha', 'estado'], name='cita_doc_fecha_estado_idx'),
+            models.Index(fields=['paciente', 'fecha'], name='cita_paciente_fecha_idx'),
+        ]
     
     def __str__(self):
         return f"{self.paciente} con {self.doctor} - {self.fecha} {self.hora}"

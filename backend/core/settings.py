@@ -12,6 +12,42 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 
 from pathlib import Path
 import os
+import logging
+from django.core.exceptions import ImproperlyConfigured
+
+# [FASE 6 §6.2] Sentry — inicializar antes que otros imports para capturar errores tempranos
+SENTRY_DSN = os.environ.get('SENTRY_DSN')
+if SENTRY_DSN and os.environ.get('DEBUG', 'False') == 'False':
+    import sentry_sdk
+    from sentry_sdk.integrations.django import DjangoIntegration
+    from sentry_sdk.integrations.logging import LoggingIntegration
+
+    def _scrub_pii(event, hint=None):
+        """Elimina headers sensibles antes de enviar a Sentry (RGPD)."""
+        if 'request' in event:
+            headers = event['request'].get('headers', {})
+            for h in ['Authorization', 'Cookie', 'X-Api-Key']:
+                headers.pop(h, None)
+        return event
+
+    sentry_logging = LoggingIntegration(
+        level=logging.INFO,
+        event_level=logging.ERROR,
+    )
+
+    sentry_sdk.init(
+        dsn=SENTRY_DSN,
+        integrations=[
+            DjangoIntegration(),
+            sentry_logging,
+        ],
+        environment=os.environ.get('SENTRY_ENV', 'production'),
+        release=os.environ.get('RENDER_GIT_COMMIT', 'unknown')[:7],
+        traces_sample_rate=float(os.environ.get('SENTRY_TRACES_SAMPLE_RATE', '0.1')),
+        profiles_sample_rate=0.1,
+        send_default_pii=False,
+        before_send=_scrub_pii,
+    )
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -20,26 +56,57 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-&)-^#6c1$g5jsvzxqo)zkjp42l)l=-cs1_y&saw6=3^!(+v)=4')
-
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.getenv('DEBUG', 'False') == 'True'
+DEBUG = os.environ.get('DEBUG', 'False').lower() == 'true'
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'belkis-saude.com', 'www.belkis-saude.com', 'gestion-saude-backend.onrender.com', 'gestion-saude.onrender.com', '*.onrender.com']
+# SECURITY WARNING: keep the secret key used in production secret!
+SECRET_KEY = os.environ.get('SECRET_KEY')
+if not SECRET_KEY:
+    if DEBUG:
+        SECRET_KEY = 'django-insecure-dev-only-key-not-for-production'
+    else:
+        raise ImproperlyConfigured("SECRET_KEY must be set in production")
+
+ALLOWED_HOSTS = [h.strip() for h in os.environ.get('ALLOWED_HOSTS', '').split(',') if h.strip()]
+if not ALLOWED_HOSTS:
+    if DEBUG:
+        ALLOWED_HOSTS = ['localhost', '127.0.0.1', '*.localhost']
+    else:
+        raise ImproperlyConfigured("ALLOWED_HOSTS must be set in production")
+
+# CSRF trusted origins — must include frontend domains for cross-origin POST
+CSRF_TRUSTED_ORIGENS = [o.strip() for o in os.environ.get('CSRF_TRUSTED_ORIGENS', '').split(',') if o.strip()]
+if not CSRF_TRUSTED_ORIGENS and DEBUG:
+    CSRF_TRUSTED_ORIGENS = ['http://localhost:5173', 'http://127.0.0.1:5173']
 
 # Cache configuration for rate limiting and session management
-# Using LocMemCache for development; use Redis for production
-CACHES = {
-    'default': {
-        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
-        'LOCATION': 'belkis-saude-cache',
-        'TIMEOUT': 300,  # Default timeout: 5 minutes
-        'OPTIONS': {
-            'MAX_ENTRIES': 1000
+# Uses Redis in production (REDIS_URL env var); falls back to LocMemCache in development
+REDIS_URL = os.environ.get('REDIS_URL')
+if REDIS_URL:
+    CACHES = {
+        'default': {
+            'BACKEND': 'django_redis.cache.RedisCache',
+            'LOCATION': REDIS_URL,
+            'OPTIONS': {
+                'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+            },
+            'KEY_PREFIX': 'gestion-saude',
+            'TIMEOUT': 300,
         }
     }
-}
+elif not DEBUG:
+    raise ImproperlyConfigured("REDIS_URL must be set in production for cache backend")
+else:
+    CACHES = {
+        'default': {
+            'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+            'LOCATION': 'belkis-saude-cache',
+            'TIMEOUT': 300,
+            'OPTIONS': {
+                'MAX_ENTRIES': 1000
+            }
+        }
+    }
 
 
 # Application definition
@@ -80,7 +147,7 @@ ROOT_URLCONF = 'core.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'sitio'],  # Agregar directorio donde se sirve el frontend
+        'DIRS': [],  # Frontend servido como Static Site separado (§2.4)
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -100,13 +167,25 @@ WSGI_APPLICATION = 'core.wsgi.application'
 
 import dj_database_url
 
-DATABASES = {
-    'default': dj_database_url.config(
-        default='postgresql://postgres:Gestion-Saude@qzqghurkbjcirjgoosow.supabase.co:5432/postgres',
-        conn_max_age=600,
-        ssl_require=True
-    )
-}
+DATABASE_URL_CONFIG = os.environ.get('DATABASE_URL')
+if DATABASE_URL_CONFIG:
+    DATABASES = {
+        'default': dj_database_url.config(
+            default=DATABASE_URL_CONFIG,
+            conn_max_age=600,
+            ssl_require=True
+        )
+    }
+    DATABASES['default']['CONN_HEALTH_CHECKS'] = True
+    DATABASES['default']['OPTIONS'] = DATABASES['default'].get('OPTIONS', {})
+    DATABASES['default']['OPTIONS']['connect_timeout'] = 10
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
 
 
 # Password validation
@@ -143,11 +222,12 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
+STATIC_ROOT = BASE_DIR / 'staticfiles'
 
-# Media files (uploaded images)
-MEDIA_URL = '/sitio/'
-MEDIA_ROOT = BASE_DIR / 'sitio'
+# Media files (uploaded images) — separated from frontend build (§2.4)
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
 
 # Ensure media directories exist
 import os
@@ -157,25 +237,67 @@ try:
 except Exception as e:
     print(f"Warning: Could not create media directories: {e}")
 
+# [FASE 7 §7.4] Storage backend con feature flag
+# Si MEDIA_STORAGE=s3, usa S3 (Cloudflare R2/Supabase Storage/AWS S3)
+# Si no, usa FileSystemStorage (default, para dev)
+# VER NOTA: django-storages y boto3 están en requirements.txt como comentados;
+# instalar con: pip install django-storages[s3] boto3
+if os.environ.get('MEDIA_STORAGE') == 's3':
+    try:
+        STORAGES = {
+            'default': {
+                'BACKEND': 'storages.backends.s3.S3Storage',
+                'OPTIONS': {
+                    'access_key': os.environ.get('AWS_ACCESS_KEY_ID'),
+                    'secret_key': os.environ.get('AWS_SECRET_ACCESS_KEY'),
+                    'bucket_name': os.environ.get('AWS_STORAGE_BUCKET_NAME'),
+                    'endpoint_url': os.environ.get('AWS_S3_ENDPOINT_URL'),
+                    'region_name': os.environ.get('AWS_S3_REGION_NAME', 'auto'),
+                    'default_acl': None,
+                    'querystring_auth': True,
+                    'file_overwrite': False,
+                    'object_parameters': {'CacheControl': 'max-age=86400'},
+                },
+            },
+            'staticfiles': {
+                'BACKEND': 'whitenoise.storage.CompressedManifestStaticFilesStorage',
+            },
+        }
+    except ImportError:
+        print('[FASE 7 §7.4] django-storages no instalado; usando FileSystemStorage')
+        STORAGES = {
+            'default': {
+                'BACKEND': 'django.core.files.storage.FileSystemStorage',
+            },
+            'staticfiles': {
+                'BACKEND': 'whitenoise.storage.CompressedManifestStaticFilesStorage',
+            },
+        }
+else:
+    STORAGES = {
+        'default': {
+            'BACKEND': 'django.core.files.storage.FileSystemStorage',
+        },
+        'staticfiles': {
+            'BACKEND': 'whitenoise.storage.CompressedManifestStaticFilesStorage',
+        },
+    }
 
-# Al final del archivo, añade la configuración de CORS:
-# Permite que React (puertos 5173, 5174, 5175) se conecte
-CORS_ALLOWED_ORIGINS = [
+
+# CORS configuration — origins driven by env var CORS_ALLOWED_ORIGINS (comma-separated)
+_default_cors_origins = [
     "http://localhost:5173",
     "http://127.0.0.1:5173",
     "http://localhost:5174",
     "http://127.0.0.1:5174",
     "http://localhost:5175",
     "http://127.0.0.1:5175",
-    "https://gestion-saude.onrender.com",
-    "https://gestion-saude-backend.onrender.com",
 ]
+_env_cors = [o.strip() for o in os.environ.get('CORS_ALLOWED_ORIGINS', '').split(',') if o.strip()]
+CORS_ALLOWED_ORIGENS = _env_cors if _env_cors else _default_cors_origins
 
-# Opcional: Si quieres permitir credenciales (cookies, sesiones)
+# Si hay credenciales permitidas, los hosts permitidos deben coincidir
 CORS_ALLOW_CREDENTIALS = True
-
-# Permitir todas las orígenes desde el frontend desplegado y manejo global de CORS
-CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_METHODS = [
     'DELETE',
     'GET',
@@ -229,6 +351,7 @@ REST_FRAMEWORK = {
     'DEFAULT_THROTTLE_RATES': {
         'user': '60/minute',  # Rate limit for authenticated users
         'anon': '30/minute',  # Rate limit for anonymous users
+        'registro': '5/minute',  # Dedicated rate limit for public registration
     }
 }
 
@@ -240,6 +363,23 @@ EMAIL_PORT = int(os.getenv('EMAIL_PORT', 587))
 EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS', 'True') == 'True'
 EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', '')
 EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', '')
+
+# [FASE 5 §5.3] Email backend: Resend/anymail si está configurado, console en dev
+RESEND_API_KEY = os.getenv('RESEND_API_KEY', '')
+
+if RESEND_API_KEY:
+    EMAIL_BACKEND = 'anymail.backends.resend.EmailBackend'
+    ANYMAIL = {
+        'RESEND_API_KEY': RESEND_API_KEY,
+    }
+else:
+    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+    if not DEBUG:
+        logging.warning("[FASE 5 §5.3] Email: fallback a console backend (sin RESEND_API_KEY en prod)")
+
+# [FASE 5 §5.2] Limitar tamaño de uploads en memoria
+DATA_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024  # 10MB
+FILE_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024  # 10MB
 
 # Configuración de Twilio (opcional)
 TWILIO_ACCOUNT_SID = os.getenv('TWILIO_ACCOUNT_SID', '')
@@ -262,4 +402,48 @@ SIMPLE_JWT = {
     'USER_ID_CLAIM': 'user_id',
     'AUTH_TOKEN_CLASSES': ('rest_framework_simplejwt.tokens.AccessToken',),
     'TOKEN_TYPE_CLAIM': 'token_type',
+}
+
+# Security settings for production (HTTPS / HSTS / secure cookies)
+# Only activated when DEBUG=False so local dev over HTTP is unaffected
+if not DEBUG:
+    SECURE_SSL_REDIRECT = True
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SECURE_HSTS_SECONDS = 31536000
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
+
+# [FASE 6 §6.3] Logging estructurado: JSON en prod, texto legible en dev
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'json': {
+            '()': 'pythonjsonlogger.jsonlogger.JsonFormatter',
+            'format': '%(asctime)s %(name)s %(levelname)s %(message)s',
+        },
+        'verbose': {
+            'format': '{levelname} {asctime} {name} {module} {message}',
+            'style': '{',
+        },
+    },
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose' if DEBUG else 'json',
+        },
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': 'INFO',
+    },
+    'loggers': {
+        'django': {'handlers': ['console'], 'level': 'INFO', 'propagate': False},
+        'django.request': {'handlers': ['console'], 'level': 'WARNING', 'propagate': False},
+        'django.security': {'handlers': ['console'], 'level': 'WARNING', 'propagate': False},
+        'chatia.metrics': {'handlers': ['console'], 'level': 'INFO', 'propagate': False},
+        'notificaciones.services': {'handlers': ['console'], 'level': 'WARNING', 'propagate': False},
+    },
 }

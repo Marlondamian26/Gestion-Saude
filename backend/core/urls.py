@@ -17,7 +17,6 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include, re_path
 from django.views.static import serve
-from django.views.generic import TemplateView
 from django.conf import settings
 from django.conf.urls.static import static
 from rest_framework_simplejwt.views import (  # <-- NUEVAS IMPORTACIONES
@@ -30,6 +29,7 @@ from usuarios.views import CustomTokenObtainPairView
 from django.http import JsonResponse
 from django.db import connection
 
+# [FASE 0] Health check DB (mantener compatibilidad)
 def db_keepalive(request):
     try:
         with connection.cursor() as cursor:
@@ -42,10 +42,14 @@ def db_keepalive(request):
             status=500,
         )
 
+# [FASE 6 §6.4] Health check completo
+from .health import health_view
+
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('health/db/', db_keepalive),
+    path('health/', health_view, name='health'),  # [FASE 6 §6.4]
     
     # Rutas JWT (autenticación)
     path('api/token/', CustomTokenObtainPairView.as_view(), name='token_obtain_pair'),
@@ -57,12 +61,10 @@ urlpatterns = [
     path('api/', include('notificaciones.urls')), 
 ]
 
-# Servir archivos media en producción con WhiteNoise
+# Servir archivos media en producción
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 else:
     urlpatterns += [
-        re_path(r'^sitio/(?P<path>.*)$', serve, {'document_root': settings.MEDIA_ROOT}),
-        # Catch-all para SPA: servir index.html para cualquier ruta no manejada
-        re_path(r'^.*$', TemplateView.as_view(template_name='index.html')),
+        re_path(r'^media/(?P<path>.*)$', serve, {'document_root': settings.MEDIA_ROOT}),
     ]

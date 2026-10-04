@@ -5,24 +5,59 @@ services:
     region: oregon
     plan: free
     workingDirectory: backend
-    buildCommand: set -e && echo "Installing requirements..." && pip install -r requirements.txt && echo "Making migrations..." && python manage.py makemigrations && echo "Migrating..." && python manage.py migrate --noinput --verbosity=2 && echo "Showing migrations..." && python manage.py showmigrations && echo "Collecting static..." && python manage.py collectstatic --noinput
-    startCommand: gunicorn core.wsgi:application --bind 0.0.0.0:$PORT
+    buildCommand: set -e && echo "Installing requirements..." && pip install -r requirements.txt && echo "Running deploy checks..." && python manage.py check --deploy --fail-level WARNING && echo "Migrating..." && python manage.py migrate --noinput --verbosity=2 && echo "Collecting static..." && python manage.py collectstatic --noinput
+    startCommand: gunicorn core.wsgi:application --bind 0.0.0.0:$PORT --workers ${RENDER_CPU_COUNT:-1} --threads 4 --timeout 120  # WSGI; alternativa ASGI: uvicorn core.asgi:application --host 0.0.0.0 --port $PORT --workers 1 --limit-concurrency 1000
     envVars:
       - key: DATABASE_URL
         fromDatabase:
           name: Gestion-Saude-Base_de_Datos
           property: connectionString
       - key: SECRET_KEY
-        generateValue: true
+        sync: false
       - key: DEBUG
         value: "False"
       - key: ALLOWED_HOSTS
         value: "gestion-saude-backend.onrender.com,localhost,127.0.0.1"
-      - key: CORS_ALLOWED_ORIGINS
+      - key: CSRF_TRUSTED_ORIGENS
         value: "https://gestion-saude.onrender.com,https://gestion-saude-backend.onrender.com"
-      - key: VITE_API_URL
-        value: "https://gestion-saude-backend.onrender.com/api"
+      - key: CORS_ALLOWED_ORIGENS
+        value: "https://gestion-saude.onrender.com,https://gestion-saude-backend.onrender.com,https://gestion-saude-promo.onrender.com"
+      - key: REDIS_URL
+        sync: false
       - key: DEMO_PATIENT_USERNAME
         value: "patient"
       - key: DEMO_PATIENT_PASSWORD
         value: "patient123"
+
+  - type: static
+    name: Gestion-Saude-frontend
+    region: oregon
+    plan: free
+    rootDir: frontend
+    buildCommand: npm ci && npm run build
+    staticPublishPath: dist
+    envVars:
+      - key: VITE_API_URL
+        value: https://gestion-saude-backend.onrender.com/api
+      - key: VITE_PROMO_URL
+        value: https://gestion-saude-promo.onrender.com
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+
+  # Landing page promocional (sitio independiente)
+  - type: static
+    name: Gestion-Saude-promo
+    region: oregon
+    plan: free
+    rootDir: frontend
+    buildCommand: npm ci && npm run build:promo
+    staticPublishPath: dist-promo
+    envVars:
+      - key: VITE_PLATFORM_URL
+        value: https://gestion-saude.onrender.com
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /promo.html

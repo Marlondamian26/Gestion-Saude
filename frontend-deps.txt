@@ -1,0 +1,38 @@
+frontend@0.0.0 /workspaces/Mis_proyectos/frontend
+├── UNMET DEPENDENCY @eslint/js@^9.39.1
+├── UNMET DEPENDENCY @types/react-dom@^19.2.3
+├── UNMET DEPENDENCY @types/react@^19.2.7
+├── UNMET DEPENDENCY @vitejs/plugin-react@^5.1.1
+├── UNMET DEPENDENCY axios@^1.13.5
+├── UNMET DEPENDENCY date-fns@^4.1.0
+├── UNMET DEPENDENCY eslint-plugin-react-hooks@^7.0.1
+├── UNMET DEPENDENCY eslint-plugin-react-refresh@^0.4.24
+├── UNMET DEPENDENCY eslint@^9.39.1
+├── UNMET DEPENDENCY globals@^16.5.0
+├── UNMET DEPENDENCY jwt-decode@^4.0.0
+├── UNMET DEPENDENCY react-dom@^19.2.0
+├── UNMET DEPENDENCY react-hook-form@^7.71.2
+├── UNMET DEPENDENCY react-icons@^5.5.0
+├── UNMET DEPENDENCY react-router-dom@^7.13.1
+├── UNMET DEPENDENCY react@^19.2.0
+└── UNMET DEPENDENCY vite@^7.3.1
+
+npm error code ELSPROBLEMS
+npm error missing: @eslint/js@^9.39.1, required by frontend@0.0.0
+npm error missing: @types/react-dom@^19.2.3, required by frontend@0.0.0
+npm error missing: @types/react@^19.2.7, required by frontend@0.0.0
+npm error missing: @vitejs/plugin-react@^5.1.1, required by frontend@0.0.0
+npm error missing: axios@^1.13.5, required by frontend@0.0.0
+npm error missing: date-fns@^4.1.0, required by frontend@0.0.0
+npm error missing: eslint-plugin-react-hooks@^7.0.1, required by frontend@0.0.0
+npm error missing: eslint-plugin-react-refresh@^0.4.24, required by frontend@0.0.0
+npm error missing: eslint@^9.39.1, required by frontend@0.0.0
+npm error missing: globals@^16.5.0, required by frontend@0.0.0
+npm error missing: jwt-decode@^4.0.0, required by frontend@0.0.0
+npm error missing: react-dom@^19.2.0, required by frontend@0.0.0
+npm error missing: react-hook-form@^7.71.2, required by frontend@0.0.0
+npm error missing: react-icons@^5.5.0, required by frontend@0.0.0
+npm error missing: react-router-dom@^7.13.1, required by frontend@0.0.0
+npm error missing: react@^19.2.0, required by frontend@0.0.0
+npm error missing: vite@^7.3.1, required by frontend@0.0.0
+npm error A complete log of this run can be found in: /home/codespace/.npm/_logs/2026-10-04T04_09_37_912Z-debug-0.log

@@ -1,136 +1,273 @@
-# Gestion-Saude 🏥
+# Gestão Saúde — Gestión de Citas Médicas
 
-> Sistema de Gestión para Consultorio Médico o Clínica
+Plataforma de gestión de citas médicas para pacientes, doctores y enfermeros. El paciente puede agendar, cancelar y posponer citas; el doctor gestiona horarios y la enfermera apoya el proceso. Incluye un asistente de chat (ChatIA) para agendar citas vía interfaz conversacional.
 
-Este repositorio contiene la versión activa de la aplicación web que permite
-administrar pacientes, doctores, enfermeras, notificaciones y agendamiento de
-citas en un consultorio médico o clínica. El proyecto se compose de un
-backend Django/DRF y un frontend React/Vite.
+## Estado actual
 
-También, como parte del proyecto, se cuenta con el código del sitio web Consultorio Dra. Belkis Morejón Acosta, como ejemplo de establecimiento en Luanda-Angola que utiliza la plataforma de gestión médica en cuestión. 
+| Métrica | Valor | Target |
+|---|---|---|
+| Tests backend | 139 passed, 3 skipped | ≥ 136 |
+| Tests frontend | 31 passed | ≥ 31 |
+| Cobertura backend | ~62% | ≥ 70% (Horizonte 1) |
+| Cobertura frontend | ~65% | ≥ 70% (Horizonte 1) |
+| Bundle principal | 333 kB (101 kB gzip) | < 350 kB ✅ |
+| N+1 queries | Eliminadas (select_related) | — |
+| Uptime | — | ≥ 99.5% |
 
----
-## 🧩 Arquitectura
+## Documentación
 
- - **backend/** – aplicación Django 6.0 con autenticación JWT, modelos
-   dependientes de un usuario personalizado (`usuarios.models.Usuario`), y API
-   expuesta vía Django REST Framework. La base de datos local usa SQLite. En 
-   producción (Render) usa PostgreSQL para persistencia.
-- **frontend/** – interfaz React (JSX) que consume los endpoints del backend. Usa
-Vite para el bundling; los componentes están en `src/components`.
-- `Notas` – guía de mantenimiento y comandos útiles (reinicio de base, creación
-de superusuario, etc.).
-- `test_*` – scripts Python de prueba que automatizan flujos de usuario (doctor,
-enfermera) contra el API.
+- **[README.md](README.md)** — este archivo
+- **[AUDIT.md](AUDIT.md)** — auditoría completa FASE 0-7
+- **[CHANGELOG.md](CHANGELOG.md)** — historial de cambios
+- **[CONTRIBUTING.md](CONTRIBUTING.md)** — guía de contribución
+- **[docs/ROADMAP.md](docs/ROADMAP.md)** — roadmap funcional y KPIs
+- **[docs/er-diagram.md](docs/er-diagram.md)** — diagrama ER
+- **[backend/LOGGING.md](backend/LOGGING.md)** — guía de logging estructurado
+- **[docs/architecture/evaluation-asgi.md](docs/architecture/evaluation-asgi.md)** — evaluación ASGI vs WSGI
+- **[docs/architecture/evaluation-media-storage.md](docs/architecture/evaluation-media-storage.md)** — migración media S3/R2
 
----
-## 🚀 Configuración inicial
+```
+                    ┌─────────────────────────────────────┐
+                    │           Render Free Tier            │
+                    │  ┌──────────────┐  ┌──────────────┐  │
+                    │  │   Backend    │  │   Frontend   │  │
+                    │  │  (Django 6)  │  │  (React 19)  │  │
+                    │  │  Gunicorn    │  │  Vite 7      │  │
+                    │  │  SQLite/pg   │  │  Static Site │  │
+                    │  └──────┬───────┘  └──────┬───────┘  │
+                    │         │                  │          │
+                    └─────────┼──────────────────┼──────────┘
+                              │                  │
+                    ┌─────────┴────────┐ Redis  │
+                    │  Supabase DB      │───────┘
+                    └──────────────────┘
+                              │
+                    ┌─────────┴────────┐
+                    │  Upstash Redis   │  (cache + throttling)
+                    └──────────────────┘
 
-1. **Clona el repositorio** y cambia a la rama correspondiente:
-   ```bash
-   git clone https://github.com/MarlonDamian26/mis-proyectos.git
-   cd mis-proyectos
-   git checkout belkis-saude
-   ```
-2. **Backend**
-   ```bash
-   cd backend
-   python -m venv venv           # crear entorno virtual
-   .\venv\Scripts\activate     # Windows PowerShell
-   pip install -r requirements.txt
-   python manage.py migrate      # crea tablas en db.sqlite3
-   ```
-3. **Superusuario**
-   ```bash
-   python manage.py createsuperuser
-   # username: belkis_admin   (o usar la comprobación/creación automática)
-   ```
-4. **Frontend** (desde la raíz o carpeta frontend):
-   ```bash
-   cd frontend
-   npm install
-   npm run dev                  # servidor de desarrollo en http://localhost:5173
-   ```
-5. Accede al frontend en el navegador y loguea con el usuario `belkis_admin`.
-
----
-## 🔄 Reiniciar la plataforma
-
-Si deseas borrar todos los datos y migraciones para comenzar desde cero,
-delegar el proceso al documento `Notas`. Ahí encontrarás comandos paso a paso
-para vaciar la base de datos, regenerar migraciones y recrear el superusuario.
-
-El sistema incluye un *administrador genérico* (`admin` / `12345678`) que se
-crea automáticamente cuando no existen superusuarios válidos. Esto garantiza
-que siempre haya una forma de acceder al panel incluso después de eliminar
-todos los registros o usuarios.
-
-- Si se elimina manualmente, el usuario `admin` reaparece al reiniciar el
-  servidor o realizar migraciones.
-- Si se crea cualquier otro superusuario, el genérico desaparece
-  automáticamente.
-- Al introducir `admin` con la contraseña `12345678` en la página de login,
-  el sistema te llevará al panel administrativo siempre que no haya otro
-  administrador activo.
-
-Resumen rápido de reinicio completo:
-```powershell
-cd backend
-Remove-Item .\db.sqlite3 -ErrorAction SilentlyContinue
-Remove-Item .\usuarios\migrations\*.py -Exclude __init__.py -ErrorAction SilentlyContinue
-Remove-Item .\notificaciones\migrations\*.py -Exclude __init__.py -ErrorAction SilentlyContinue
-python manage.py makemigrations usuarios notificaciones
-python manage.py migrate
-python manage.py createsuperuser  # se puede omitir; el genérico será creado automáticamente
+  Optional services (set via env vars):
+  - Resend: transactional emails (free tier 3000/mo)
+  - Twilio: WhatsApp/SMS notifications (free sandbox, paid prod)
+  - Sentry: error tracking (free tier 5k errors/mo)
+  - Render KV/Upstash: distributed cache (if REDIS_URL set)
 ```
 
----
-## 🧪 Pruebas automatizadas
+## Requisitos
 
-Hay scripts independientes (`test_doctor_workflow.py`) que ejecutan las siguientes
-tareas contra un servidor en marcha:
-1. crear un doctor/ enfermera desde el administrador REST
-2. iniciar sesión con sus credenciales
-3. acceder y modificar su propio perfil
-4. verificar restricciones de acceso a datos ajenos
+- **Python:** 3.12+ (testeado en 3.14.2)
+- **Node.js:** 20+ (testeado en v24.21.0)
+- **npm:** 11.19.0+
+- **PostgreSQL:** 16+ (SQLite para dev)
+- **Redis:** opcional (LocMemCache fallback en dev)
 
-Puedes ejecutarlos con:
+## Setup local
+
 ```bash
-python test_doctor_workflow.py
-``` 
+# 1. Clonar
+git clone <repo-url>
+cd Mis_proyectos
 
----
-## 📦 Actualizaciones y dependencias
+# 2. Backend
+cd backend
+python -m venv venv
+source venv/bin/activate  # Linux: source, Windows: venv\Scripts\activate
+pip install -r requirements.txt
+pip install -r requirements-dev.txt
+cp .env.example .env
+# Editar .env con tus valores
+python manage.py migrate
+python manage.py createsuperuser
+python manage.py runserver
+# ¡Abierto en http://localhost:8000/
 
-- Actualiza `requirements.txt` con `pip freeze > requirements.txt` cuando se
-instalen paquetes nuevos.
-- Usa `npm update` o edita `package.json`/`package-lock.json` para el frontend.
+# 3. Frontend (en otra terminal)
+cd ../frontend
+npm ci
+npm run dev
+# ¡Abierto en http://localhost:5173/
+```
 
----
-## 🌱 Bot programado para gestión de citas
+## Comandos útiles
 
-Próximamente se planea integrar funciones que ayuden a los pacientes a
-reservar citas de forma inteligente:
+```bash
+# Backend
+python manage.py runserver           # dev server
+python manage.py migrate             # aplicar migraciones
+python manage.py makemigrations      # crear migraciones (nunca en prod)
+python manage.py test                # tests unitarios
+python manage.py check --deploy     # verificar configuración prod
+python manage.py shell              # shell Django
 
-- Un asistente conversacional (chatbot) podría sugerir horarios libres según
-  preferencias y urgencia.
+# Tests
+python -m pytest --cov=. --cov-report=term-missing  # todo con cobertura
+python -m pytest backend/usuarios/tests/ -v          # tests específicos
 
-del médico y al historial del paciente.
-- Requiere exponer algoritmos/servicios nuevos en el backend y un
-  componente de texto en el frontend.
+# Frontend
+npm run dev          # dev server
+npm run lint         # ESLint
+npm run test         # Jest/Vitest unit tests
+npm run test:coverage # tests con cobertura
+npm run i18n:check   # verificar paridad de claves i18n
+npm run build        # build de producción
 
-- Con vistas al futuro con IA: Un modelo de recomendaciones podría priorizar turnos en base a la especialidad
+# E2E (requiere navegador Playwright)
+npm run e2e
 
-Mientras planificamos, considera cómo estructuraremos los datos (por ejemplo,
-almacenar tags de síntomas en las citas) y qué endpoints adicionales necesitaremos
-para entrenar y consultar los modelos.
+# Seed E2E (CI only)
+python manage.py seed_e2e --password=E2ETest123!
+```
 
----
-## 📝 Notas adicionales
+## Estructura del proyecto
 
-El proyecto está en constante evolución; si clonas en otro equipo, sigue las
-instrucciones de la sección **Restauración completa** en `Notas` para dejar el
-entorno listo rápidamente.
+```
+Mis_proyectos/
+├── backend/                    # Django 6 API
+│   ├── core/                   # Configuración del proyecto
+│   │   ├── settings.py
+│   │   ├── health.py           # [FASE 6] Health check
+│   │   └── urls.py
+│   ├── usuarios/               # App de usuarios, doctores, citas
+│   │   ├── models.py           # Usuario, Doctor, Paciente, Cita, Horario
+│   │   ├── ai_service.py       # ChatIA (no modificar, solo instrumentar)
+│   │   ├── chat_metrics.py     # [FASE 5] Métricas ChatIA
+│   │   ├── image_utils.py      # [FASE 5] Optimización WebP
+│   │   ├── views/              # [FASE 3] Paquete de views
+│   │   ├── serializers.py
+│   │   └── management/
+│   │       └── commands/       # seed_demo, seed_e2e, optimizar_imagenes
+│   ├── notificaciones/         # Notificaciones, email, WhatsApp
+│   │   ├── sse.py              # [FASE 5] SSE endpoint
+│   │   ├── services.py
+│   │   └── models.py
+│   ├── requirements.txt
+│   └── pytest.ini
+├── frontend/                   # React 19 + Vite 7
+│   ├── src/
+│   │   ├── components/         # UI components (incl. ChatIA descompuesto)
+│   │   ├── hooks/              # Custom hooks (incl. useChatIA)
+│   │   ├── services/           # API services + error handler
+│   │   ├── context/            # React Context providers
+│   │   ├── config/             # App constants
+│   │   ├── i18n/               # i18n (ES, PT, EN)
+│   │   └── test/               # MSW mock server + setup
+│   ├── scripts/                # check-i18n.js
+│   └── package.json
+├── .github/workflows/          # CI/CD [FASE 6]
+│   ├── backend-ci.yml
+│   ├── frontend-ci.yml
+│   └── e2e.yml
+├── docs/
+│   └── er-diagram.md           # Diagrama ER [FASE 6]
+├── AUDIT.md                    # Documento de auditoría completa
+├── CHANGELOG.md                # Historial de cambios
+├── render.yaml                 # Configuración de despliegue
+└── .env.example                # Variables de entorno (template)
+```
 
-¡Gracias por colaborar! cualquier contribución a la documentación o al código es
-bienvenida.
+## Variables de entorno
+
+### Backend (`backend/.env`)
+
+| Variable | Obligatoria | Default | Descripción |
+|---|---|---|---|
+| `SECRET_KEY` | ✅ Sí (prod) | — | Clave secreta de Django (rotar, nunca commitear) |
+| `DEBUG` | ✅ Sí | `'False'` | `'True'` para desarrollo |
+| `ALLOWED_HOSTS` | ✅ Sí (prod) | — | Hosts permitidos (comma-separated) |
+| `DATABASE_URL` | ✅ Sí | — | URL de conexión a PostgreSQL (Supabase) |
+| `REDIS_URL` | ⚠️ Si cache activo | — | URL de Redis (Upstash/Render KV) |
+| `EMAIL_HOST_USER` | ❌ No | — | Para SMTP fallback |
+| `RESEND_API_KEY` | ❌ No | — | [FASE 5] Resend email provider |
+| `SENTRY_DSN` | ❌ No | — | [FASE 6] Sentry backend DSN |
+| `TWILIO_ACCOUNT_SID` | ❌ No | — | Para WhatsApp/SMS |
+| `TWILIO_AUTH_TOKEN` | ❌ No | — | Para WhatsApp/SMS |
+| `TWILIO_WHATSAPP_NUMBER` | ❌ No | — | Número de WhatsApp empresarial |
+
+### Frontend
+
+| Variable | Obligatoria | Default | Descripción |
+|---|---|---|---|
+| `VITE_API_URL` | ✅ Sí | — | URL base de la API (`https://host.onrender.com/api`) |
+| `VITE_SENTRY_DSN` | ❌ No | — | [FASE 6] Sentry frontend DSN |
+
+## Testing
+
+### Unit tests (backend)
+```bash
+python -m pytest --cov=. --cov-report=term-missing
+```
+
+### Unit tests (frontend)
+```bash
+npm run test
+npm run test:coverage
+```
+
+### E2E (Playwright)
+```bash
+npm run e2e
+```
+
+## Troubleshooting
+
+### Puerto 8000 ocupado
+```bash
+lsof -i :8000     # Linux/Mac
+kill $(lsof -t -i:8000)
+```
+
+### Error: "REDIS_URL must be set in production"
+- En dev: `REDIS_URL=redis://localhost:6379/0` (si tienes Redis corriendo).
+- Sin Redis: `DEBUG=True` activa LocMemCache fallback.
+
+### Error: "SECRET_KEY must be set in production"
+- En prod: setear `SECRET_KEY` como secret en Render.
+- En dev: `SECRET_KEY=test-key DEBUG=True python manage.py runserver`.
+
+### Tests fallan con "No such table"
+- Asegúrate de haber corrido `python manage.py migrate` o usa `pytest-django` que crea la DB de test automáticamente.
+
+### Node: "port 5173 in use"
+```bash
+npx kill-port 5173
+npm run dev
+```
+
+## Contribuir
+
+1. Crea un branch: `git checkout -b feat/nueva-funcionalidad`
+2. Haz commit con Conventional Commits: `feat: descripción`
+3. Push: `git push origin feat/nueva-funcionalidad`
+4. Abre PR → CI debe pasar en verde.
+5. Al menos 1 reviewer.
+
+### Convenciones de commit
+- `feat:` nueva funcionalidad
+- `fix:` arreglo de bug
+- `perf:` mejora de rendimiento
+- `refactor:` refactorización sin cambios de comportamiento
+- `docs:` documentación
+- `test:` tests
+- `ci:` configuración CI/CD
+- `perf(5.1):` para cambios asociados a FASE 5 §5.1, etc.
+
+### Política de migraciones
+- **Nunca** `makemigrations` en producción.
+- En CI se verifica `--check --dry-run` (FASE 6.1.2).
+- Resolver migraciones locales antes de mergear a `main`.
+
+## Despliegue
+
+El proyecto despliega en **Render** usando `render.yaml`:
+- Backend: servicio Python (Django + Gunicorn).
+- Frontend: Static Site (Vite).
+- PostgreSQL y Redis como servicios gestionados.
+
+```bash
+# Verificar readiness antes de deploy
+bash scripts/verify_deploy_readiness.sh
+```
+
+## Licencia
+
+Este proyecto está bajo desarrollo activo. Consulta con el propietario del repositorio para términos de licencia.

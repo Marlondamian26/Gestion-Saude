@@ -3,6 +3,7 @@ import react from '@vitejs/plugin-react'
 import { resolve, dirname } from 'path'
 import { copyFileSync, existsSync, mkdirSync, cpSync } from 'fs'
 import path from 'path'
+import { visualizer } from 'rollup-plugin-visualizer'
 
 function redirectPlugin() {
   return {
@@ -28,7 +29,16 @@ function redirectPlugin() {
 }
 
 export default defineConfig({
-  plugins: [react()/*, redirectPlugin()*/],
+  plugins: [
+    react(),
+    visualizer({
+      filename: 'dist/stats.html',
+      gzipSize: true,
+      brotliSize: true,
+      open: false,
+    }),
+    /*, redirectPlugin()*/
+  ],
   base: '/',
   build: {
     outDir: path.resolve(__dirname, 'dist'),
@@ -37,8 +47,10 @@ export default defineConfig({
     rollupOptions: {
       output: {
         manualChunks: {
-          vendor: ['react', 'react-dom'],
-          router: ['react-router-dom'],
+          'vendor-react': ['react', 'react-dom'],
+          'vendor-router': ['react-router-dom'],
+          'vendor-forms': ['react-hook-form'],
+          'vendor-util': ['date-fns', 'jwt-decode', 'axios'],
         },
       },
     },
