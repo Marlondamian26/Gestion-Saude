@@ -54,6 +54,7 @@ class TestCacheBackendConfig(TestCase):
     def test_prod_without_redis_url_fails(self):
         """En producción (DEBUG=False), sin REDIS_URL debe lanzar ImproperlyConfigured."""
         env = dict(os.environ)
+        env.pop('DJANGO_SETTINGS_MODULE', None)  # forzar uso de core.settings en subprocess
         env['DEBUG'] = 'false'
         env.pop('REDIS_URL', None)
         env['SECRET_KEY'] = 'test-fail-fast'
@@ -75,6 +76,7 @@ class TestCacheBackendConfig(TestCase):
     def test_dev_without_redis_url_uses_locmem(self):
         """En desarrollo (DEBUG=True), sin REDIS_URL usa LocMemCache."""
         env = dict(os.environ)
+        env.pop('DJANGO_SETTINGS_MODULE', None)  # forzar uso de core.settings en subprocess
         env['DEBUG'] = 'true'
         env.pop('REDIS_URL', None)
         env['SECRET_KEY'] = 'dev-fallback-test'
