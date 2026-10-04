@@ -4,10 +4,14 @@ import { BrowserRouter } from 'react-router-dom';
 import { LanguageProvider } from './context/LanguageContext';
 import { ThemeProvider } from './context/ThemeContext';
 import App from './App';
+import './sitioPromocional/styles/tokens.css';
 import './index.css';
-import './sitioPromocional/styles/promo-tokens.css';
+import './sitioPromocional/styles/primitives.css';
 import './sitioPromocional/styles/promocional.css';
 import './sitioPromocional/styles/promo-responsive.css';
+
+import { readFromUrl } from './utils/syncPreferences';
+readFromUrl();
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>

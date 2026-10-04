@@ -10,7 +10,11 @@
     "lint": "eslint .",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:coverage": "vitest run --coverage"
+    "test:coverage": "vitest run --coverage",
+    "e2e": "playwright test",
+    "e2e:ui": "playwright test --ui",
+    "e2e:report": "playwright show-report",
+    "i18n:check": "node -e \"const t=require('./src/context/translations/promo.js').promoTranslations;const keys=new Set(Object.keys(t.promo_pt));let ok=true;for(const[l]of Object.entries(t)){const k=new Set(Object.keys(l));for(const k2 of keys){if(!k.has(k2)){console.error('Missing key: '+k2+' in '+l);ok=false;}}}if(ok)console.log('All i18n keys present in pt, es, en');process.exit(ok?0:1)\""
   },
   "dependencies": {
     "react": "^19.2.0",

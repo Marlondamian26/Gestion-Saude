@@ -1,0 +1,260 @@
+/* ============================================
+   TOKENS — Belkis Saúde Promo
+   Fuente única de verdad del sistema visual.
+   ============================================ */
+
+:root {
+  /* --- Primary scale (derivada de #00a896) --- */
+  --promo-primary-50:  #e6f7f5;
+  --promo-primary-100: #b3e8e2;
+  --promo-primary-200: #80d9cf;
+  --promo-primary-300: #4dcabc;
+  --promo-primary-400: #1abba9;
+  --promo-primary-500: #00a896;
+  --promo-primary-600: #009687;
+  --promo-primary-700: #007d70;
+  --promo-primary-800: #005c53;
+  --promo-primary-900: #003d37;
+
+  /* --- Neutral scale (warm gray) --- */
+  --promo-neutral-50:  #faf9f7;
+  --promo-neutral-100: #f4f2ee;
+  --promo-neutral-200: #e6e2db;
+  --promo-neutral-300: #d1ccc3;
+  --promo-neutral-400: #a8a29e;
+  --promo-neutral-500: #78716c;
+  --promo-neutral-600: #57534e;
+  --promo-neutral-700: #3d3935;
+  --promo-neutral-800: #292624;
+  --promo-neutral-900: #1a1816;
+
+  /* --- Semantic (light) --- */
+  --promo-bg: #ffffff;
+  --promo-bg-alt: var(--promo-neutral-50);
+  --promo-surface: #ffffff;
+  --promo-surface-elevated: #ffffff;
+  --promo-surface-sunken: var(--promo-neutral-100);
+  --promo-text: var(--promo-neutral-900);
+  --promo-text-muted: var(--promo-neutral-500);
+  --promo-text-subtle: var(--promo-neutral-400);
+  --promo-border: var(--promo-neutral-200);
+  --promo-border-strong: var(--promo-neutral-300);
+
+  /* --- Gradients --- */
+  --promo-gradient-primary: linear-gradient(135deg, #00a896 0%, #02c4ac 100%);
+  --promo-gradient-primary-soft: linear-gradient(135deg, rgba(0,168,150,0.10) 0%, rgba(2,196,172,0.14) 100%);
+  --promo-gradient-hero-overlay: linear-gradient(135deg, rgba(0,168,150,0.88) 0%, rgba(2,196,172,0.62) 55%, rgba(0,0,0,0.35) 100%);
+  --promo-gradient-fade-bottom: linear-gradient(180deg, transparent 55%, var(--promo-bg) 100%);
+  --promo-gradient-surface: linear-gradient(180deg, #ffffff 0%, var(--promo-neutral-50) 100%);
+
+  /* --- Accent extras --- */
+  --promo-success: #10b981;
+  --promo-warning: #fbbf24;
+
+  /* --- Shadows (multicapa) --- */
+  --promo-shadow-xs: 0 1px 2px rgba(26,24,22,0.04);
+  --promo-shadow-sm:
+    0 1px 2px rgba(26,24,22,0.04),
+    0 2px 6px rgba(26,24,22,0.04);
+  --promo-shadow-md:
+    0 2px 4px rgba(26,24,22,0.04),
+    0 6px 14px rgba(26,24,22,0.06);
+  --promo-shadow-lg:
+    0 4px 8px rgba(26,24,22,0.05),
+    0 14px 32px rgba(26,24,22,0.08);
+  --promo-shadow-xl:
+    0 8px 16px rgba(26,24,22,0.06),
+    0 24px 48px rgba(26,24,22,0.10);
+  --promo-shadow-primary:
+    0 6px 16px rgba(0,168,150,0.24),
+    0 12px 28px rgba(0,168,150,0.14);
+
+  /* --- Radii --- */
+  --promo-radius-xs: 4px;
+  --promo-radius-sm: 8px;
+  --promo-radius-md: 12px;
+  --promo-radius-lg: 18px;
+  --promo-radius-xl: 28px;
+  --promo-radius-2xl: 36px;
+  --promo-radius-full: 9999px;
+
+  /* --- Spacing scale (base 4px) --- */
+  --promo-space-1: 0.25rem;
+  --promo-space-2: 0.5rem;
+  --promo-space-3: 0.75rem;
+  --promo-space-4: 1rem;
+  --promo-space-5: 1.25rem;
+  --promo-space-6: 1.5rem;
+  --promo-space-8: 2rem;
+  --promo-space-10: 2.5rem;
+  --promo-space-12: 3rem;
+  --promo-space-16: 4rem;
+  --promo-space-20: 5rem;
+  --promo-space-24: 6rem;
+  --promo-space-32: 8rem;
+
+  /* --- Typography --- */
+  --promo-font-sans: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --promo-font-display: 'Fraunces', 'Playfair Display', Georgia, serif;
+
+  /* Fluid type scale (clamp 375px → 1440px) */
+  --promo-fs-xs:   clamp(0.75rem,  0.72rem + 0.15vw, 0.8125rem);
+  --promo-fs-sm:   clamp(0.875rem, 0.84rem + 0.20vw, 0.9375rem);
+  --promo-fs-base: clamp(1rem,     0.96rem + 0.25vw, 1.0625rem);
+  --promo-fs-lg:   clamp(1.125rem, 1.05rem + 0.40vw, 1.25rem);
+  --promo-fs-xl:   clamp(1.25rem,  1.15rem + 0.60vw, 1.5rem);
+  --promo-fs-2xl:  clamp(1.5rem,   1.3rem  + 1.00vw, 2rem);
+  --promo-fs-3xl:  clamp(1.875rem, 1.5rem  + 1.60vw, 2.75rem);
+  --promo-fs-4xl:  clamp(2.25rem,  1.7rem  + 2.40vw, 3.75rem);
+  --promo-fs-5xl:  clamp(2.75rem,  1.9rem  + 3.40vw, 4.5rem);
+
+  --promo-lh-tight: 1.1;
+  --promo-lh-snug: 1.25;
+  --promo-lh-normal: 1.5;
+  --promo-lh-relaxed: 1.7;
+
+  --promo-tracking-tight: -0.02em;
+  --promo-tracking-normal: 0;
+  --promo-tracking-wide: 0.04em;
+
+  /* --- Motion --- */
+  --promo-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --promo-ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --promo-ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --promo-dur-fast: 150ms;
+  --promo-dur-base: 250ms;
+  --promo-dur-slow: 400ms;
+  --promo-dur-slower: 600ms;
+
+  /* --- Layout --- */
+  --promo-container: 1200px;
+  --promo-container-narrow: 720px;
+  --promo-gutter: clamp(1.25rem, 4vw, 2.5rem);
+  --promo-section-py: clamp(4rem, 8vw, 7rem);
+
+  /* --- Backward compatibility aliases (old --promo-* vars) --- */
+  --promo-primary: var(--promo-primary-500);
+  --promo-primary-dark: var(--promo-primary-600);
+  --promo-primary-light: var(--promo-primary-300);
+  --promo-secondary: var(--promo-neutral-50);
+  --promo-accent: var(--promo-warning);
+  --promo-text: var(--promo-neutral-900);
+  --promo-text-light: var(--promo-neutral-500);
+  --promo-white: #ffffff;
+  --promo-bg: #ffffff;
+  --promo-bg-secondary: var(--promo-neutral-50);
+  --promo-card-bg: #ffffff;
+  --promo-border: var(--promo-neutral-200);
+  --promo-shadow: rgba(26,24,22,0.06);
+  --promo-gradient: var(--promo-gradient-primary);
+
+  /* --- Dashboard toggle compatibility vars (needed by PromoThemeToggle/PromoLanguageToggle) --- */
+  --bg-primary: var(--promo-neutral-50);
+  --bg-secondary: #ffffff;
+  --bg-tertiary: var(--promo-neutral-100);
+  --bg-tertiary-hover: var(--promo-neutral-200);
+  --text-primary: var(--promo-neutral-900);
+  --text-secondary: var(--promo-neutral-600);
+  --text-muted: var(--promo-neutral-500);
+  --border-color: var(--promo-neutral-200);
+  --border-radius-sm: 8px;
+  --border-radius-md: 12px;
+  --border-radius-lg: 18px;
+  --border-radius-xl: 28px;
+  --box-shadow: var(--promo-shadow-sm);
+  --box-shadow-hover: var(--promo-shadow-md);
+  --color-patient: var(--promo-primary-500);
+  --color-patient-soft: var(--promo-primary-200);
+  --color-patient-bg: var(--promo-primary-50);
+  --color-admin: #7c3aed;
+  --color-admin-soft: #a78bfa;
+  --transition-smooth: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ============================================
+   DARK THEME
+   ============================================ */
+:root[data-theme='dark'] {
+  --promo-primary-500: #02c4ac;
+  --promo-primary-600: #00b39b;
+  --promo-primary-700: #00a896;
+  --promo-primary-800: #00877d;
+  --promo-primary-900: #006d63;
+
+  --promo-neutral-50:  #0e1013;
+  --promo-neutral-100: #13161a;
+  --promo-neutral-200: #1b1f24;
+  --promo-neutral-300: #262b33;
+  --promo-neutral-400: #3a4048;
+  --promo-neutral-500: #94a3b8;
+  --promo-neutral-600: #57534e;
+  --promo-neutral-700: #3d3935;
+  --promo-neutral-800: #292624;
+  --promo-neutral-900: #f1f5f9;
+
+  --promo-bg: #0e1013;
+  --promo-bg-alt: #13161a;
+  --promo-surface: #181c21;
+  --promo-surface-elevated: #1e2228;
+  --promo-surface-sunken: #0b0d0f;
+  --promo-text: #f1f5f9;
+  --promo-text-muted: #94a3b8;
+  --promo-text-subtle: #64748b;
+  --promo-border: #262b33;
+  --promo-border-strong: #343a44;
+
+  --promo-gradient-primary: linear-gradient(135deg, #02c4ac 0%, #00b39b 100%);
+  --promo-gradient-hero-overlay: linear-gradient(135deg, rgba(0,125,112,0.90) 0%, rgba(2,120,105,0.65) 55%, rgba(0,0,0,0.60) 100%);
+  --promo-gradient-surface: linear-gradient(180deg, #0e1013 0%, #13161a 100%);
+
+  --promo-shadow-sm: 0 2px 6px rgba(0,0,0,0.35);
+  --promo-shadow-md: 0 6px 14px rgba(0,0,0,0.40);
+  --promo-shadow-lg: 0 14px 32px rgba(0,0,0,0.50);
+  --promo-shadow-xl: 0 24px 48px rgba(0,0,0,0.60);
+  --promo-shadow-primary: 0 8px 24px rgba(2,196,172,0.28);
+
+  /* Backward compat dark aliases */
+  --promo-primary: var(--promo-primary-500);
+  --promo-primary-dark: var(--promo-primary-600);
+  --promo-primary-light: #05e0c7;
+  --promo-secondary: var(--promo-neutral-50);
+  --promo-text: #f1f5f9;
+  --promo-text-light: var(--promo-neutral-500);
+  --promo-white: var(--promo-neutral-900);
+  --promo-bg: var(--promo-neutral-50);
+  --promo-bg-secondary: var(--promo-neutral-700);
+  --promo-card-bg: var(--promo-neutral-800);
+  --promo-border: var(--promo-neutral-300);
+
+  --bg-primary: var(--promo-neutral-50);
+  --bg-secondary: var(--promo-neutral-800);
+  --bg-tertiary: var(--promo-neutral-700);
+  --bg-tertiary-hover: var(--promo-neutral-600);
+  --text-primary: var(--promo-neutral-900);
+  --text-secondary: #cbd5e1;
+  --text-muted: var(--promo-neutral-500);
+  --border-color: var(--promo-neutral-300);
+  --box-shadow: 0 4px 12px rgba(0,0,0,0.30);
+  --box-shadow-hover: 0 12px 24px rgba(0,0,0,0.40);
+  --color-patient: var(--promo-primary-300);
+  --color-patient-soft: var(--promo-primary-700);
+}
+
+/* ============================================
+   THEME TRANSITIONS
+   ============================================ */
+.theme-transition,
+.theme-transition *,
+.sitio-promocional {
+  transition: background-color var(--promo-dur-base) var(--promo-ease),
+              color var(--promo-dur-base) var(--promo-ease),
+              border-color var(--promo-dur-base) var(--promo-ease);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .theme-transition,
+  .theme-transition *,
+  .sitio-promocional {
+    transition: none;
+  }
+}

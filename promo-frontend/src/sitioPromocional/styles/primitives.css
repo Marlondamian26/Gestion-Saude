@@ -1,0 +1,76 @@
+/* ============================================
+   PRIMITIVAS — Clases utilitarias del promo
+   No es Tailwind. Patrones repetidos solo.
+   ============================================ */
+
+.promo-container {
+  max-width: var(--promo-container);
+  margin-inline: auto;
+  padding-inline: var(--promo-gutter);
+  width: 100%;
+}
+
+.promo-container-narrow {
+  max-width: var(--promo-container-narrow);
+  margin-inline: auto;
+  padding-inline: var(--promo-gutter);
+  width: 100%;
+}
+
+.promo-section {
+  padding-block: var(--promo-section-py);
+  width: 100%;
+  overflow-x: hidden;
+}
+
+.promo-eyebrow {
+  display: inline-block;
+  font-size: var(--promo-fs-sm);
+  font-weight: 600;
+  letter-spacing: var(--promo-tracking-wide);
+  text-transform: uppercase;
+  color: var(--promo-primary-600);
+  margin-bottom: var(--promo-space-6);
+}
+
+.promo-heading {
+  font-family: var(--promo-font-display);
+  font-weight: 600;
+  line-height: var(--promo-lh-tight);
+  letter-spacing: var(--promo-tracking-tight);
+  color: var(--promo-text);
+  margin: 0 0 var(--promo-space-6);
+}
+
+.promo-heading-display {
+  font-size: var(--promo-fs-4xl);
+  font-weight: 600;
+}
+
+.promo-body {
+  font-family: var(--promo-font-sans);
+  font-size: var(--promo-fs-base);
+  line-height: var(--promo-lh-relaxed);
+  color: var(--promo-text-muted);
+}
+
+.promo-card {
+  background: var(--promo-surface);
+  border: 1px solid var(--promo-border);
+  border-radius: var(--promo-radius-lg);
+  box-shadow: var(--promo-shadow-sm);
+  transition: transform var(--promo-dur-slow) var(--promo-ease),
+              box-shadow var(--promo-dur-slow) var(--promo-ease),
+              border-color var(--promo-dur-base) var(--promo-ease);
+}
+
+.promo-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--promo-shadow-lg);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .promo-card:hover {
+    transform: none;
+  }
+}
