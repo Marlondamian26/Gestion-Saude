@@ -5,7 +5,7 @@ from rest_framework import viewsets, generics, permissions, status
 from rest_framework.decorators import api_view, permission_classes, authentication_classes
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated
-from rest_framework.throttling import UserRateThrottle
+from rest_framework.throttling import UserRateThrottle, AnonRateThrottle
 from rest_framework.decorators import throttle_classes
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework_simplejwt.views import TokenObtainPairView
@@ -14,6 +14,12 @@ from django.contrib.auth import update_session_auth_hash  # <-- NUEVO IMPORT
 from .models import Usuario, Doctor, Enfermera, Paciente, Especialidad, Horario, Cita, SitioImagen
 
 logger = logging.getLogger(__name__)
+
+
+class RegistroAnonThrottle(AnonRateThrottle):
+    """Throttle dedicado para el endpoint público de registro."""
+    scope = 'registro'
+
 
 # custom token endpoint to allow login via email/telefono or username
 from .serializers import CustomTokenObtainPairSerializer
@@ -30,18 +36,18 @@ from rest_framework.decorators import action
 
 # Vista para registro de usuarios (pública - NO requiere token)
 @api_view(['POST'])
-@permission_classes([AllowAny])  # <-- Cualquiera puede registrar
+@permission_classes([AllowAny])
+@throttle_classes([RegistroAnonThrottle])
 def registro_usuario(request):
     serializer = RegistroUsuarioSerializer(data=request.data)
     if serializer.is_valid():
         usuario = serializer.save()
         if usuario.rol == 'patient':
-            # evita el error de integridad si por alguna razón ya existe
-            from django.db import IntegrityError
+            from django.db import IntegrityError, transaction
             try:
-                Paciente.objects.create(usuario=usuario)
+                with transaction.atomic():
+                    Paciente.objects.create(usuario=usuario)
             except IntegrityError:
-                # ya había un perfil de paciente, no hagas nada
                 pass
         
         # Notificar si se registra un admin
