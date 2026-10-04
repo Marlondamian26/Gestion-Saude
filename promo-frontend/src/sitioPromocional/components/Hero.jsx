@@ -75,8 +75,8 @@ function Hero() {
           </span>
 
           <h1 id="hero-title" className="promo-hero-title promo-heading-display">
-            {tPromo('heroTitleBefore')}
-            <em className="hero__em">{tPromo('heroTitleEm')}</em>
+            {tPromo('heroTitleBefore')}{' '}
+            <em className="hero__em">{tPromo('heroTitleEm')}</em>{' '}
             <span className="hero__after">{tPromo('heroTitleAfter')}</span>
           </h1>
 
