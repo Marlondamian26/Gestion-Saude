@@ -37,8 +37,8 @@ class Usuario(AbstractUser):
         null=True,
         verbose_name='Fecha de nacimiento'
     )
-    # Hacer email opcional (aunque AbstractUser lo requiere, podemos permitir blank)
-    email = models.EmailField(blank=True, verbose_name='Correo electrónico')
+    # Hacer email opcional pero único (null=True para DB, blank=True para formularios)
+    email = models.EmailField(unique=True, null=True, blank=True, verbose_name='Correo electrónico')
     
     # ✅ Solucionar conflictos de related_name
     groups = models.ManyToManyField(
@@ -63,18 +63,6 @@ class Usuario(AbstractUser):
         return f"{nombre} - {self.get_rol_display()}"
 
     def save(self, *args, **kwargs):
-        # Forzar rol 'admin' para el usuario genérico 'admin'
-        if self.username == 'admin':
-            self.rol = 'admin'
-        
-        # si el rol es 'admin' forzar flags de superuser/staff
-        if self.rol == 'admin':
-            self.is_superuser = True
-            self.is_staff = True
-        else:
-            # si no es admin y no es el usuario genérico, dejar de ser superuser
-            if self.username != 'admin':
-                self.is_superuser = False
         super().save(*args, **kwargs)
     
     class Meta:

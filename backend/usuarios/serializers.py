@@ -170,36 +170,36 @@ class HorarioSerializer(serializers.ModelSerializer):
 # Serializer usado para obtener tokens permitiendo login con email/telefono o usuario
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from django.contrib.auth import authenticate
+from django.core.exceptions import MultipleObjectsReturned
+
 
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
     def validate(self, attrs):
         # `username` field may contain username, email or telefono
-        identifier = attrs.get('username')
+        identifier = attrs.get('username', '').strip()
         password = attrs.get('password')
         user = None
 
         if identifier and password:
-            # intenta autenticar directamente con el campo username
             user = authenticate(username=identifier, password=password)
             if not user:
-                # buscar por email
+                # buscar por email (único, no vacío)
                 try:
                     u = Usuario.objects.get(email=identifier)
                     user = authenticate(username=u.username, password=password)
-                except Usuario.DoesNotExist:
+                except (Usuario.DoesNotExist, MultipleObjectsReturned):
                     pass
             if not user:
                 # buscar por telefono
                 try:
                     u = Usuario.objects.get(telefono=identifier)
                     user = authenticate(username=u.username, password=password)
-                except Usuario.DoesNotExist:
+                except (Usuario.DoesNotExist, MultipleObjectsReturned):
                     pass
 
         if not user:
             raise serializers.ValidationError('No existe una cuenta activa con las credenciales proporcionadas')
 
-        # forzar el username real antes de continuar
         attrs['username'] = user.username
         data = super().validate(attrs)
         return data
