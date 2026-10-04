@@ -52,13 +52,13 @@ services:
         destination: /index.html
 
   # Landing page promocional (sitio independiente)
-  - type: static
+  - type: web
     name: Gestion-Saude-promo
     region: oregon
     plan: free
     rootDir: frontend
     buildCommand: npm ci && npm run build:promo
-    staticPublishPath: dist-promo
+    startCommand: node server-promo.cjs
     envVars:
       - key: VITE_PLATFORM_URL
         value: https://gestion-saude.onrender.com
