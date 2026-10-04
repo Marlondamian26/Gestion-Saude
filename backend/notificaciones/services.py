@@ -154,20 +154,171 @@ class ServicioNotificaciones:
         return True, "Email enviado correctamente via SMTP"
 
     @staticmethod
-    def enviar_whatsapp(destinatario, mensaje):
-        """Enviar notificación por WhatsApp (requiere Twilio)"""
+    def enviar_whatsapp(destinatario, mensaje, notificacion=None):
+        """
+        Enviar notificación por WhatsApp con fallback.
+
+        [FASE 5 §5.4] Cadena de fallback: WhatsApp → SMS → Email → in-app.
+        - Si Twilio no está configurado → fallback directo a email.
+        - Si el error es de configuración (credenciales inválidas) → no reintentar.
+        - Número validado como E.164.
+
+        Args:
+            destinatario: número de teléfono en formato E.164 (+54911...).
+            mensaje: texto del mensaje.
+            notificacion: opcional, Notificacion para actualizar estado.
+
+        Returns:
+            Tuple (success: bool, message: str)
+        """
+        numero_validado = ServicioNotificaciones._normalizar_numero(destinatario)
+        if numero_validado is None:
+            return False, "Número inválido (debe ser E.164: +<país><número>)"
+
         if not settings.TWILIO_ACCOUNT_SID or not settings.TWILIO_AUTH_TOKEN or not settings.TWILIO_WHATSAPP_NUMBER:
-            return False, "WhatsApp no configurado"
+            logger.warning(
+                "whatsapp_failed",
+                extra={
+                    'event': 'whatsapp_error',
+                    'reason': 'not_configured',
+                    'intent': 1,
+                    'notification_id': notificacion.id if notificacion else None,
+                    'recipient_mask': numero_validado[-4:],
+                }
+            )
+            return ServicioNotificaciones._fallback_email(destinatario, mensaje, notificacion)
+
         try:
             client = Client(settings.TWILIO_ACCOUNT_SID, settings.TWILIO_AUTH_TOKEN)
             message = client.messages.create(
                 body=mensaje,
                 from_=f'whatsapp:{settings.TWILIO_WHATSAPP_NUMBER}',
-                to=f'whatsapp:{destinatario}'
+                to=f'whatsapp:{numero_validado}'
+            )
+            logger.info(
+                'whatsapp_sent',
+                extra={
+                    'event': 'whatsapp_sent',
+                    'status': 'success',
+                    'intent': 1,
+                    'notification_id': notificacion.id if notificacion else None,
+                    'recipient_mask': numero_validado[-4:],
+                    'provider': 'twilio',
+                }
             )
             return True, "WhatsApp enviado correctamente"
         except Exception as e:
-            return False, str(e)
+            error_code = getattr(e, 'code', None)
+            logger.warning(
+                'whatsapp_failed',
+                extra={
+                    'event': 'whatsapp_error',
+                    'status': 'failure',
+                    'intent': 1,
+                    'reason': str(e)[:200],
+                    'error_code': error_code,
+                    'notification_id': notificacion.id if notificacion else None,
+                    'recipient_mask': numero_validado[-4:],
+                }
+            )
+            return ServicioNotificaciones._fallback_sms(destinatario, mensaje, notificacion, error_code)
+
+    @staticmethod
+    def _fallback_sms(destinatario, mensaje, notificacion, twilio_code=None):
+        """
+        Fallback SMS vía Twilio (coste por mensaje).
+
+        [REQUERIMIENTO] Si el negocio no quiere coste SMS, esta función
+        puede ser reemplazada por un salto directo a _fallback_email.
+        """
+        if twilio_code and twilio_code in (21211, 21212):
+            # Errores de validación (número inválido, "To" no puede usar sandbox)
+            # No reintentar, saltar directamente a email
+            logger.warning(
+                'sms_skipped',
+                extra={
+                    'event': 'sms_skipped',
+                    'reason': 'twilio_validation_error',
+                    'error_code': twilio_code,
+                }
+            )
+            return ServicioNotificaciones._fallback_email(destinatario, mensaje, notificacion)
+
+        if not settings.TWILIO_ACCOUNT_SID or not settings.TWILIO_AUTH_TOKEN:
+            return ServicioNotificaciones._fallback_email(destinatario, mensaje, notificacion)
+
+        try:
+            client = Client(settings.TWILIO_ACCOUNT_SID, settings.TWILIO_AUTH_TOKEN)
+            message = client.messages.create(
+                body=mensaje,
+                from_=settings.TWILIO_WHATSAPP_NUMBER,  # número SMPP configurado
+                to=numero_validado if (numero_validado := ServicioNotificaciones._normalizar_numero(destinatario)) else destinatario
+            )
+            logger.info(
+                'sms_sent',
+                extra={
+                    'event': 'sms_sent',
+                    'status': 'success',
+                    'intent': 2,
+                    'notification_id': notificacion.id if notificacion else None,
+                    'recipient_mask': (numero_validado or destinatario)[-4:],
+                }
+            )
+            return True, "SMS enviado correctamente (fallback)"
+        except Exception as e:
+            logger.error(
+                'sms_failed',
+                extra={
+                    'event': 'sms_error',
+                    'status': 'failure',
+                    'intent': 2,
+                    'reason': str(e)[:200],
+                    'notification_id': notificacion.id if notificacion else None,
+                }
+            )
+            return ServicioNotificaciones._fallback_email(destinatario, mensaje, notificacion)
+
+    @staticmethod
+    def _fallback_email(destinatario, mensaje, notificacion=None):
+        """
+        Fallback final: email.
+        Usa enviar_email con el mensaje como asunto corto.
+        """
+        asunto = 'Notificación importante'
+        if notificacion and notificacion.titulo:
+            asunto = notificacion.titulo
+
+        # Extraer email del destinatario (puede ser un número de teléfono)
+        if '@' not in str(destinatario) and notificacion and hasattr(notificacion, 'usuario'):
+            email = notificacion.usuario.email
+        else:
+            email = str(destinatario)
+
+        return ServicioNotificaciones.enviar_email(
+            email, asunto, mensaje, notificacion, intentos_max=2
+        )
+
+    @staticmethod
+    def _normalizar_numero(numero):
+        """
+        Valida y normaliza un número de teléfono a E.164.
+
+        [FASE 5 §5.4] Requiere código de país (+XX).
+        No loguea el número completo (solo últimos 4 dígitos).
+        """
+        if not numero:
+            return None
+
+        import re
+        limpio = re.sub(r'[\s\-\(\)]', '', str(numero))
+
+        if not limpio.startswith('+'):
+            raise ValueError('Número debe incluir código de país (+XX)')
+
+        if not re.match(r'^\+\d{8,15}$', limpio):
+            raise ValueError('Formato de número inválido')
+
+        return limpio
     
     @staticmethod
     def crear_notificacion(usuario, tipo, titulo, mensaje, objeto_relacionado=None):
