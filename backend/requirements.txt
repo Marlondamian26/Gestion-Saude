@@ -17,3 +17,7 @@ twilio==9.10.2
 celery==5.5.3
 pillow==12.1.1
 django-dbbackup==4.1.0
+
+# [FASE 5 §5.3] Email transaccional
+django-anymail[resend]==11.1  # [REQUIERE APROBACIÓN] si se usa en prod
+tenacity==9.0.0

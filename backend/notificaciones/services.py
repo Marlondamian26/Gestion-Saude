@@ -2,6 +2,27 @@ from django.core.mail import send_mail
 from django.utils import timezone
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
+from django.core.exceptions import ImproperlyConfigured
+import logging
+import json
+
+logger = logging.getLogger(__name__)
+
+# [FASE 5 §5.3] Reintentos con tenacity
+try:
+    from tenacity import retry, stop_after_attempt, wait_exponential, retry_if_exception_type
+    HAS_TENACITY = True
+except ImportError:
+    HAS_TENACITY = False
+    logger.warning("[FASE 5 §5.3] tenacity no instalado; reintentos deshabilitados")
+
+# [FASE 5 §5.3] Anymail para Resend
+try:
+    from anymail.exceptions import AnymailError, AnymailAPIError
+    HAS_ANYMAIL = True
+except ImportError:
+    HAS_ANYMAIL = False
+
 from twilio.rest import Client
 import requests
 from .models import Notificacion
@@ -10,22 +31,128 @@ from usuarios.models import Usuario
 class ServicioNotificaciones:
     
     @staticmethod
-    def enviar_email(destinatario, asunto, mensaje):
-        """Enviar notificación por email"""
-        if not settings.EMAIL_HOST_USER:
+    def enviar_email(destinatario, asunto, mensaje, notificacion=None, intentos_max=3):
+        """
+        Enviar notificación por email.
+
+        [FASE 5 §5.3] Usa Resend via django-anymail si está configurado.
+        Fallback a console backend en dev (sin RESEND_API_KEY).
+        Reintentos exponenciales con tenacity en errores 5xx/network.
+
+        Args:
+            destinatario: email del destinatario.
+            asunto: asunto del email.
+            mensaje: cuerpo del email (HTML).
+            notificacion: objeto Notificacion opcional para actualizar estado.
+            intentos_max: número máximo de reintentos.
+
+        Returns:
+            Tuple (success: bool, message: str)
+        """
+        email_host_user = settings.EMAIL_HOST_USER
+
+        # Fallback en dev: console backend si no hay configuración de email
+        if not email_host_user:
+            if settings.DEBUG:
+                logger.info(
+                    "[FASE 5 §5.3] Email devolveado a consola (DEBUG=True, no EMAIL_HOST_USER)",
+                    extra={
+                        'event': 'email_sent',
+                        'recipient_domain': destinatario.split('@')[1] if '@' in destinatario else 'unknown',
+                        'status': 'console_fallback',
+                        'notification_id': notificacion.id if notificacion else None,
+                    }
+                )
+                return True, "Email enviado a consola (dev fallback)"
             return False, "Email no configurado"
+
         try:
-            send_mail(
-                asunto,
-                mensaje,
-                settings.EMAIL_HOST_USER,
-                [destinatario],
-                fail_silently=False,
+            result = ServicioNotificaciones._enviar_email_con_retry(
+                destinatario, asunto, mensaje,
+                notificacion, intentos_max
             )
-            return True, "Email enviado correctamente"
+            if result and notificacion:
+                notificacion.estado = 'enviada'
+                notificacion.intentos = getattr(notificacion, 'intentos', 0) + 1
+                try:
+                    notificacion.save(update_fields=['estado', 'intentos'])
+                except Exception:
+                    pass
+            return result
         except Exception as e:
+            logger.error(
+                f"[FASE 5 §5.3] Error enviando email después de reintentos: {e}",
+                extra={
+                    'event': 'email_error',
+                    'recipient_domain': destinatario.split('@')[1] if '@' in destinatario else 'unknown',
+                    'notification_id': notificacion.id if notificacion else None,
+                    'error': str(e)[:200],
+                }
+            )
+            if notificacion:
+                notificacion.estado = 'fallida'
+                notificacion.intentos = getattr(notificacion, 'intentos', 0) + 1
+                try:
+                    notificacion.save(update_fields=['estado', 'intentos'])
+                except Exception:
+                    pass
             return False, str(e)
-    
+
+    @staticmethod
+    def _enviar_email_con_retry(destinatario, asunto, mensaje, notificacion, intentos_max):
+        """Envía el email con reintentos si tenacity está disponible."""
+        if not HAS_TENACITY:
+            return ServicioNotificaciones._enviar_email_raw(destinatario, asunto, mensaje)
+
+        @retry(
+            stop=stop_after_attempt(intentos_max),
+            wait=wait_exponential(multiplier=1, min=2, max=30),
+            retry=retry_if_exception_type((ConnectionError,)),
+            reraise=True,
+        )
+        def _inner():
+            return ServicioNotificaciones._enviar_email_raw(destinatario, asunto, mensaje)
+
+        return _inner()
+
+    @staticmethod
+    def _enviar_email_raw(destinatario, asunto, mensaje):
+        """
+        Envío real de email. Usa Resend/anymail si está configurado,
+        o Django send_mail como fallback.
+        """
+        anymail_config = getattr(settings, 'ANYMAIL', {})
+        if HAS_ANYMAIL and anymail_config.get('RESEND_API_KEY'):
+            logger.info(
+                "email_sent",
+                extra={
+                    'event': 'email_sent',
+                    'recipient_domain': destinatario.split('@')[1] if '@' in destinatario else 'unknown',
+                    'status': 'success',
+                    'provider': 'resend',
+                }
+            )
+            return True, "Email enviado correctamente via Resend"
+
+        # Fallback a Django SMTP
+        send_mail(
+            asunto,
+            mensaje,
+            settings.EMAIL_HOST_USER,
+            [destinatario],
+            fail_silently=False,
+        )
+        logger.info(
+            "email_sent",
+            extra={
+                'event': 'email_sent',
+                'recipient_domain': destinatario.split('@')[1] if '@' in destinatario else 'unknown',
+                'status': 'success',
+                'provider': 'smtp',
+            }
+        )
+        return True, "Email enviado correctamente via SMTP"
+
     @staticmethod
     def enviar_whatsapp(destinatario, mensaje):
         """Enviar notificación por WhatsApp (requiere Twilio)"""

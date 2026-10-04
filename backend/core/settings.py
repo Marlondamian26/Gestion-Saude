@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 
 from pathlib import Path
 import os
+import logging
 from django.core.exceptions import ImproperlyConfigured
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -282,6 +283,19 @@ EMAIL_PORT = int(os.getenv('EMAIL_PORT', 587))
 EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS', 'True') == 'True'
 EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', '')
 EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', '')
+
+# [FASE 5 §5.3] Email backend: Resend/anymail si está configurado, console en dev
+RESEND_API_KEY = os.getenv('RESEND_API_KEY', '')
+
+if RESEND_API_KEY:
+    EMAIL_BACKEND = 'anymail.backends.resend.EmailBackend'
+    ANYMAIL = {
+        'RESEND_API_KEY': RESEND_API_KEY,
+    }
+else:
+    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+    if not DEBUG:
+        logging.warning("[FASE 5 §5.3] Email: fallback a console backend (sin RESEND_API_KEY en prod)")
 
 # [FASE 5 §5.2] Limitar tamaño de uploads en memoria
 DATA_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024  # 10MB
