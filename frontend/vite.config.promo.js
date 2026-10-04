@@ -1,10 +1,23 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import path from 'path';
+import { readFileSync, writeFileSync, existsSync, copyFileSync } from 'fs';
 
 export default defineConfig({
   plugins: [
     react(),
+    {
+      name: 'promo-root-files',
+      closeBundle() {
+        const outDir = path.resolve(__dirname, 'dist-promo');
+        const promoHtml = path.resolve(outDir, 'promo.html');
+        if (existsSync(promoHtml)) {
+          copyFileSync(promoHtml, path.resolve(outDir, 'index.html'));
+          copyFileSync(promoHtml, path.resolve(outDir, '404.html'));
+          console.log('Created index.html and 404.html as fallbacks for SPA routing');
+        }
+      },
+    },
     {
       name: 'promo-root-redirect',
       configureServer(server) {
