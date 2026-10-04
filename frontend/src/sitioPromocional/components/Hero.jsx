@@ -157,6 +157,9 @@ function Hero() {
                 src={getImageUrl(heroImage.imagen)} 
                 alt={heroImage.titulo || 'Hero image'} 
                 className="promo-hero-img"
+                fetchPriority="high"
+                loading="eager"
+                decoding="async"
               />
               {heroImage.titulo && (
                 <div className="promo-hero-img-overlay">

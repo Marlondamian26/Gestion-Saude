@@ -159,6 +159,8 @@ function Carousel() {
             src={getImageUrl(currentImage.imagen)} 
             alt={currentImage.titulo || 'Carousel image'} 
             className="promo-carousel-image"
+            loading="lazy"
+            decoding="async"
           />
           {currentImage.titulo && (
             <div className="promo-carousel-caption">
