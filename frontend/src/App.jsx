@@ -10,7 +10,11 @@ import { AuthProvider } from './context/AuthContext';
 import { NotificacionesProvider } from './context/NotificacionesContext';
 import { LanguageProvider } from './context/LanguageContext';
 
+// Services
+import { setErrorHandler } from './services/errorHandler';
+
 // Components
+import ErrorBoundary from './components/ErrorBoundary';
 import Login from './components/Login';
 import Registro from './components/Registro';
 import Dashboard from './components/Dashboard';
@@ -98,6 +102,17 @@ function AppContent() {
 }
 
 function App() {
+  // [FASE 4 §4.4.3] Configurar handler global de errores de API
+  React.useEffect(() => {
+    setErrorHandler((message, type) => {
+      // En FASE 6 se integrará con toast/notification real
+      console.error(`[API ${type}]`, message);
+      // Notificación simple para usuarios
+      if (typeof window !== 'undefined' && window.alert) {
+        window.alert(message);
+      }
+    });
+  }, []);
 
   return (
     <LanguageProvider>
@@ -105,7 +120,9 @@ function App() {
         <AuthProvider>
           <NotificacionesProvider>
             <Router>
-              <AppContent />
+              <ErrorBoundary key="app">
+                <AppContent />
+              </ErrorBoundary>
             </Router>
           </NotificacionesProvider>
         </AuthProvider>
