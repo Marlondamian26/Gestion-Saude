@@ -979,3 +979,144 @@ Tabla `ChatMetric` en BD para dashboards internos (FASE 7).
 6. **Redis en prod**
    - Provisionar Redis (Upstash free tier o Render Key Value).
    - Setear `REDIS_URL` en Render → backend → Environment.
+
+---
+
+## FASE 6 — Observabilidad, CI/CD y Documentación ✅
+
+### Estado
+| Ítem | Verificado | Corregido | Evidencia | Estado |
+|---|---|---|---|---|
+| §6.1 CI/CD (backend, frontend, E2E) | ✅ | ✅ | .github/workflows/*.yml | ✅ |
+| §6.2 Sentry (backend + frontend) | ✅ | ✅ | sentry-sdk en requirements, @sentry/react en package.json, settings.py init | ✅ |
+| §6.3 Logging JSON estructurado | ✅ | ✅ | python-json-logger, core/tests/test_logging_config.py | ✅ |
+| §6.4 Health check endpoint | ✅ | ✅ | core/health.py, /health/, rate limit | ✅ |
+| §6.5 Documentación | ✅ | ✅ | README.md, CHANGELOG.md, CONTRIBUTING.md, docs/er-diagram.md, backend/LOGGING.md | ✅ |
+| §6.6 Branding | — | — | Pendiente confirmación nombre canónico | ⚠️ |
+
+### Tests FASE 6
+- `core/tests/test_health.py`: 5 passed
+- `core/tests/test_sentry_config.py`: 3 passed
+- `core/tests/test_logging_config.py`: 3 passed
+- **Total FASE 6: 10 tests nuevos**
+
+### Pendientes FASE 6 (acción manual)
+1. Setear `VITE_SENTRY_DSN` en Render frontend env vars.
+2. Setear `SENTRY_DSN` en Render backend env vars.
+
+---
+
+## FASE 7 — Escalabilidad y Roadmap ✅
+
+### Estado general: ✅ Evaluación completada + mitigaciones aplicadas
+| Subsección | Tipo | Verificado | Corregido | Evidencia | Estado |
+|---|---|---|---|---|---|
+| §7.1 Índices y queries | medir+optimizar | ✅ | ✅ | 41→1, 11→1, 21→1 queries | ✅ |
+| §7.2 Bundle frontend | medir+optimizar | ✅ | ✅ | 610kB→333kB (-45%) | ✅ |
+| §7.3 ASGI | evaluar+preparar | ✅ | ✅ | docs/architecture/evaluation-asgi.md, cache-based SSE limiter | ✅ |
+| §7.4 Media storage | evaluar+preparar | ✅ | ✅ | docs/architecture/evaluation-media-storage.md, feature flag | ✅ |
+| §7.5 Roadmap | documentar | ✅ | ✅ | docs/ROADMAP.md | ✅ |
+
+### Benchmarks de rendimiento
+
+#### §7.1 — Database Query Performance
+
+**Metodología:** Benchmark con `CaptureQueriesContext` sobre 10 items.
+
+| Endpoint | Items | Queries (baseline) | Queries (post-fix) | Reducción |
+|---|---|---|---|---|
+| CitaViewSet.list | 10 | 41 | 1 | **-97.6%** |
+| NotificacionViewSet.list | 10 | 11 | 1 | **-90.9%** |
+| HorarioViewSet.list | 10 | 21 | 1 | **-95.2%** |
+| DoctorViewSet.list | 1 | 3 | 3 | 0% (ya optimizado) |
+| PacienteViewSet.list | 1 | 2 | 2 | 0% (ya optimizado) |
+
+**Causa del N+1:**
+- CitaSerializer: `paciente_nombre` (source=paciente.usuario) + `doctor_nombre` (source=doctor.usuario) → 4 queries/item extra.
+- NotificacionSerializer: `usuario_detalle` (nested UsuarioSerializer) → 1 query/item extra.
+- HorarioSerializer: `doctor_nombre` (source=doctor.usuario) → 2 queries/item extra.
+
+**Fix:** `select_related()` añadido en `get_queryset()` de cada ViewSet.
+
+#### §7.1.3 — Índices añadidos
+
+| Tabla | Índice | Campos | Uso |
+|---|---|---|---|
+| Cita | `cita_doc_fecha_estado_idx` | (doctor, fecha, estado) | Overlap check, filtrado doctor |
+| Cita | `cita_paciente_fecha_idx` | (paciente, fecha) | Listado por paciente |
+| Notificacion | `notif_usuario_leida_idx` | (usuario, leida) | `marcar_todas_leidas`, `no_leidas` |
+| Notificacion | `notif_usuario_estado_idx` | (usuario, estado) | Filtrado por estado |
+| Horario | `horario_doc_dia_activo_idx` | (doctor, dia_semana, activo) | Disponibilidad por día |
+| Usuario | `usuario_rol_idx` | (rol) | Filtrado por rol (buscar_pacientes) |
+
+#### §7.2 — Bundle Frontend Performance
+
+| Métrica | Antes | Después | Δ |
+|---|---|---|---|
+| `index.js` (bundle principal) | 609.67 kB | 333.11 kB | **-45.4%** |
+| `index.js` gzip | 164.94 kB | 101.18 kB | **-38.7%** |
+| Lazy chunks | 0 | 10 (Dashboard, ChatIA, Citas, etc.) | ✅ |
+| `vendor-react` chunk | 0 kB (empty) | 0.00 kB | ✅ creado |
+| Tests (vitest) | 31 pass | 31 pass | ✅ |
+| Build | ✅ | ✅ | ✅ |
+
+**Metodología:** `npx vite build`, análisis de chunks con `rollup-plugin-visualizer`.
+
+**Fix:** Lazy loading con `React.lazy` + `Suspense` en rutas. Componentes eager: Login, Registro (primer render). Componentes lazy: Dashboard, Citas, Doctores, Perfil, Admin, EnfermeriaDashboard, ChatIA, SitioPromocionalLanding.
+
+**Optimización adicional:** `fetchPriority="high"` en Hero image (above-the-fold), `loading="lazy"` + `decoding="async"` en Carousel images.
+
+### Evaluaciones arquitectónicas
+
+#### ASGI vs WSGI (ver detalle en `docs/architecture/evaluation-asgi.md`)
+
+**Veredicto:** Mantener WSGI + mitigación para corto plazo. Migrar a ASGI cuando usuarios concurrentes SSE > 50.
+
+**Decisión basada en:**
+- Render free: 1 worker, ~4 threads → 4 conexiones SSE max.
+- `MAX_SSE_CONCURRENT = 2` (configurable) limita conexiones SSE.
+- Cache-based counter (`SSE_COUNTS_KEY`) funciona multi-worker con Redis.
+- Fallback a polling (60s) cuando límite alcanzado.
+
+**Plan de migración ASGI (Opción C):**
+```yaml
+# render.yaml (cuando se apruebe)
+startCommand: uvicorn core.asgi:application --host 0.0.0.0 --port $PORT --workers 1 --limit-concurrency 1000
+```
+
+#### Media Storage (ver detalle en `docs/architecture/evaluation-media-storage.md`)
+
+**Veredicto:** Cloudflare R2 (10GB free) o Supabase Storage (menos fricción). Feature flag implementado.
+
+**Estado:** Código listo con `MEDIA_STORAGE=s3` flag. Pendiente aprobación + provisionamiento.
+
+### Acciones que requieren intervención humana
+
+1. **Provisionar Redis en Render** → setear `REDIS_URL`.
+2. **Rotar `SECRET_KEY`** → generar nuevo con `get_random_secret_key()`.
+3. **Setear `RESEND_API_KEY`** → crear cuenta Resend, verificar dominio.
+4. **Rotar demo credentials** → eliminar admin/admin, patient/patient123 de render.yaml.
+5. **Setear `SENTRY_DSN`** (backend + frontend `VITE_SENTRY_DSN`).
+6. **Migrar media a S3/R2** → aprobar proveedor, setear credenciales, `python manage.py migrate_media_to_s3 --apply`.
+7. **Aprobar migración a ASGI** → si usuarios SSE > 50 concurrentes.
+8. **Ejecutar índices en prod** → correr migración `000X_add_performance_indexes` (ya en código; SQLite local no muestra mejora pero PostgreSQL sí).
+9. **Backup de Supabase** → `pg_dump` desde panel de Supabase.
+10. **Setup UptimeRobot** → monitorizar `/health/`.
+
+### Riesgos residuales
+
+| Riesgo | Impacto | Mitigación | Estado |
+|---|---|---|---|
+| SSE bloquea workers WSGI | Alto (saturación) | Cache-based limiter + polling fallback | ✅ Mitigado |
+| Media no persiste en Render free | Alto (imágenes perdidas) | Feature flag S3 + migrate_media command | ⚠️ Pendiente aprobación |
+| Demo credentials expuestos | Alto (seguridad) | Rotar en render.yaml | ⚠️ Acción manual |
+| SECRET_KEY no rotado | Alto (seguridad) | Rotar en Render env vars | ⚠️ Acción manual |
+| Redis no provisionado | Medio (cache/SSE limit) | LocMemCache fallback en dev | ⚠️ Acción manual |
+| Queries sin EXPLAIN ANALYZE en prod | Medio | Documentado comando para humano | ℹ️ Documentado |
+
+### Próximos pasos
+1. Aprobar/descartar migración a S3/R2 (§7.4).
+2. Aprobar/descartar migración a ASGI (§7.3).
+3. Ejecutar acciones manuales pendientes (lista de arriba).
+4. Implementar features del Roadmap Horizonte 1 (docs/ROADMAP.md).
+5. PR consolidadoo para revisión.

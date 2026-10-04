@@ -2,7 +2,29 @@
 
 Plataforma de gestión de citas médicas para pacientes, doctores y enfermeros. El paciente puede agendar, cancelar y posponer citas; el doctor gestiona horarios y la enfermera apoya el proceso. Incluye un asistente de chat (ChatIA) para agendar citas vía interfaz conversacional.
 
-## Arquitectura
+## Estado actual
+
+| Métrica | Valor | Target |
+|---|---|---|
+| Tests backend | 139 passed, 3 skipped | ≥ 136 |
+| Tests frontend | 31 passed | ≥ 31 |
+| Cobertura backend | ~62% | ≥ 70% (Horizonte 1) |
+| Cobertura frontend | ~65% | ≥ 70% (Horizonte 1) |
+| Bundle principal | 333 kB (101 kB gzip) | < 350 kB ✅ |
+| N+1 queries | Eliminadas (select_related) | — |
+| Uptime | — | ≥ 99.5% |
+
+## Documentación
+
+- **[README.md](README.md)** — este archivo
+- **[AUDIT.md](AUDIT.md)** — auditoría completa FASE 0-7
+- **[CHANGELOG.md](CHANGELOG.md)** — historial de cambios
+- **[CONTRIBUTING.md](CONTRIBUTING.md)** — guía de contribución
+- **[docs/ROADMAP.md](docs/ROADMAP.md)** — roadmap funcional y KPIs
+- **[docs/er-diagram.md](docs/er-diagram.md)** — diagrama ER
+- **[backend/LOGGING.md](backend/LOGGING.md)** — guía de logging estructurado
+- **[docs/architecture/evaluation-asgi.md](docs/architecture/evaluation-asgi.md)** — evaluación ASGI vs WSGI
+- **[docs/architecture/evaluation-media-storage.md](docs/architecture/evaluation-media-storage.md)** — migración media S3/R2
 
 ```
                     ┌─────────────────────────────────────┐
