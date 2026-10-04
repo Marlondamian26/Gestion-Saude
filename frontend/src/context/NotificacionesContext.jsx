@@ -1,8 +1,8 @@
-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
 import axiosInstance, { wakeUpBackend } from '../services/auth';
 import { useAuth } from './AuthContext';
 import { useLanguage } from './LanguageContext';
-import { APP_NAME } from '../config/constants';
+import { APP_NAME, API_BASE_URL } from '../config/constants';
 
 const NotificacionesContext = createContext();
 
@@ -20,8 +20,15 @@ export const NotificacionesProvider = ({ children }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [pollingInterval, setPollingInterval] = useState(null);
+  const [sseActive, setSSEActive] = useState(false);
+
   const { user } = useAuth();
   const { language, t } = useLanguage();
+
+  // SSE state
+  const sseRef = useRef(null);
+  const reconnectAttemptsRef = useRef(0);
+  const useSSERef = useRef(true);
 
   // Función para traducir y procesar notificaciones
   const procesarNotificacion = (notif, t) => {
@@ -163,7 +170,81 @@ export const NotificacionesProvider = ({ children }) => {
     }
   }, [user, language]);
 
-  // Configurar polling cada 30 segundos
+  // SSE connection management
+  const connectSSE = useCallback(() => {
+    if (!user?.id || !useSSERef.current) return;
+
+    const token = localStorage.getItem('access_token');
+    if (!token) {
+      console.warn('[Notificaciones] No access token, falling back to polling');
+      setSSEActive(false);
+      return;
+    }
+
+    try {
+      const sseUrl = `${API_BASE_URL}/notificaciones/stream/?token=${token}`;
+      const eventSource = new EventSource(sseUrl);
+
+      eventSource.onmessage = (event) => {
+        reconnectAttemptsRef.current = 0;
+
+        if (event.data === 'keepalive') return;
+
+        try {
+          const raw = JSON.parse(event.data);
+          if (raw.error) {
+            console.error('[SSE] Server error:', raw.error);
+            return;
+          }
+
+          // Procesar como una nueva notificación
+          const notif = procesarNotificacion(raw, t);
+          setNotificaciones(prev => {
+            // Evitar duplicados (mismo id)
+            if (prev.some(n => n.id === raw.id)) return prev;
+            const updated = [notif, ...prev];
+            const noLeidasCount = updated.filter(n => !n.leida).length;
+            setNoLeidas(noLeidasCount);
+            if (noLeidasCount > 0) {
+              document.title = `(${noLeidasCount}) ${APP_NAME}`;
+            }
+            return updated;
+          });
+        } catch (e) {
+          console.error('[SSE] Error parsing event:', e);
+        }
+      };
+
+      eventSource.onerror = (err) => {
+        reconnectAttemptsRef.current += 1;
+        console.warn(`[SSE] Connection error (attempt ${reconnectAttemptsRef.current})`);
+
+        if (reconnectAttemptsRef.current >= 3) {
+          console.warn('[SSE] Falling back to polling');
+          setSSEActive(false);
+          eventSource.close();
+          return;
+        }
+
+        // Exponential backoff: 5s, 10s, 20s
+        const delay = Math.min(5000 * Math.pow(2, reconnectAttemptsRef.current - 1), 20000);
+        setTimeout(() => {
+          if (useSSERef.current && user?.id) {
+            connectSSE();
+          }
+        }, delay);
+      };
+
+      sseRef.current = eventSource;
+      setSSEActive(true);
+      console.log('[SSE] Connected to notificaciones stream');
+    } catch (e) {
+      console.error('[SSE] Failed to connect:', e);
+      setSSEActive(false);
+    }
+  }, [user, t, language]);
+
+  // Configurar polling cada 60 segundos (fallback / complemento a SSE)
   useEffect(() => {
     if (!user) {
       if (pollingInterval) {
@@ -176,14 +257,59 @@ export const NotificacionesProvider = ({ children }) => {
     // Cargar inicial
     cargarNotificaciones();
 
-    // Configurar polling
-    const interval = setInterval(cargarNotificaciones, 30000); // 30 segundos
+    // Configurar polling (60s + pausa en pestaña oculta)
+    let interval;
+    let isPaused = false;
+
+    const pausarSiOculto = () => {
+      if (document.hidden) {
+        isPaused = true;
+      }
+    };
+
+    const reanudarSiVisible = () => {
+      if (!document.hidden && isPaused) {
+        isPaused = false;
+        cargarNotificaciones();
+      }
+    };
+
+    interval = setInterval(() => {
+      if (!isPaused) {
+        cargarNotificaciones();
+      }
+    }, 60000); // 60 segundos
+
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) {
+        isPaused = true;
+      } else {
+        isPaused = false;
+        cargarNotificaciones();
+      }
+    });
+
     setPollingInterval(interval);
 
     return () => {
       if (interval) clearInterval(interval);
     };
   }, [user, cargarNotificaciones]);
+
+  // SSE: conectar al montar, desconectar al unmount o logout
+  useEffect(() => {
+    if (user && useSSERef.current) {
+      connectSSE();
+    }
+
+    return () => {
+      useSSERef.current = false;
+      if (sseRef.current) {
+        sseRef.current.close();
+        sseRef.current = null;
+      }
+    };
+  }, [user, language]);
 
   // Marcar una notificación como leída
   const marcarComoLeida = async (id) => {
@@ -248,11 +374,12 @@ export const NotificacionesProvider = ({ children }) => {
   };
 
   return (
-    <NotificacionesContext.Provider value={{
+     <NotificacionesContext.Provider value={{
       notificaciones,
       noLeidas,
       loading,
       error,
+      sseActive,
       cargarNotificaciones,
       marcarComoLeida,
       marcarTodasLeidas,
