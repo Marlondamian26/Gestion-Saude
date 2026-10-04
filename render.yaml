@@ -5,7 +5,7 @@ services:
     region: oregon
     plan: free
     workingDirectory: backend
-    buildCommand: set -e && echo "Installing requirements..." && pip install -r requirements.txt && echo "Making migrations..." && python manage.py makemigrations && echo "Migrating..." && python manage.py migrate --noinput --verbosity=2 && echo "Showing migrations..." && python manage.py showmigrations && echo "Collecting static..." && python manage.py collectstatic --noinput
+    buildCommand: set -e && echo "Installing requirements..." && pip install -r requirements.txt && echo "Running deploy checks..." && python manage.py check --deploy --fail-level WARNING && echo "Migrating..." && python manage.py migrate --noinput --verbosity=2 && echo "Collecting static..." && python manage.py collectstatic --noinput
     startCommand: gunicorn core.wsgi:application --bind 0.0.0.0:$PORT --workers ${RENDER_CPU_COUNT:-1} --threads 4 --timeout 120
     envVars:
       - key: DATABASE_URL
