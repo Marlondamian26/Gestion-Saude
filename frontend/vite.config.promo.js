@@ -1,26 +1,14 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import path from 'path';
-import { writeFileSync, existsSync } from 'fs';
 
 export default defineConfig({
   plugins: [
     react(),
     {
-      name: 'promo-redirects',
-      closeBundle() {
-        if (existsSync(path.resolve(__dirname, 'dist-promo'))) {
-          writeFileSync(
-            path.resolve(__dirname, 'dist-promo', '_redirects'),
-            '/* /promo.html 200\n',
-          );
-        }
-      },
-    },
-    {
       name: 'promo-root-redirect',
       configureServer(server) {
-        server.middlewares.use((req, res, next) => {
+        server.middlewares.use((req, _res, next) => {
           if (req.url === '/' || req.url === '') {
             req.url = '/promo.html';
           }
@@ -29,6 +17,7 @@ export default defineConfig({
       },
     },
   ],
+  publicDir: 'public-promo',
   base: '/',
   server: {
     port: 5174,
