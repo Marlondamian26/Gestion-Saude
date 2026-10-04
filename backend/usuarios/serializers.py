@@ -337,3 +337,21 @@ class SitioImagenSerializer(serializers.ModelSerializer):
         model = SitioImagen
         fields = ['id', 'titulo', 'descripcion', 'imagen', 'tipo', 'orden', 'activo', 'fecha_creacion']
         read_only_fields = ['id', 'fecha_creacion']
+
+    def validate_imagen(self, value):
+        """[FASE 5 §5.2] Validación real de imagen con Pillow."""
+        from usuarios.image_utils import validar_imagen
+        try:
+            validar_imagen(value, max_bytes=10 * 1024 * 1024)  # 10MB para sitio
+        except ValueError as e:
+            raise serializers.ValidationError(str(e))
+        return value
+
+    def create(self, validated_data):
+        """Optimiza la imagen al crear."""
+        from usuarios.image_utils import optimizar_imagen
+        imagen = validated_data.get('imagen')
+        if imagen:
+            target = (1920, 1080) if validated_data.get('tipo') == 'hero' else (1200, 800)
+            validated_data['imagen'] = optimizar_imagen(imagen, target_size=target)
+        return super().create(validated_data)

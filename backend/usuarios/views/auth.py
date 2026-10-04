@@ -26,6 +26,7 @@ from ..models import Usuario, Paciente
 from ..serializers import (
     UsuarioSerializer, RegistroUsuarioSerializer, CustomTokenObtainPairSerializer,
 )
+from ..image_utils import validar_imagen, optimizar_imagen
 from notificaciones.services import ServicioNotificaciones
 
 logger = logging.getLogger(__name__)
@@ -137,14 +138,17 @@ def gestionar_foto_perfil(request, usuario_id=None):
 
         archivo_foto = request.FILES['foto']
 
-        # Validar tipo de archivo
-        tipos_permitidos = ['image/jpeg', 'image/png', 'image/gif', 'image/webp']
-        if archivo_foto.content_type not in tipos_permitidos:
-            return Response({'error': 'Solo se permiten imágenes (JPEG, PNG, GIF, WebP)'}, status=status.HTTP_400_BAD_REQUEST)
+        # [FASE 5 §5.2] Validar tipo MIME real con Pillow (no confiar en content_type)
+        try:
+            validar_imagen(archivo_foto)
+        except ValueError as e:
+            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Validar tamaño (máx 25MB)
-        if archivo_foto.size > 25 * 1024 * 1024:
-            return Response({'error': 'La imagen no debe superar 25MB'}, status=status.HTTP_400_BAD_REQUEST)
+        # Redimensionar y convertir a WebP (5MB max, 512x512)
+        try:
+            archivo_foto = optimizar_imagen(archivo_foto, target_size=(512, 512))
+        except ValueError as e:
+            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
         # Asegurar que el directorio de media existe
         import os
