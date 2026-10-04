@@ -21,7 +21,7 @@ services:
       - key: CSRF_TRUSTED_ORIGENS
         value: "https://gestion-saude.onrender.com,https://gestion-saude-backend.onrender.com"
       - key: CORS_ALLOWED_ORIGENS
-        value: "https://gestion-saude.onrender.com,https://gestion-saude-backend.onrender.com"
+        value: "https://gestion-saude.onrender.com,https://gestion-saude-backend.onrender.com,https://gestion-saude-promo.onrender.com"
       - key: REDIS_URL
         sync: false
       - key: DEMO_PATIENT_USERNAME
@@ -39,7 +39,25 @@ services:
     envVars:
       - key: VITE_API_URL
         value: https://gestion-saude-backend.onrender.com/api
+      - key: VITE_PROMO_URL
+        value: https://gestion-saude-promo.onrender.com
     routes:
       - type: rewrite
         source: /*
         destination: /index.html
+
+  # Landing page promocional (sitio independiente)
+  - type: static
+    name: Gestion-Saude-promo
+    region: oregon
+    plan: free
+    rootDir: frontend
+    buildCommand: npm ci && npm run build:promo
+    staticPublishPath: dist-promo
+    envVars:
+      - key: VITE_PLATFORM_URL
+        value: https://gestion-saude.onrender.com
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /promo.html
