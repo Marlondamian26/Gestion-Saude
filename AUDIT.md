@@ -1749,3 +1749,130 @@ grep -rn "sitioPromocional|LandingWrapper" frontend/dist/ → limpio
 - **[REQUIERE ACCIÓN MANUAL]** Push a GitHub — Codespace devuelve 403 (permisos).
 - **[REQUIERE ACCIÓN MANUAL]** Verificar env vars en Render Dashboard que coincidan con `render.yaml`.
 - **[REQUIERE ACCIÓN MANUAL]** Si backend no tiene imágenes en `/media/`, necesario acceso admin a Render para subir imágenes hero/carousel via Django admin.
+
+---
+
+# AUDIT.md — FASE 10: Rediseño UI/UX del Sitio Promocional Independiente
+
+**Fecha de ejecución:** 2026-10-04
+**Ejecutado por:** KiloCode (agente IA)
+**Commit base:** `0f4a37b` (FASE 1-9 completadas)
+
+## §10.0 — Baseline visual y decisiones de diseño
+
+### 10.0.1 — Capturas del estado actual (baseline "antes")
+
+**Estructura de capturas:**
+```
+promo-frontend/docs/design/before/
+├── promo-full-light-pt-mobile.png        (390×844)
+├── promo-full-light-pt-desktop.png       (1440×900)
+├── promo-full-light-es-mobile.png
+├── promo-full-light-es-desktop.png
+├── promo-full-light-en-mobile.png
+├── promo-full-light-en-desktop.png
+├── promo-full-dark-pt-mobile.png
+├── promo-full-dark-pt-desktop.png
+├── promo-full-dark-es-mobile.png
+├── promo-full-dark-es-desktop.png
+├── promo-full-dark-en-mobile.png
+└── promo-full-dark-en-desktop.png
+```
+
+**Estado de captura:** ✅ 12 capturas completadas con Playwright (full-page, `animations: 'disabled'`).
+- Viewport mobile: 390×844 (iPhone 12/13 equivalent)
+- Viewport desktop: 1440×900
+- Combinaciones: light × {pt,es,en} × {mobile,desktop} = 6
+- Combinaciones: dark × {pt,es,en} × {mobile,desktop} = 6
+- Total: **12 capturas**
+
+**Observación:** No se incluyó `theme=auto` en el baseline porque el modo auto delega a `prefers-color-scheme`, que no se puede simular fácilmente en screenshots sin cambiar el sistema. Se capturó `light` y `dark` (resueltos explícitamente).
+
+### 10.0.2 — Auditoría visual y de UX
+
+| Sección | Problema | Severidad | Fix propuesto |
+|---|---|---|---|
+| Hero | Imagen tratada como card pequeña a la derecha, no como fondo full-bleed | Alta | Hero full-bleed con imagen de fondo + overlay gradiente, texto superpuesto |
+| Hero | Sin fuente display; título usa Segoe UI/system sans | Alta | Cargar Fraunces como font-display; título h1 con font-display |
+| Hero | Overlay básico (radial gradient); sin blur ni capa de legibilidad | Media | Overlay multicapa: gradiente lineal + radial blur derecha-izquierda |
+| Hero | Animación fadeInUp genérica; sin parallax ni stagger | Media | Parallax sutil (15% scroll), stagger de entrada (badge→title→subtitle→actions) |
+| Carousel | autoplay 5s (muy rápido); sin pausa on hover robusta | Media | autoplay 6s; pausa on hover + visibilitychange + prefers-reduced-motion |
+| Carousel | Flechas usan caracteres Unicode (◀ ▶) no iconos | Baja | Reemplazar con FaChevronLeft/FaChevronRight |
+| Carousel | Sin Ken Burns; crossfade presente pero básico | Media | Ken Burns sutil (scale 1→1.03), crossfade 800ms |
+| Carousel | Dots pequeños; sin role="tab"/aria-labels descriptivos | Alta | Dots con label "Slide N", role tab, tamaño activo 32px |
+| Navbar | Sin scroll-aware background change | Alta | Background transparente arriba, sólido con blur al scroll >40px |
+| Navbar | Sin indicador de sección activa | Media | Underline animado con IntersectionObserver |
+| Navbar | No hay trap de focus en mobile menu | Alta | focus trap + Esc para cerrar |
+| Navbar | Usa `Link` de react-router para scroll; debería usar `<a href="#id">` | Media | Cambiar a anchors para scroll suave |
+| Servicios | Cards básicos; hover solo translateY | Baja | Añadir franja superior gradient + sombra elevada |
+| SobreNosotros | Avatar/placeholder de doctor es un card con gradiente (no foto real) | Alta | Usar imagen del doctor desde backend; marco decorativo con patrón |
+| SobreNosotros | Features usan siempre FaUserMd (icono repetido) | Baja | Iconos diferentes por feature |
+| SobreNosotros | Stats hardcodeados (+5, +2000, 98%, 24/7) | Baja | Derivar de CONFIG.stats |
+| Testimonios | Sin comillas decorativas | Baja | Pseudo-elemento ::before con comilla grande |
+| Testimonios | Stars usan #ffc107 (amarillo) en vez de --promo-primary | Baja | Keep #fbbf24 (warm accent) para coherencia |
+| Contacto | Cards no son clickeables (WhatsApp separado) | Media | Wrap card en `<a>` con href mailto/tel/maps |
+| Contacto | Sin indicador visual de hover (flecha) | Baja | Añadir FaArrowRight en hover |
+| CTA | Sin patrón decorativo de fondo | Baja | Añadir radial-gradient patrón + padding aumentado |
+| Footer | Background hardcodeado #1a2f33 (no theme-aware) | Alta | Usar var(--promo-surface) + border-top |
+| Footer | Redes Facebook/Instagram usan href="#" | Alta | Mantener como placeholder con `[REQUIERE ACCIÓN MANUAL]` |
+| General | No Google Fonts cargadas | Alta | Añadir preconnect + Fraunces + Inter en index.html |
+| General | CSS usa vars mixtos: `--bg-primary` (dashboard-style) + `--promo-*` | Media | Consolidar todo en `tokens.css` con `--promo-*` |
+| General | `!important` usado en dark footer (#83-84) | Alta | Eliminar `!important`, usar specificity |
+| General | Duplicate keyframes fadeInUp en promocional.css + promo-responsive.css | Baja | Consolidar en un único lugar |
+| General | Navbar links usan `Link` de react-router (no `<a>`) | Media | Cambiar a anchors para scroll |
+| General | Sin skip-link visible en focus | Alta | Añadir skip-link a main content |
+| Toggle | PromoThemeToggle usa `clamp()` vs dashboard hardcoded `55px`/`2px` | Alta | Hacer pixel-perfect copia del dashboard |
+| Toggle | PromoLanguageToggle usa `clamp()` vs dashboard hardcoded valores | Alta | Hacer pixel-perfect copia del dashboard |
+| Toggle | Promo toggle tooltip dice "Auto"/"Toggle theme" vs dashboard "Modo automático" | Media | Sincronizar texto tooltip |
+| Lint | 13 errores ESLint: setState-in-effect en toggles | Baja | Refactor: mover setIsRotating a useEffect separado con guardia |
+
+### 10.0.3 — Decisiones de diseño estéticas
+
+**Tono visual objetivo:** Clínica médica premium — confianza, limpieza, calidez humana, jerarquía clara, micro-interacciones sutiles.
+
+**Referentes estéticos:**
+- One Medical (jerarquía tipográfica, spacing generoso)
+- Carbon Health (clean, human-centered)
+- Inspiración de tono, no de layout.
+
+**Adjetivos guía:** limpio, cálido, confiable, humano, sobrio, elegante, con detalle en los márgenes.
+
+**Anti-referentes:** Futurista frío, minimalista extremo sin calidez, infantil, colorido saturado, parallax agresivo, autoplay con sonido.
+
+**Paleta secundaria de apoyo (nuevos colores, no reemplazan primary):**
+- Warm neutral textos suaves: `#f5f3ef` (light) / `#a8a29e` (dark)
+- Soft success checkmarks: `#10b981`
+- Warm accent (badge hero): `#fbbf24` (solo acento, no dominante)
+- Star rating (testimonios): `#fbbf24`
+
+**Tipografía:**
+- **Títulos display:** Fraunces (`@import` via Google Fonts, `opsz,wght@9..144,500;9..144,600;9..144,700`)
+  - Rationale: serif contemporáneo, elegante, más único que Playfair Display. Optical sizing (`opsz`) mejora legibilidad en todos los tamaños.
+- **Cuerpo y UI:** Inter (`wght@400;500;600`) — mantener, estándar y limpio.
+- **Fallback:** `system-ui, -apple-system, sans-serif` para ambas familias.
+- Cargar solo 2 pesos por familia (Inter: 400, 600; Fraunces: 500, 600).
+
+**Iconografía:** react-icons (FaXxx) — estilo outline (`FaReg*`) cuando posible; filled para WhatsApp, estrellas, elementos destacados.
+
+**Formas:** radios 12px cards, 20-28px contenedores grandes, 9999px pills. Sombras multicapa suaves.
+
+**Micro-interacciones:** transiciones 200-400ms, easing `cubic-bezier(0.22, 1, 0.36, 1)`.
+
+**Decisiones sobre sugerencias del prompt:**
+- Parallax del hero: ✓ Sí, 15% máximo, respeta `prefers-reduced-motion`.
+- Carousel: ✓ Crossfade + Ken Burns (más elegante que slides laterales para fondos).
+- Navbar: ✓ Scroll-aware (transparente→sólido con blur).
+- Fuente Fraunces: ✓ Elegida como display font.
+
+### 10.0.4 — Commit
+```
+git commit -m "ui(10.0): baseline visual y decisiones esteticas para redisenio del promo"
+```
+
+---
+
+## §10.1 — Sistema de diseño (tokens, tipografía, primitivos CSS)
+
+### 10.1.1 — `tokens.css` (nueva, fuente única de verdad)
+
+Reemplaza `promo-tokens.css` con versión expandida según especificación del prompt. Importado primero en `main.jsx`.
