@@ -75,19 +75,22 @@ class Usuario(AbstractUser):
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 
+
 @receiver(post_save, sender='usuarios.Usuario')
-def crear_perfil_paciente(sender, instance, created, **kwargs):
-    """Crea automáticamente un perfil de Paciente para usuarios con rol 'patient'.
-
-    Esto asegura que los pacientes registrados manualmente o via API siempre tengan
-    un registro en la tabla Paciente, lo que facilita su gestión tanto en el
-    panel de administración de Django como en el dashboard de React.
+def sincronizar_perfil_paciente(sender, instance, created, **kwargs):
     """
-    # evitamos importar Paciente al principio para romper posibles dependencias
-    from .models import Paciente
+    Sincroniza el perfil de Paciente con el rol del Usuario.
 
+    Políticas (§3.4):
+    - P1 (Creación): Si rol == 'patient', crea Paciente.
+      Idempotente: get_or_create evita duplicados.
+    - P2 (Cambio de rol): No elimina Paciente al cambiar rol 'patient' → otro.
+      Mantiene historial de citas. Si vuelve a 'patient', el Paciente ya existe.
+      El Paciente 'huérfano' permanece en BD (invisibilidad gestionada en frontend).
+    - P3 (Eliminación): Usuario→Paciente es CASCADE (heredado).
+      Cita.paciente/cita.doctor también son CASCADE — pendiente decisión negocio (FASE 7).
+    """
     if instance.rol == 'patient' and instance.username != 'admin':
-        # get_or_create evita errores si ya existe
         Paciente.objects.get_or_create(usuario=instance)
 
 class Especialidad(models.Model):
