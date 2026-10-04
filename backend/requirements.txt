@@ -21,3 +21,9 @@ django-dbbackup==4.1.0
 # [FASE 5 §5.3] Email transaccional
 django-anymail[resend]==11.1  # [REQUIERE APROBACIÓN] si se usa en prod
 tenacity==9.0.0
+
+# [FASE 6 §6.2] Observabilidad
+sentry-sdk[celery,postgres]==2.35.0  # [REQUIERE ACCIÓN MANUAL] setear SENTRY_DSN en prod
+
+# [FASE 6 §6.3] Logging estructurado
+python-json-logger==3.2.0

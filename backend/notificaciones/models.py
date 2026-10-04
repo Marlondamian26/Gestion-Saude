@@ -25,7 +25,8 @@ class Notificacion(models.Model):
     mensaje = models.TextField()
     leida = models.BooleanField(default=False)
     estado = models.CharField(max_length=20, choices=ESTADOS, default='pendiente')
-    
+    intentos = models.PositiveIntegerField(default=0, verbose_name='Número de intentos de envío')
+
     # Para relacionar con cualquier modelo (cita, etc.)
     content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE, null=True, blank=True)
     object_id = models.PositiveIntegerField(null=True, blank=True)

@@ -1,0 +1,74 @@
+name: Backend CI
+
+on:
+  push:
+    branches: [main, belkis-saude, chore/audit-fixes]
+    paths:
+      - 'backend/**'
+      - 'requirements.txt'
+      - 'requirements.lock.txt'
+      - 'requirements-dev.txt'
+      - '.github/workflows/backend-ci.yml'
+  pull_request:
+    branches: [main, belkis-saude]
+    paths:
+      - 'backend/**'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.12']
+    services:
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+    env:
+      PYTHONUNBUFFERED: '1'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+          cache-dependency-path: backend/requirements-dev.txt
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r backend/requirements.txt
+          pip install -r backend/requirements-dev.txt
+
+      - name: Django check (deploy)
+        run: cd backend && python manage.py check --deploy --fail-level WARNING
+        env:
+          SECRET_KEY: ci-test-secret-key-not-for-prod
+          DEBUG: 'False'
+          ALLOWED_HOSTS: 'localhost,127.0.0.1,testserver'
+
+      - name: Migrations check
+        run: cd backend && python manage.py makemigrations --check --dry-run --strict
+        env:
+          SECRET_KEY: ci-test-secret-key-not-for-prod
+          DEBUG: 'False'
+          ALLOWED_HOSTS: 'localhost,127.0.0.1,testserver'
+
+      - name: Run tests with coverage
+        run: cd backend && pytest --cov=usuarios --cov=notificaciones --cov-report=xml --cov-fail-under=60
+        env:
+          SECRET_KEY: ci-test-secret-key-not-for-prod
+          DEBUG: 'False'
+          DATABASE_URL: 'sqlite:///test_db.db'
+          REDIS_URL: 'redis://localhost:6379/0'
+
+      - name: Upload coverage
+        uses: codecov/codecov-action@v4
+        if: always()
+        with:
+          files: backend/coverage.xml
+          fail_ci_if_error: false

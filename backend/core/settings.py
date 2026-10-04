@@ -15,6 +15,40 @@ import os
 import logging
 from django.core.exceptions import ImproperlyConfigured
 
+# [FASE 6 §6.2] Sentry — inicializar antes que otros imports para capturar errores tempranos
+SENTRY_DSN = os.environ.get('SENTRY_DSN')
+if SENTRY_DSN and os.environ.get('DEBUG', 'False') == 'False':
+    import sentry_sdk
+    from sentry_sdk.integrations.django import DjangoIntegration
+    from sentry_sdk.integrations.logging import LoggingIntegration
+
+    def _scrub_pii(event, hint=None):
+        """Elimina headers sensibles antes de enviar a Sentry (RGPD)."""
+        if 'request' in event:
+            headers = event['request'].get('headers', {})
+            for h in ['Authorization', 'Cookie', 'X-Api-Key']:
+                headers.pop(h, None)
+        return event
+
+    sentry_logging = LoggingIntegration(
+        level=logging.INFO,
+        event_level=logging.ERROR,
+    )
+
+    sentry_sdk.init(
+        dsn=SENTRY_DSN,
+        integrations=[
+            DjangoIntegration(),
+            sentry_logging,
+        ],
+        environment=os.environ.get('SENTRY_ENV', 'production'),
+        release=os.environ.get('RENDER_GIT_COMMIT', 'unknown')[:7],
+        traces_sample_rate=float(os.environ.get('SENTRY_TRACES_SAMPLE_RATE', '0.1')),
+        profiles_sample_rate=0.1,
+        send_default_pii=False,
+        before_send=_scrub_pii,
+    )
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -335,7 +369,7 @@ if not DEBUG:
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
     SECURE_HSTS_PRELOAD = True
 
-# [FASE 5 §5.5] Logging estructurado para métricas de ChatIA
+# [FASE 6 §6.3] Logging estructurado: JSON en prod, texto legible en dev
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
@@ -345,26 +379,25 @@ LOGGING = {
             'format': '%(asctime)s %(name)s %(levelname)s %(message)s',
         },
         'verbose': {
-            'format': '{levelname} {asctime} {module} {message}',
+            'format': '{levelname} {asctime} {name} {module} {message}',
             'style': '{',
         },
     },
     'handlers': {
         'console': {
             'class': 'logging.StreamHandler',
-            'formatter': 'json' if not DEBUG else 'verbose',
+            'formatter': 'verbose' if DEBUG else 'json',
         },
     },
+    'root': {
+        'handlers': ['console'],
+        'level': 'INFO',
+    },
     'loggers': {
-        'chatia.metrics': {
-            'handlers': ['console'],
-            'level': 'INFO',
-            'propagate': False,
-        },
-        'notificaciones.services': {
-            'handlers': ['console'],
-            'level': 'WARNING',
-            'propagate': False,
-        },
+        'django': {'handlers': ['console'], 'level': 'INFO', 'propagate': False},
+        'django.request': {'handlers': ['console'], 'level': 'WARNING', 'propagate': False},
+        'django.security': {'handlers': ['console'], 'level': 'WARNING', 'propagate': False},
+        'chatia.metrics': {'handlers': ['console'], 'level': 'INFO', 'propagate': False},
+        'notificaciones.services': {'handlers': ['console'], 'level': 'WARNING', 'propagate': False},
     },
 }

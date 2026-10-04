@@ -1,5 +1,5 @@
 /**
- * Tests para NotificacionesContext — polling 30s y marcar como leída (§4.5.4).
+ * Tests para NotificacionesContext — SSE + polling optimizado (§5.1).
  */
 import { describe, it, expect, vi, afterEach, beforeEach } from 'vitest';
 import { render, waitFor, act } from '@testing-library/react';
@@ -15,12 +15,28 @@ const { mockAxiosInstance, mockT, mockUser } = vi.hoisted(() => {
   };
   const t = (key, fallback) => fallback || key;
   const user = { id: 1, username: 'test', rol: 'patient' };
-  const login = vi.fn();
-  const logout = vi.fn();
-  return { mockAxiosInstance: ax, mockT: t, mockUser: user, mockLogin: login, mockLogout: logout };
+  return { mockAxiosInstance: ax, mockT: t, mockUser: user };
 });
 
-// Mock LanguageContext
+// Mock EventSource (no available in jsdom)
+const mockEventSource = vi.hoisted(() => {
+  const instances = [];
+  const handlers = { onmessage: null, onerror: null, close: vi.fn() };
+  return {
+    __instances: instances,
+    __handlers: handlers,
+    __mockInstance: {
+      close: vi.fn(),
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+      onmessage: null,
+      onerror: null,
+    },
+  };
+});
+
+global.EventSource = vi.fn(() => mockEventSource.__mockInstance);
+
 vi.mock('../../context/LanguageContext', () => ({
   useLanguage: () => ({
     language: 'es',
@@ -28,7 +44,6 @@ vi.mock('../../context/LanguageContext', () => ({
   }),
 }));
 
-// Mock AuthContext — use stable references to prevent re-renders
 vi.mock('../../context/AuthContext', () => ({
   useAuth: () => ({
     user: mockUser,
@@ -38,9 +53,9 @@ vi.mock('../../context/AuthContext', () => ({
   }),
 }));
 
-// Mock constants
 vi.mock('../../config/constants', () => ({
   APP_NAME: 'ChatIA',
+  API_BASE_URL: 'http://localhost/api',
 }));
 
 vi.mock('../../services/auth', () => ({
@@ -51,12 +66,13 @@ vi.mock('../../services/auth', () => ({
 import { NotificacionesProvider, useNotificaciones } from '../../context/NotificacionesContext';
 
 const TestConsumer = () => {
-  const { notificaciones, noLeidas, loading, cargarNotificaciones, marcarComoLeida } = useNotificaciones();
+  const { notificaciones, noLeidas, loading, cargarNotificaciones, marcarComoLeida, sseActive } = useNotificaciones();
   return (
     <div>
       <span data-testid="loading">{loading ? 'true' : 'false'}</span>
       <span data-testid="noLeidas">{noLeidas}</span>
       <span data-testid="count">{notificaciones.length}</span>
+      <span data-testid="sseActive">{sseActive ? 'true' : 'false'}</span>
       <button onClick={cargarNotificaciones} data-testid="reload">reload</button>
       <button onClick={() => marcarComoLeida(1)} data-testid="markRead">markRead</button>
     </div>
@@ -136,5 +152,22 @@ describe('NotificacionesContext', () => {
     expect(getByTestId('count').textContent).toBe('0');
     expect(getByTestId('noLeidas').textContent).toBe('0');
     unmount();
+  });
+
+  it('inicia EventSource con SSE al montar con usuario', async () => {
+    localStorage.setItem('access_token', 'mock-token');
+    mockAxiosInstance.get.mockResolvedValue({ data: [] });
+
+    render(
+      <NotificacionesProvider>
+        <TestConsumer />
+      </NotificacionesProvider>
+    );
+
+    await waitFor(() => {
+      expect(global.EventSource).toHaveBeenCalledWith(
+        expect.stringContaining('notificaciones/stream/?token=mock-token')
+      );
+    });
   });
 });

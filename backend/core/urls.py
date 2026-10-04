@@ -29,6 +29,7 @@ from usuarios.views import CustomTokenObtainPairView
 from django.http import JsonResponse
 from django.db import connection
 
+# [FASE 0] Health check DB (mantener compatibilidad)
 def db_keepalive(request):
     try:
         with connection.cursor() as cursor:
@@ -41,10 +42,14 @@ def db_keepalive(request):
             status=500,
         )
 
+# [FASE 6 §6.4] Health check completo
+from .health import health_view
+
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('health/db/', db_keepalive),
+    path('health/', health_view, name='health'),  # [FASE 6 §6.4]
     
     # Rutas JWT (autenticación)
     path('api/token/', CustomTokenObtainPairView.as_view(), name='token_obtain_pair'),
