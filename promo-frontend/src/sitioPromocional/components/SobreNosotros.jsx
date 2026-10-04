@@ -24,6 +24,24 @@ function SobreNosotros() {
       <div className="promo-sobre-content">
         <div className={`promo-sobre-image ${isInView ? 'animate-fade-left' : ''}`}>
           <div className="promo-sobre-image-card">
+            <div className="promo-sobre-stats">
+              <div className="promo-stat-item">
+                <div className="promo-stat-number">+5</div>
+                <div className="promo-stat-label">{statsYears} de experiencia</div>
+              </div>
+              <div className="promo-stat-item">
+                <div className="promo-stat-number">+2000</div>
+                <div className="promo-stat-label">{statsPatients} atendidos</div>
+              </div>
+              <div className="promo-stat-item">
+                <div className="promo-stat-number">98%</div>
+                <div className="promo-stat-label">{statsSatisfaction}</div>
+              </div>
+              <div className="promo-stat-item">
+                <div className="promo-stat-number">24/7</div>
+                <div className="promo-stat-label">{tPromo('statsEmergency')}</div>
+              </div>
+            </div>
           </div>
         </div>
 
