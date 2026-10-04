@@ -759,3 +759,223 @@ python -m pytest core/tests/test_cache_backend.py -v
    - `Cita.paciente.on_delete` = CASCADE
    - `Cita.doctor.on_delete` = CASCADE
    - **[REQUIERE DECISIÓN NEGOCIO]** Cambiar a PROTECT/SET_NULL evita borrado en cascada de historial clínico
+
+---
+
+# AUDIT.md — FASE 5: Mejoras UX y Rendimiento
+
+**Fecha de ejecución:** 2026-10-04T07:15:00Z
+**Ejecutado por:** KiloCode (agente IA)
+**Rama:** chore/audit-fixes
+
+## 5.1 — Notificaciones en tiempo real (SSE)
+
+### Baseline
+| Métrica | Valor |
+|---|---|
+| Intervalo polling | 30s (`NotificacionesContext.jsx:180`) |
+| Endpoints consumidos | `notificaciones/` (lista completa) |
+| Pausa en `document.hidden` | ❌ No |
+| Heartbeat | ❌ No |
+| Reconexión con backoff | ❌ No |
+| Requests/5min (estimado) | ~10 por usuario activo |
+| Latencia notificación | 0-30s (depende del polling) |
+
+### Decisión arquitectónica
+- **SSE (recomendado):** unidireccional, HTTP/1.1, compatible con Render free. Latencia ~1s.
+- **WebSockets:** requiere ASGI + Redis pub/sub. Complejo para solo notificaciones. **Descartado.**
+- **Polling optimizado (fallback):** 60s + pausa en `document.hidden`.
+
+### Implementación
+- `backend/notificaciones/sse.py`: `NotificacionesSSEView` con `StreamingHttpResponse`, JWT por query param, heartbeat cada 15s, corta a 600s, límite de concurrencia 2 (WSGI bound).
+- `backend/notificaciones/urls.py`: `POST /api/notificaciones/stream/?token=<jwt>`
+- `frontend/src/context/NotificacionesContext.jsx`: `EventSource` con fallback a polling 60s + pausa en hidden. Backoff exponencial (5s, 10s, 20s). Fallback a polling después de 3 errores SSE.
+- `frontend/src/config/constants.js`: Añadido `API_BASE_URL`.
+
+### Resultado
+| Métrica | Antes | Después |
+|---|---|---|
+| Requests/5min (idle) | ~10 | 0 (SSE) o 5 (fallback 60s) |
+| Latencia notificación | 0-30s | ~1s (SSE) |
+| Pausa en hidden | ❌ | ✅ |
+| Reconexión | ❌ | ✅ (backoff exponencial) |
+
+### Tests
+- `backend/notificaciones/tests/test_sse.py`: 5 tests ✅
+- `frontend/src/context/__tests__/NotificacionesContext.test.jsx`: 4 tests (incl. EventSource mock) ✅
+
+### Riesgos residuales
+- **WSGI blocking:** cada conexión SSE bloquea un worker Gunicorn. Render free (1-2 workers) → `MAX_SSE_CONCURRENT=2`. Documentado como riesgo. Recomendado ASGI en FASE 7.
+- **Timeouts de proxy:** Render puede cortar conexiones idle a los 30-60s. Heartbeat cada 15s mitiga.
+
+---
+
+## 5.2 — Optimización de imágenes
+
+### Baseline
+| Métrica | Valor |
+|---|---|
+| Límite upload | 25MB (`auth.py:146`) |
+| Validación | `content_type` only (spoofeable) ❌ |
+| Resize | ❌ No |
+| Formato | Sin conversión (JPEG/PNG original) |
+| WebP | ❌ No |
+
+### Decisión
+- **Nuevo límite:** 5MB (foto perfil), 10MB (SitioImagen).
+- **Resize:** 512×512 foto perfil (crop centrado), 1920×1080 hero, 1200×800 carousel.
+- **Formato:** WebP calidad 85 (Pillow ≥9 soporta nativamente).
+- **Validación:** Pillow `Image.open().verify()` (MIME real, no content_type).
+
+### Implementación
+- `backend/usuarios/image_utils.py`: `validar_imagen()`, `optimizar_imagen()`.
+- `backend/usuarios/views/auth.py`: `gestionar_foto_perfil` usa `optimizar_imagen`.
+- `backend/usuarios/serializers.py`: `SitioImagenSerializer.validate_imagen` + `create` con resize.
+- `backend/core/settings.py`: `DATA_UPLOAD_MAX_MEMORY_SIZE`, `FILE_UPLOAD_MAX_MEMORY_SIZE` = 10MB.
+- `backend/usuarios/management/commands/optimizar_imagenes.py`: command para batch de imágenes existentes (`--dry-run` por defecto).
+
+### Resultado esperado
+- **Reducción de peso:** JPEG/PNG → WebP suele dar 60-80% de reducción.
+- **Validación real:** bloquea spoofing de extensión/MIME.
+
+### Tests
+- `backend/usuarios/tests/test_image_utils.py`: 9 tests ✅
+
+### [REQUERIMIENTO MANUAL]
+- Ejecutar `python manage.py optimizar_imagenes --apply` en prod para re-procesar imágenes existentes. Primero con `--dry-run`.
+
+---
+
+## 5.3 — Email transaccional
+
+### Decisión de proveedor
+- **Resend (recomendado):** 3000/mes gratis, 100/día, API moderna. ✅
+- **Brevo:** 300/día gratis.
+- **SendGrid:** 100/día gratis.
+- **Mailgun:** 100/día gratis.
+
+### Implementación
+- `EMAIL_BACKEND = anymail.backends.resend.EmailBackend` si `RESEND_API_KEY` configurado.
+- **Fallback:** console backend en dev (`DEBUG=True` o sin `RESEND_API_KEY`).
+- **Reintentos:** `tenacity` con `wait_exponential(min=2, max=30)`, 3 intentos, solo en `ConnectionError`.
+- **Trazabilidad:** `Notificacion.intentos` (nuevo campo), logging estructurado.
+- **Fail-fast:** warn en prod si no hay `RESEND_API_KEY`.
+
+### Tests
+- `backend/notificaciones/tests/test_email_service.py`: 4 tests ✅
+
+### [REQUERIMIENTO MANUAL]
+1. Crear cuenta en Resend.
+2. Verificar dominio (SPF/DKIM).
+3. Setear `RESEND_API_KEY` en Render → backend → Environment.
+4. Redesplegar.
+
+---
+
+## 5.4 — WhatsApp/Twilio: fallback y logging
+
+### Baseline
+| Métrica | Valor |
+|---|---|
+| Fallback | ❌ No (WhatsApp only) |
+| Validación número | ❌ No |
+| Logging | ❌ Básico (return str(error)) |
+| Error handling | 400 bad request |
+
+### Cadena de fallback
+**WhatsApp → SMS → Email → in-app (Notificacion en BD)**
+
+### Implementación
+- `_normalizar_numero()`: valida E.164 (`+<país><número>`).
+- `_fallback_sms()`: retry en Twilio errores transitorios. No reintenta errores 4xx (número inválido).
+- `_fallback_email()`: última instancia, usa `enviar_email`.
+- **Logging estructurado:** `event`, `status`, `intent`, `error_code`, `notification_id`. Número enmascarado (últimos 4 dígitos).
+
+### Tests
+- `backend/notificaciones/tests/test_whatsapp_service.py`: 7 tests ✅
+
+### [REQUERIMIENTO MANUAL]
+- Verificar número de Twilio aprobado para producción (no sandbox).
+- Evaluar coste de SMS de fallback (~USD 0.0075/SMS).
+- Configurar WhatsApp Business API si se quiere fuera de ventana de 24h.
+
+---
+
+## 5.5 — Métricas del ChatIA
+
+### Decisión: Opción A (logs)
+No persiste eventos en BD (baja). Logs estructurados a stdout.
+
+### Catálogo de eventos
+| Evento | Trigger |
+|---|---|
+| `chat_session_started` | Nueva instancia ServicioIA |
+| `chat_intent_detected` | Transición de estado |
+| `chat_intent_unrecognized` | No match, vuelve a INICIO |
+| `chat_cita_creada` | Cita creada exitosamente |
+| `chat_abandoned` | Sesión expira |
+| `chat_error` | Excepción |
+
+### Sanitización PII
+- Emails → `[EMAIL]`
+- Teléfonos → eliminados (últimos 4 solo en WhatsApp logs)
+- Tokens → nunca logueados
+- Mensajes → truncados a 200 chars
+
+### Implementación
+- `backend/usuarios/chat_metrics.py`: funciones de logging estructurado.
+- `backend/usuarios/ai_service.py`: instrumentación (logging solo, sin cambio de lógica).
+- `backend/core/settings.py`: `LOGGING` config con `python-json-logger`.
+- `backend/usuarios/CHAT_METRICS.md`: catálogo + KPIs.
+
+### KPIs a vigilar
+1. Conversión: `cita_creada / session_started ≥ 2%`
+2. Intenciones no reconocidas: `< 15% mensuales`
+3. Duración promedio de sesión
+
+### Tests
+- `backend/usuarios/tests/test_chat_metrics.py`: 7 tests ✅
+
+### [OPCIONAL — solo si negocio lo pide]
+Tabla `ChatMetric` en BD para dashboards internos (FASE 7).
+
+---
+
+## Tabla de cambios por subsección (FASE 5)
+
+| Ítem | Verificado | Corregido | Evidencia | Estado |
+|---|---|---|---|---|
+| §5.1 SSE + fallback | ✅ | ✅ | sse.py, 5 tests; NotificacionesContext, 4 tests | ✅ |
+| §5.2 Imágenes | ✅ | ✅ | image_utils.py, 9 tests; command optimizar_imagenes | ✅ |
+| §5.3 Email | ✅ | ✅ | services.py enviar_email, 4 tests; requirements.txt | ✅ |
+| §5.4 WhatsApp fallback | ✅ | ✅ | services.py enviar_whatsapp + fallbacks, 7 tests | ✅ |
+| §5.5 Métricas ChatIA | ✅ | ✅ | chat_metrics.py, ai_service instrumentation, 7 tests | ✅ |
+
+## Test suite (FASE 5)
+- **Backend:** 126 passed, 3 skipped (99 en SQLite)
+- **Frontend:** 31 passed (Vitest + RTL + MSW + jsdom)
+- **Build:** `vitest run` + `vitest build` ✅
+
+## [REQUERIMIENTO ACCIÓN MANUAL] Pendientes FASE 5
+
+1. **Proveedor de email (Resend)**
+   - Crear cuenta, verificar dominio, setear `RESEND_API_KEY` en Render.
+
+2. **WhatsApp/Twilio producción**
+   - Verificar número de Twilio aprobado (no sandbox).
+   - Evaluar coste de SMS de fallback.
+
+3. **SSE en producción**
+   - Verificar timeout de proxy en Render.
+   - Considerar ASGI (FASE 7) si >2 usuarios simultáneos necesitan SSE.
+
+4. **Optimizar imágenes existentes**
+   - `python manage.py optimizar_imagenes --dry-run` → revisar → `--apply` en prod.
+
+5. **Backup de Supabase**
+   - `DATABASE_URL` no disponible en Codespace, `pg_dump` no instalado.
+   - Usar `pg_dump` localmente o panel de Supabase → Settings → Database → Download backup.
+
+6. **Redis en prod**
+   - Provisionar Redis (Upstash free tier o Render Key Value).
+   - Setear `REDIS_URL` en Render → backend → Environment.
