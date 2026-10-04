@@ -20,14 +20,14 @@ function CTA() {
         </p>
         
         <div className="promo-cta-buttons">
-          <Link to={REGISTRO_URL} className="promo-btn promo-btn-primary">
+          <a href={REGISTRO_URL} className="promo-btn promo-btn-primary">
             <FaUserPlus />
             {tPromo('ctaRegister')}
-          </Link>
-          <Link to={PLATFORM_URL} className="promo-btn promo-btn-secondary">
+          </a>
+          <a href={PLATFORM_URL} className="promo-btn promo-btn-secondary">
             <FaCalendarCheck />
             {tPromo('ctaLogin')}
-          </Link>
+          </a>
           <button className="promo-btn promo-btn-secondary" onClick={handleWhatsApp}>
             <FaWhatsapp />
             {tPromo('navWhatsApp')}

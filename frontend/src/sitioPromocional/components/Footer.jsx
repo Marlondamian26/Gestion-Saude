@@ -39,14 +39,14 @@ function Footer() {
         <div className="promo-footer-section">
           <h4>{tPromo('navInicio')}</h4>
           <div className="promo-footer-links">
-            <Link to={PLATFORM_URL}>
+            <a href={PLATFORM_URL}>
               <FaArrowRight style={{ marginRight: '0.5rem', fontSize: '0.75rem' }} />
               {tPromo('navLogin')}
-            </Link>
-            <Link to={REGISTRO_URL}>
+            </a>
+            <a href={REGISTRO_URL}>
               <FaArrowRight style={{ marginRight: '0.5rem', fontSize: '0.75rem' }} />
               {tPromo('ctaRegister')}
-            </Link>
+            </a>
             <a href="#servicios">
               <FaArrowRight style={{ marginRight: '0.5rem', fontSize: '0.75rem' }} />
               {tPromo('navServicos')}

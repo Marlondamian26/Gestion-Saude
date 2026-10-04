@@ -119,14 +119,14 @@ function Hero() {
           </p>
           
           <div className="promo-hero-buttons">
-            <Link to={PLATFORM_URL} className="promo-btn promo-btn-primary">
+            <a href={PLATFORM_URL} className="promo-btn promo-btn-primary">
               <FaStethoscope />
               {tPromo('heroLogin')}
-            </Link>
-            <Link to={REGISTRO_URL} className="promo-btn promo-btn-secondary">
+            </a>
+            <a href={REGISTRO_URL} className="promo-btn promo-btn-secondary">
               <FaArrowRight />
               {tPromo('heroRegister')}
-            </Link>
+            </a>
             <button className="promo-btn promo-btn-secondary" onClick={handleWhatsApp}>
               <FaWhatsapp />
               {tPromo('heroWhatsApp')}

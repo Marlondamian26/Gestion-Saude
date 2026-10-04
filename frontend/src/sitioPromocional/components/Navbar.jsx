@@ -6,7 +6,7 @@ import { CLINIC_NAME, CLINIC_PHONE, CLINIC_WHATSAPP, PLATFORM_URL } from '../con
 
 function Navbar() {
   const { tPromo, language, setLanguage } = useLanguage();
-  
+
   const languages = [
     { code: 'pt', name: 'PT' },
     { code: 'es', name: 'ES' },
@@ -39,9 +39,9 @@ function Navbar() {
             <FaPhone />
             {tPromo('navWhatsApp')}
           </button>
-          <Link to={PLATFORM_URL} className="promo-btn promo-navbar-cta">
+          <a href={PLATFORM_URL} className="promo-btn promo-navbar-cta">
             {tPromo('navLogin')}
-          </Link>
+          </a>
         </div>
       </div>
     </nav>
