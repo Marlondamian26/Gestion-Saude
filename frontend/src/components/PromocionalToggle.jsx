@@ -1,34 +1,42 @@
 import React from 'react';
-import { useLocation } from 'react-router-dom';
-import { FaGlobe, FaHome } from 'react-icons/fa';
+import { useLocation, Link, useNavigate } from 'react-router-dom';
+import { FaGlobe } from 'react-icons/fa';
 import { useLanguage } from '../context/LanguageContext';
 
 const PromocionalToggle = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const { t } = useLanguage();
 
-  const isPromocional = location.pathname === '/' || location.pathname === '/promocional';
-  const promoUrl = import.meta.env.VITE_PROMO_URL || 'https://gestion-saude-promo.onrender.com';
+  const isPromocional = location.pathname === '/promocional';
 
   const handleClick = () => {
     if (isPromocional) {
-      window.location.href = window.location.origin + '/dashboard';
-    } else {
-      window.location.href = promoUrl;
+      navigate('/dashboard');
     }
   };
 
+  if (isPromocional) {
+    return (
+      <button
+        onClick={handleClick}
+        style={styles.button}
+        title={t('backToDashboard')}
+        aria-label={t('backToDashboard')}
+      >
+        <span style={styles.icon}>
+          <FaGlobe />
+        </span>
+      </button>
+    );
+  }
+
   return (
-    <button
-      onClick={handleClick}
-      style={styles.button}
-      title={isPromocional ? t('backToDashboard') : 'Ver sitio web promocional'}
-      aria-label={isPromocional ? t('backToDashboard') : 'Ver sitio web promocional'}
-    >
+    <Link to="/promocional" style={styles.button} title="Ver sitio web promocional" aria-label="Ver sitio web promocional">
       <span style={styles.icon}>
         <FaGlobe />
       </span>
-    </button>
+    </Link>
   );
 };
 
@@ -48,6 +56,7 @@ const styles = {
     boxShadow: 'var(--box-shadow)',
     padding: 0,
     minWidth: 'clamp(45px, 10vw, 55px)',
+    textDecoration: 'none',
   },
   icon: {
     fontSize: 'clamp(14px, 3vw, 20px)',

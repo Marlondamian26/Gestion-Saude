@@ -10,9 +10,16 @@ import { ThemeProvider } from './context/ThemeContext';
 import { AuthProvider } from './context/AuthContext';
 import { NotificacionesProvider } from './context/NotificacionesContext';
 import { LanguageProvider } from './context/LanguageContext';
+import { LanguageProvider as PromoLanguageProvider } from './context/PromoLanguageContext';
 
 // Services
 import { setErrorHandler } from './services/errorHandler';
+
+// Promotional site
+import LandingWrapper from './sitioPromocional/components/LandingWrapper';
+import './sitioPromocional/styles/promo-tokens.css';
+import './sitioPromocional/styles/promocional.css';
+import './sitioPromocional/styles/promo-responsive.css';
 
 // Components — imports estáticos (landing + auth, primer render)
 import ErrorBoundary from './components/ErrorBoundary';
@@ -66,12 +73,12 @@ function PageLoader() {
   return <div className="page-loader">Cargando...</div>;
 }
 
-function PromocionalRedirect() {
-  const promoUrl = import.meta.env.VITE_PROMO_URL || 'https://gestion-saude-promo.onrender.com';
-  React.useEffect(() => {
-    window.location.href = promoUrl;
-  }, []);
-  return null;
+function PromocionalPage() {
+  return (
+    <PromoLanguageProvider>
+      <LandingWrapper />
+    </PromoLanguageProvider>
+  );
 }
 
 function HeaderBar() {
@@ -93,7 +100,7 @@ function AppContent() {
         <Suspense fallback={<PageLoader />}>
             <Routes>
               <Route path="/" element={<Navigate to="/dashboard" replace />} />
-              <Route path="/promocional" element={<PromocionalRedirect />} />
+              <Route path="/promocional" element={<PromocionalPage />} />
               <Route path="/login" element={<Login />} />
               <Route path="/registro" element={<Registro />} />
               <Route path="/dashboard" element={<Dashboard />} />
