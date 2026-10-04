@@ -19,6 +19,7 @@ export const promoTranslations = {
     heroLogin: 'Entrar',
     heroRegister: 'Registar',
     heroWhatsApp: 'WhatsApp',
+    heroWhatsApp: 'WhatsApp',
 
     // Servicios
     servicesTitle: 'Nossos Serviços',
@@ -103,6 +104,7 @@ export const promoTranslations = {
     heroLogin: 'Iniciar Sesión',
     heroRegister: 'Registrarse',
     heroWhatsApp: 'WhatsApp',
+    heroWhatsApp: 'WhatsApp',
 
     // Servicios
     servicesTitle: 'Nuestros Servicios',
@@ -186,6 +188,7 @@ export const promoTranslations = {
     heroSubtitle: 'At our clinic you will find comprehensive, personalized and human medical care. Your well-being and that of your family are our top priority.',
     heroLogin: 'Login',
     heroRegister: 'Register',
+    heroWhatsApp: 'WhatsApp',
     heroWhatsApp: 'WhatsApp',
 
     // Servicios
