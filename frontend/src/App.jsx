@@ -66,6 +66,14 @@ function PageLoader() {
   return <div className="page-loader">Cargando...</div>;
 }
 
+function PromocionalRedirect() {
+  const promoUrl = import.meta.env.VITE_PROMO_URL || 'https://gestion-saude-promo.onrender.com';
+  React.useEffect(() => {
+    window.location.href = promoUrl;
+  }, []);
+  return null;
+}
+
 function HeaderBar() {
   return (
     <div style={styles.headerBar}>
@@ -83,18 +91,20 @@ function AppContent() {
 
       <div style={styles.contentContainer}>
         <Suspense fallback={<PageLoader />}>
-          <Routes>
-            <Route path="/" element={<Navigate to="/dashboard" replace />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/registro" element={<Registro />} />
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/citas" element={<Citas />} />
-            <Route path="/doctores" element={<Doctores />} />
-            <Route path="/perfil" element={<Perfil />} />
-            <Route path="/admin" element={<AdminDashboard />} />
-            <Route path="/enfermeria" element={<EnfermeriaDashboard />} />
-            <Route path="/chat" element={<ChatIA />} />
-          </Routes>
+            <Routes>
+              <Route path="/" element={<Navigate to="/dashboard" replace />} />
+              <Route path="/promocional" element={<PromocionalRedirect />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/registro" element={<Registro />} />
+              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/citas" element={<Citas />} />
+              <Route path="/doctores" element={<Doctores />} />
+              <Route path="/perfil" element={<Perfil />} />
+              <Route path="/admin" element={<AdminDashboard />} />
+              <Route path="/enfermeria" element={<EnfermeriaDashboard />} />
+              <Route path="/chat" element={<ChatIA />} />
+              <Route path="*" element={<Navigate to="/dashboard" replace />} />
+            </Routes>
         </Suspense>
       </div>
 
