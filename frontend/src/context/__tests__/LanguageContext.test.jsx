@@ -4,26 +4,14 @@
  */
 import { describe, it, expect } from 'vitest';
 
-// Importamos el contexto para extraer los diccionarios
-import LanguageContext from '../../context/LanguageContext';
-
-// Extraemos los diccionarios de traducción del módulo
-// LanguageContext.jsx exporta el contexto; las traducciones están como const "translations"
-// usamos una técnica para obtenerlas
 import * as langModule from '../../context/LanguageContext';
 
-function getTranslations() {
-  // El archivo LanguageContext.jsx exporta LanguageContext y LanguageProvider.
-  // Las traducciones son un const no exportado. Las extraemos con regex.
-  // Alternativa: test indirecta — renderizar un componente que use useLanguage.
-  return null;
-}
-
-// Como las traducciones no están exportadas, usamos regex sobre el archivo fuente
 import fs from 'node:fs';
 import path from 'node:path';
 
-const filePath = path.resolve(__dirname, '../../context/LanguageContext.jsx');
+// FASE 8 §8.2: Las traducciones de plataforma están en translations/platform.js
+// Las traducciones promo están en translations/promo.js (ver LanguageContext.test.promo.jsx)
+const filePath = path.resolve(__dirname, '../../context/translations/platform.js');
 const content = fs.readFileSync(filePath, 'utf8');
 
 function extractBlockKeys(startIdx, endIdx) {

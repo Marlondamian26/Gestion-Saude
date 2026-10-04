@@ -1120,3 +1120,87 @@ startCommand: uvicorn core.asgi:application --host 0.0.0.0 --port $PORT --worker
 3. Ejecutar acciones manuales pendientes (lista de arriba).
 4. Implementar features del Roadmap Horizonte 1 (docs/ROADMAP.md).
 5. PR consolidadoo para revisión.
+
+---
+
+# AUDIT.md — FASE 8: Separación y Rediseño del Sitio Promocional
+
+**Fecha de ejecución:** 2026-10-04T08:16:00Z
+**Ejecutado por:** KiloCode (agente IA)
+**Rama:** chore/audit-fixes
+**Commit base FASE 7:** c304acd
+
+## 8.0 — Baseline y decisión arquitectónica
+
+### 8.0.1 — Baseline de bundle
+
+**Build actual (`npm run build`):**
+
+| Chunk | Tipo | Tamaño | Gzip |
+|---|---|---|---|
+| `index-B5vBMchE.js` | App shell (eager) | 333.11 KB | 101.18 KB |
+| `vendor-router-_SQJwgJu.js` | Modulepreload (eager) | 46.87 KB | 16.58 KB |
+| `vendor-util-C0ugCn4D.js` | Modulepreload (eager) | 59.08 KB | 21.28 KB |
+| `index-LcJd59no.css` | App shell CSS (eager) | 24.56 KB | 5.39 KB |
+| `LandingWrapper-CcA0mp0G.js` | Promo (lazy chunk) | 20.86 KB | 5.48 KB |
+| `LandingWrapper-Bws2Re9f.css` | Promo CSS (lazy) | 19.92 KB | 3.90 KB |
+
+- **Bundle inicial que descarga un visitante anónimo en `/`:** 439.06 KB JS (143.12 KB gzip) + 24.56 KB CSS (5.39 KB gzip)
+- **Contenido promocional (LandingWrapper chunk):** 20.86 KB JS (5.48 KB gzip) + 19.92 KB CSS (3.90 KB gzip)
+- **Porcentaje de JS que es exclusivamente promocional:** ~4.8%
+- **Problema:** El 95% del JS inicial es app shell (contexts, services, error boundary) que el visitante anónimo no necesita. `LanguageContext` (2015 líneas) incluye todas las traducciones de la plataforma + el promo; `AuthContext`, `NotificacionesContext` (SSE) no son necesarios por el landing.
+
+### 8.0.2 — Decisión arquitectónica
+
+**Veredicto:** Opción B — 2 entry points Vite en el mismo monorepo.
+
+Ver tabla comparativa completa en `docs/architecture/evaluation-promo-separation.md`.
+
+| Opción | Veredicto |
+|---|---|
+| A) Monorepo frontend + promo (2 proyectos) | ❌ Duplicación innecesaria |
+| B) 2 entry points Vite (vite.config.js + vite.config.promo.js) | ✅ **ELEGIDA** |
+| C) Repos separados | ❌ Overkill |
+| D) Module Federation | ❌ Complejidad excesiva |
+
+**Justificación:** Un solo `package.json`, `node_modules` compartido, builds separados (`dist/` vs `dist-promo/`), contextos compartidos por referencia. Vite tree-shakea los namespaces no usados por cada entry.
+
+### 8.0.3 — Estructura objetivo
+
+```
+frontend/
+├── index.html                     # entry plataforma (existente)
+├── promo.html                     # NUEVO
+├── vite.config.js                 # plataforma (existente)
+├── vite.config.promo.js           # NUEVO → dist-promo
+├── src/
+│   ├── main.jsx                   # plataforma
+│   ├── promo-main.jsx             # NUEVO
+│   ├── App.jsx                    # modificado (quita rutas promo)
+│   ├── PromoApp.jsx               # NUEVO
+│   └── sitioPromocional/
+│       ├── App.jsx                # NUEVO (reemplaza sitioPromocional.jsx huérfano)
+│       ├── ...
+│       └── styles/
+│           ├── promo-tokens.css   # NUEVO
+│           ├── promocional.css    # rediseñado
+│           └── promo-responsive.css
+```
+
+### 8.0.4 — Riesgos documentados
+
+| Riesgo | Mitigación |
+|---|---|
+| LanguageContext importa algo del dashboard | Auditoría §8.2.1 |
+| CORS bloquea `/sitio-imagenes/` desde dominio promo | §8.3.7 + §8.4.3 (acción manual en Render) |
+| PromocionalToggle usa useNavigate → roto en promo | Cambiar a window.location.href §8.3.3 |
+| Entry huérfano sitioPromocional.jsx | Eliminado en §8.1.7 |
+
+---
+
+## Tabla de cambios por subsección
+
+| Ítem | Verificado | Corregido | Evidencia | Estado |
+|---|---|---|---|---|
+| §8.0.1 Baseline bundle | ✅ | ✅ | Build 439 KB JS + 24.6 KB CSS; LandingWrapper 20.86 KB | ✅ |
+| §8.0.2 Decisión arquitectónica | ✅ | ✅ | Opción B elegida; ver docs/architecture/evaluation-promo-separation.md | ✅ |

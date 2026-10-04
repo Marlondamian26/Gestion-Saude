@@ -1,11 +1,11 @@
 import React from 'react';
 import { lazy, Suspense } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import './index.css';
 import './App.css';
 import './styles/components-responsive.css';
 
-// Context — import estáticos (pequeños, se usan en todas partes)
+// Context — imports estáticos (pequeños, se usan en todas partes)
 import { ThemeProvider } from './context/ThemeContext';
 import { AuthProvider } from './context/AuthContext';
 import { NotificacionesProvider } from './context/NotificacionesContext';
@@ -26,7 +26,6 @@ const Doctores = lazy(() => import('./components/Doctores'));
 const Perfil = lazy(() => import('./components/Perfil'));
 const AdminDashboard = lazy(() => import('./components/AdminDashboard'));
 const EnfermeriaDashboard = lazy(() => import('./components/EnfermeriaDashboard'));
-const SitioPromocionalLanding = lazy(() => import('./sitioPromocional/components/LandingWrapper'));
 const ChatIA = lazy(() => import('./components/chat/ChatIA'));
 
 // Theme/Language toggles — usados en header, import estáticos
@@ -67,32 +66,25 @@ function PageLoader() {
   return <div className="page-loader">Cargando...</div>;
 }
 
-function HeaderBar({ isPromocional }) {
+function HeaderBar() {
   return (
     <div style={styles.headerBar}>
       <PromocionalToggle />
-          {!isPromocional && (
-          <>
-            <ThemeToggle />
-            <LanguageToggle />
-          </>
-        )}
+      <ThemeToggle />
+      <LanguageToggle />
     </div>
   );
 }
 
 function AppContent() {
-  const location = useLocation();
-  const isPromocional = location.pathname === '/' || location.pathname === '/promocional';
-
   return (
     <div style={styles.appContainer}>
-      <HeaderBar isPromocional={isPromocional} />
+      <HeaderBar />
 
       <div style={styles.contentContainer}>
         <Suspense fallback={<PageLoader />}>
           <Routes>
-            <Route path="/promocional" element={<SitioPromocionalLanding />} />
+            <Route path="/" element={<Navigate to="/dashboard" replace />} />
             <Route path="/login" element={<Login />} />
             <Route path="/registro" element={<Registro />} />
             <Route path="/dashboard" element={<Dashboard />} />
@@ -102,7 +94,6 @@ function AppContent() {
             <Route path="/admin" element={<AdminDashboard />} />
             <Route path="/enfermeria" element={<EnfermeriaDashboard />} />
             <Route path="/chat" element={<ChatIA />} />
-            <Route path="/" element={<SitioPromocionalLanding />} />
           </Routes>
         </Suspense>
       </div>
@@ -116,7 +107,9 @@ function App() {
   // [FASE 4 §4.4.3] Configurar handler global de errores de API
   React.useEffect(() => {
     setErrorHandler((message, type) => {
+      // En FASE 6 se integrará con toast/notification real
       console.error(`[API ${type}]`, message);
+      // Notificación simple para usuarios
       if (typeof window !== 'undefined' && window.alert) {
         window.alert(message);
       }

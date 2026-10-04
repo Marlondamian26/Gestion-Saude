@@ -5,9 +5,12 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "dev:promo": "vite --config vite.config.promo.js --port 5174",
     "build": "vite build",
+    "build:promo": "vite build --config vite.config.promo.js",
     "lint": "eslint .",
     "preview": "vite preview",
+    "preview:promo": "vite preview --config vite.config.promo.js",
     "serve": "vite preview --port 4173 --host",
     "test": "vitest run",
     "test:watch": "vitest",
