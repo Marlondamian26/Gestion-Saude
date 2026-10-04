@@ -77,6 +77,8 @@ ALLOWED_HOSTS = [h.strip() for h in os.environ.get('ALLOWED_HOSTS', '').split(',
 if not ALLOWED_HOSTS:
     if DEBUG:
         ALLOWED_HOSTS = ['localhost', '127.0.0.1', '*.localhost']
+    elif os.environ.get('RENDER', '').lower() == 'true':
+        ALLOWED_HOSTS = ['.onrender.com']
     else:
         raise ImproperlyConfigured("ALLOWED_HOSTS must be set in production")
 
