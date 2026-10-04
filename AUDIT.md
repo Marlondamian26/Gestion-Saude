@@ -1293,3 +1293,27 @@ frontend/
 | §8.3.5 Vendor chunk split | ✅ | ✅ | vendor-react (66 kB) + vendor-router (13 kB) | ✅ |
 | §8.4 Render Static Site | ✅ | ✅ | render.yaml + CORS + env vars | ✅ |
 | §8.4 Tokens CSS | ✅ | ✅ | promo-tokens.css (18 variables) | ✅ |
+| §8.6 UI/UX Redesign | ✅ | ✅ | LandingWrapper.jsx rediseñado; toggles pixel-perfect vs platform; CSS vars added | ✅ |
+
+## §8.6 — Rediseño UI/UX
+
+- [x] `LandingWrapper.jsx` reescrito con componentes de toggle que usan CSS variables del dashboard (`--bg-secondary`, `--border-color`, `--text-primary`, `--box-shadow`, `--color-patient`, etc.)
+- [x] **PromoThemeToggle**: diseño pixel-perfect vs `ThemeToggle.jsx` — ícono de rotación, tooltip, auto-indicator (dotted verde), right-click para modo automático, hover scale(1.1), brightness(1.2) en ícono
+- [x] **PromoLanguageToggle**: dropdown con flags (🇧🇷🇪🇸🇺🇸), `FaGlobe` icon, estado activo con `var(--color-patient)`, checkmark, estilos hover idénticos
+- [x] CSS `promocional.css`: variables platform añadidas a `:root` y `[data-theme="dark"]`
+- [x] Layout: `.promo-floating-toggles` (fixed, z-index 2000) y `.promo-main` (margin-top, overflow-x) como clases CSS en lugar de inline styles
+
+### Build results post-§8.6
+
+| Archivo | Gzip |
+|---|---|
+| `promo.html` | 0.58 KB |
+| `promo-*.css` | 4.51 KB |
+| `vendor-router` | 12.95 KB |
+| `promo-*.js` | 11.00 KB |
+| `vendor-react` | 66.55 KB |
+| **Total** | **~95.09 KB** ✅ (≤120 KB objetivo) |
+
+### Tests
+- 31/31 frontend tests pass ✅
+- 8/8 test files pass ✅
