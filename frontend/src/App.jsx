@@ -7,19 +7,12 @@ import './styles/components-responsive.css';
 
 // Context — imports estáticos (pequeños, se usan en todas partes)
 import { ThemeProvider } from './context/ThemeContext';
-import { AuthProvider } from './context/AuthContext';
+import { AuthProvider, useAuth } from './context/AuthContext';
 import { NotificacionesProvider } from './context/NotificacionesContext';
 import { LanguageProvider } from './context/LanguageContext';
-import { LanguageProvider as PromoLanguageProvider } from './context/PromoLanguageContext';
 
 // Services
 import { setErrorHandler } from './services/errorHandler';
-
-// Promotional site
-import LandingWrapper from './sitioPromocional/components/LandingWrapper';
-import './sitioPromocional/styles/promo-tokens.css';
-import './sitioPromocional/styles/promocional.css';
-import './sitioPromocional/styles/promo-responsive.css';
 
 // Components — imports estáticos (landing + auth, primer render)
 import ErrorBoundary from './components/ErrorBoundary';
@@ -73,12 +66,11 @@ function PageLoader() {
   return <div className="page-loader">Cargando...</div>;
 }
 
-function PromocionalPage() {
-  return (
-    <PromoLanguageProvider>
-      <LandingWrapper />
-    </PromoLanguageProvider>
-  );
+// [FASE 9 §9.2] Bootstrap: redirige a /login o /dashboard según sesión
+function Bootstrap() {
+  const { user, loading } = useAuth();
+  if (loading) return <PageLoader />;
+  return <Navigate to={user ? '/dashboard' : '/login'} replace />;
 }
 
 function HeaderBar() {
@@ -98,20 +90,19 @@ function AppContent() {
 
       <div style={styles.contentContainer}>
         <Suspense fallback={<PageLoader />}>
-            <Routes>
-              <Route path="/" element={<Navigate to="/dashboard" replace />} />
-              <Route path="/promocional" element={<PromocionalPage />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/registro" element={<Registro />} />
-              <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/citas" element={<Citas />} />
-              <Route path="/doctores" element={<Doctores />} />
-              <Route path="/perfil" element={<Perfil />} />
-              <Route path="/admin" element={<AdminDashboard />} />
-              <Route path="/enfermeria" element={<EnfermeriaDashboard />} />
-              <Route path="/chat" element={<ChatIA />} />
-              <Route path="*" element={<Navigate to="/dashboard" replace />} />
-            </Routes>
+          <Routes>
+            <Route path="/" element={<Bootstrap />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/registro" element={<Registro />} />
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/citas" element={<Citas />} />
+            <Route path="/doctores" element={<Doctores />} />
+            <Route path="/perfil" element={<Perfil />} />
+            <Route path="/admin" element={<AdminDashboard />} />
+            <Route path="/enfermeria" element={<EnfermeriaDashboard />} />
+            <Route path="/chat" element={<ChatIA />} />
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
         </Suspense>
       </div>
 

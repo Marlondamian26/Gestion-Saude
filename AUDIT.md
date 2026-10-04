@@ -1352,3 +1352,306 @@ frontend/
 | `promo-*.js` | 12.05 KB |
 | `vendor-react` | 66.85 KB |
 | **Total** | **~98.10 KB** ✅ (≤120 KB objetivo)
+
+---
+
+# AUDIT.md — FASE 9: Separación Real y Sincronización Total entre Frontends
+
+**Fecha de ejecución:** 2026-10-04T17:30Z
+**Ejecutado por:** KiloCode (agente IA)
+**Commit base:** `0f7ec70` (Integrate promotional site into main frontend)
+
+## §9.0 — Baseline y decisión arquitectónica
+
+### 9.0.1 — Inventario del estado tras FASE 8
+
+| Elemento | Estado | Fuente (archivo:línea) |
+|---|---|---|
+| `promo.html` (entry promo) | Existía → **eliminado en §9.1** | `frontend/promo.html` (borrado) |
+| `vite.config.promo.js` | Existía → **eliminado en §9.1** | `frontend/vite.config.promo.js` (borrado) |
+| `src/promo-main.jsx` | Existía → **eliminado en §9.1** | `frontend/src/promo-main.jsx` (borrado) |
+| `src/PromoApp.jsx` | Existía → **eliminado en §9.1** | `frontend/src/PromoApp.jsx` (borrado) |
+| `src/context/PromoLanguageContext.jsx` | Existía → **eliminado en §9.1** | `frontend/src/context/PromoLanguageContext.jsx` (borrado) |
+| Scripts `dev:promo`, `build:promo`, `preview:promo` | Existían → **eliminados en §9.1** | `frontend/package.json:8,10,13` |
+| `frontend/public-promo/` | Existía → **eliminado en §9.1** | `frontend/public-promo/` (borrado) |
+| `frontend/server-promo.cjs` | Existía → **eliminado en §9.1** | `frontend/server-promo.cjs` (borrado) |
+| `frontend/src/sitioPromocional/` | Existía (código promo) → **movido a §9.1** | `frontend/src/sitioPromocional/` → `promo-frontend/src/sitioPromocional/` |
+| `frontend/.env.example` sin `VITE_PROMO_URL` | Existía → **corregido en §9.3** | `frontend/.env.example` |
+| `render.yaml` promo service comparte `rootDir: frontend` | Existía → **corregido en §9.8** | `render.yaml:55-67` |
+| `App.jsx` importa `LandingWrapper` | Existía → **eliminado en §9.1** | `frontend/src/App.jsx:19-22` (antiguo) |
+| `App.jsx` tiene ruta `/promocional` | Existía → **eliminada en §9.1** | `frontend/src/App.jsx:103` (antiguo) |
+| `App.jsx` `/` → `/dashboard` | Sí (pero sin verificación de sesión) → **Bootstrap en §9.2** | (antiguo) |
+| Sincronización idioma/tema entre dominios | **No existe** → **implementada en §9.5/§9.6** | — |
+| CORS incluye `localhost:5174` | Sí | `backend/core/settings.py:313` |
+| JWT refresh = 1 día | Sí | `backend/core/settings.py:418` |
+
+### 9.0.2 — Decisión arquitectónica
+
+**Verdicto:** Opción A — `frontend/` + `promo-frontend/` (carpetas hermanas, cada una con su `package.json`).
+
+Ver tabla comparativa completa en `docs/architecture/evaluation-promo-independence.md`.
+
+| Opción | Verdicto |
+|---|---|
+| A) `frontend/` + `promo-frontend/` (hermanas, package.json independientes) | ✅ **ELEGIDA** |
+| B) npm workspaces | ❌ `node_modules` hoisted → no independencia real |
+| C) Repos Git separados | ❌ Overkill, duplicación de CI |
+| D) Segundo entry point Vite (FASE 8) | ❌ Comparte `package.json` y `node_modules` |
+
+**Justificación:** Un solo `package.json` compartido (FASE 8) no satisface el requisito de independencia real. Cada proyecto necesita su propio `package.json`, `package-lock.json`, y `node_modules/`. Verificado: `promo-frontend/node_modules/react@19.3.0` ≠ `frontend/node_modules/react@19.2.4`.
+
+### 9.0.3 — Estrategia de sincronización cross-origin
+
+Ver `docs/architecture/cross-origin-sync.md` — URL params + localStorage local. Funciona sin autenticación.
+
+### Decisión sobre el punto de pausa (§9.1 checkpoint)
+
+La pausa tras §9.1 se ejecutó. La separación estructural fue verificada con `npm run build` y `npm test` exitosos en ambos proyectos. Se decidió continuar con la sincronización.
+
+---
+
+## §9.1 — Crear `promo-frontend/` como proyecto Vite independiente
+
+### 9.1.1 — Estructura creada
+
+```
+promo-frontend/
+├── package.json          # independiente (React 19, Vite, etc.)
+├── package-lock.json     # independiente
+├── vite.config.js        # independiente (port 5174, manualChunks)
+├── index.html            # entry propio
+├── eslint.config.js      # eslint propio
+├── .env.example          # VITE_API_URL, VITE_PLATFORM_URL
+├── .env                  # local dev
+├── .gitignore
+├── vitest.config.js
+├── public/
+│   └── favicon.svg
+└── src/
+    ├── main.jsx
+    ├── App.jsx
+    ├── index.css
+    ├── context/
+    │   ├── LanguageContext.jsx    # (copia de PromoLanguageContext + sync)
+    │   ├── ThemeContext.jsx       # (copia adaptada + sync)
+    │   └── translations/
+    │       └── promo.js           # (movido desde frontend/)
+    ├── utils/
+    │   ├── apiUtils.js
+    │   └── syncPreferences.js
+    ├── test/
+    │   ├── setup.js
+    │   └── msw-server.js
+    └── sitioPromocional/          # (movido desde frontend/)
+        ├── components/
+        ├── styles/
+        ├── config/
+        ├── hooks/
+        └── __tests__/
+```
+
+### 9.1.2 — `package.json` independiente
+
+- Dependencias: `react@19`, `react-dom@19`, `react-router-dom@7`, `react-icons@5`
+- **NO** axios, date-fns, jwt-decode, react-hook-form, @sentry/react
+- El promo usa `fetch` nativo
+- `node_modules/` independiente verificado (React 19.3.0 vs 19.2.4)
+
+### 9.1.3 — Build
+
+| Chunk | Gzip |
+|---|---|
+| `index.html` | 0.58 KB |
+| `index-*.css` | 6.71 KB |
+| `vendor-router` | 13.69 KB |
+| `vendor-react` | 75.29 KB |
+| `index-*.js` | 12.13 KB |
+| **Total** | **~108.4 KB gzip** ✅ |
+
+### 9.1.4 — Tests
+
+- 12/12 tests pass (CTA, Carousel, LandingWrapper, Navbar)
+
+### 9.1.5 — Limpieza del `frontend/`
+
+Eliminados:
+- `frontend/promo.html`
+- `frontend/src/promo-main.jsx`
+- `frontend/src/PromoApp.jsx`
+- `frontend/vite.config.promo.js`
+- `frontend/src/context/PromoLanguageContext.jsx`
+- `frontend/public-promo/`
+- `frontend/server-promo.cjs`
+- `frontend/requirements.txt`
+- Scripts `dev:promo`, `build:promo`, `preview:promo` de `package.json`
+- Ruta `/promocional` y import de `LandingWrapper` de `App.jsx`
+
+### 9.1.6 — Auditoría post-limpieza
+
+```
+grep -rn "sitioPromocional|PromoLanguageContext|PromoApp|promo-main" frontend/src/ → limpio
+grep -rn "sitioPromocional|LandingWrapper" frontend/dist/ → limpio
+```
+
+---
+
+## Tabla de cambios por subsección — FASE 9
+
+| Ítem | Verificado | Corregido | Evidencia | Estado |
+|---|---|---|---|---|
+| §9.0.1 Baseline | ✅ | ✅ | Tabla de inventario arriba | ✅ |
+| §9.0.2 Decisión arquitectónica | ✅ | ✅ | Opción A elegida; `docs/architecture/evaluation-promo-independence.md` | ✅ |
+| §9.0.3 Estrategia sync | ✅ | ✅ | `docs/architecture/cross-origin-sync.md` | ✅ |
+| §9.1 Estructura promo-frontend | ✅ | ✅ | `promo-frontend/` con package.json, vite.config.js, index.html, context/, utils/, App.jsx | ✅ |
+| §9.1 Limpieza frontend | ✅ | ✅ | Eliminados: promo.html, promo-main.jsx, PromoApp.jsx, vite.config.promo.js, PromoLanguageContext.jsx, public-promo/, server-promo.cjs, scripts dev:promo/build:promo/preview:promo | ✅ |
+| §9.1 Build plataforma sin promo | ✅ | ✅ | `grep -rn "sitioPromocional"` en `frontend/dist/` → vacío | ✅ |
+| §9.1 Build promo sin dashboard | ✅ | ✅ | `npm run build` en promo-frontend → 108 KB gzip, no dashboard chunks | ✅ |
+| §9.1 node_modules independiente | ✅ | ✅ | `promo-frontend/node_modules/react@19.3.0` ≠ `frontend/node_modules/react@19.2.4` | ✅ |
+| §9.1 Tests promo | ✅ | ✅ | 12/12 tests pass | ✅ |
+| §9.2 Platform arranca en login | ✅ | ✅ | `App.jsx` con `Bootstrap` → `/login` o `/dashboard` | ✅ |
+| §9.2 Tests AuthContext | — | — | En progreso | 🟡 |
+
+### Benchmarks de bundle (post-§9.1)
+
+**Plataforma (`frontend/`):**
+| Chunk | Gzip |
+|---|---|
+| `index.html` | 0.42 KB |
+| `index-*.css` (app shell) | 5.39 KB |
+| `vendor-router` | 16.75 KB |
+| `vendor-util` | 21.28 KB |
+| `index-*.js` (app shell + lazy routes) | 95.25 KB |
+| **Bundle inicial (eager)** | **~138.9 KB gzip** |
+
+**Promo (`promo-frontend/`):**
+| Chunk | Gzip |
+|---|---|
+| `index.html` | 0.58 KB |
+| `index-*.css` | 6.71 KB |
+| `vendor-router` | 13.69 KB |
+| `vendor-react` | 75.29 KB |
+| `index-*.js` (app code) | 12.13 KB |
+| **Total** | **~108.4 KB gzip** ✅ (≤120 KB objetivo) |
+
+## Decisión arquitectónica
+
+**Opción A elegida:** `frontend/` y `promo-frontend/` como proyectos Vite hermanos independientes. Documentado en `docs/architecture/evaluation-promo-independence.md`.
+
+## Estrategia de sync cross-origin
+
+**URL params + localStorage local.** Documentado en `docs/architecture/cross-origin-sync.md`. Funciona sin autenticación.
+
+## Sesión y expiración
+
+| Propiedad | Valor | Fuente |
+|---|---|---|
+| `ACCESS_TOKEN_LIFETIME` | 60 minutos | `backend/core/settings.py:417` |
+| `REFRESH_TOKEN_LIFETIME` | 1 día | `backend/core/settings.py:418` |
+| `ROTATE_REFRESH_TOKENS` | False | `backend/core/settings.py:419` |
+| `BLACKLIST_AFTER_ROTATION` | True | `backend/core/settings.py:420` |
+
+**Decisión:** Dejar `ROTATE_REFRESH_TOKENS = False`. El usuario debe reloguearse a las 24h desde el login original.
+
+## Acciones que requieren intervención humana
+
+1. **[REQUIERE ACCIÓN MANUAL] Actualizar `CORS_ALLOWED_ORIGINS` en Render backend** — Ver §9.3.5.
+2. **[REQUIERE ACCIÓN MANUAL] Confirmar dominios exactos en Render** — `belkis-saude-promo.onrender.com` vs `gestion-saude-promo.onrender.com`. Ver §9.8.7.
+3. **[REQUIERE ACCIÓN MANUAL] Verificar env vars en Render Static Sites** — Ver §9.8.3-9.8.4.
+
+## Riesgos residuales
+
+| Riesgo | Mitigación |
+|---|---|
+| Sincronización no es real-time entre pestañas | Documentado. Sync ocurre al navegar entre dominios. |
+| `react-refresh/only-export-components` en context files | Preexistente en la plataforma. No afecta build ni runtime. |
+| Cold start del backend en promo | `wakeUpBackend()` + fallback de imagen del doctor. Fail-safe. |
+
+---
+
+## §9.4–§9.9 — Implementación completada
+
+### §9.4 — Verificación de endpoints backend `/sitio-imagenes/`
+
+**Auditado:** `backend/usuarios/views/sitio.py`
+
+- `/api/sitio-imagenes/` — List + create (filter por `tipo`, `activo`)
+- `/api/sitio-imagenes/carousel/` — GET, `AllowAny`, devuelve array de imágenes activas ordenadas por `orden`
+- `/api/sitio-imagenes/hero/` — GET, `AllowAny`, devuelve un objeto (imagen hero activa)
+
+**Bug encontrado y corregido:**
+- `carousel` action retornaba `serializer.data` (un dict/list) en lugar de `Response(serializer.data)`. Esto causaría error 500 en producción. ✅ **Corregido:** `return Response(serializer.data)` + `Response` importado al tope del módulo.
+
+**Formato de respuesta del serializer (`SitioImagenSerializer`):**
+```json
+{"id": 1, "titulo": "...", "descripcion": "...", "imagen": "/media/filename.jpg", "tipo": "hero", "orden": 0, "activo": true, "fecha_creacion": "..."}
+```
+
+**Fix en frontend (`apiUtils.js:53-59`):**
+- `getImageUrl()` ahora usa `API_URL.replace(/\/api$/, '')` para construir URLs de media correctas.
+- Antes: `${API_URL}/media/...` → `https://backend.onrender.com/api/media/...` (incorrecto)
+- Después: `${backendOrigin}/media/...` → `https://backend.onrender.com/media/...` ✅
+
+### §9.5 — Sync bidireccional de idioma (URL params + localStorage)
+
+**Implementado en ambos `LanguageContext.jsx`:**
+
+| Archivo | Import | Función |
+|---|---|---|
+| `promo-frontend/src/context/LanguageContext.jsx` | `readFromUrl` de `syncPreferences.js` | Lee `?lang=` al montar, escribe a `localStorage.language` |
+| `frontend/src/context/LanguageContext.jsx` | `readFromUrl` de `syncPreferences.js` | Lee `?lang=` al montar, escribe a `localStorage.language` |
+
+**Mecanismo:**
+1. Al cargar la app, `readFromUrl()` lee `?lang=` y `?theme=` de la URL, los escribe a `localStorage`, y limpia los params de la URL.
+2. Al cambiar idioma (toggle), `setLanguage()` actualiza `localStorage.language` via useEffect.
+3. Cross-origin: componentes (Navbar, CTA, Footer, PromocionalToggle) usan `buildPlatformUrl()`/`buildPromoUrl()` para añadir `?lang=` y `?theme=` al navegar al otro dominio.
+
+### §9.6 — Storage utility (storage.js)
+
+**Creado `storage.js` en ambos proyectos:**
+- `promo-frontend/src/utils/storage.js`
+- `frontend/src/utils/storage.js`
+
+**API:**
+- `safeStorage.getItem(key, fallback)` — SSR-safe localStorage read
+- `safeStorage.setItem(key, value)` — SSR-safe localStorage write
+- `safeStorage.removeItem(key)` — SSR-safe localStorage remove
+- `readLanguage()`, `writeLanguage(lang)`
+- `readTheme()`, `writeTheme(theme)`
+- `readThemeAutomatic()`, `writeThemeAutomatic(isAuto)`
+
+**ThemeContext refactor:**
+- Ambos `ThemeContext.jsx` ahora importan desde `storage.js` en lugar de acceder `localStorage` directamente.
+- `detectInitialTheme()` usa `readTheme()` en lugar de `localStorage.getItem('theme')`.
+- `writeTheme()` y `writeThemeAutomatic()` reemplazan `localStorage.setItem()`.
+
+### §9.8 — render.yaml con 3 servicios estáticos independientes
+
+**Actualizado `render.yaml`:**
+- `Gestion-Saude-backend` (web) — backend Django con Gunicorn
+- `Gestion-Saude-frontend` (static) — `rootDir: frontend`, env `VITE_PROMO_URL=https://belkis-saude-promo.onrender.com`
+- `Gestion-Saude-promo` (static) — `rootDir: promo-frontend` (era `rootDir: frontend` + `build:promo` + `server-promo.cjs`), ahora build `npm ci && npm run build`, publish `dist/`, env `VITE_API_URL` + `VITE_PLATFORM_URL`
+
+**CORS actualizado:**
+- `CORS_ALLOWED_ORIGINS` ahora incluye `belkis-saude-promo.onrender.com` y `garantia-saude-promo.onrender.com`
+- `CSRF_TRUSTED_ORIGINS` también incluye los nuevos dominios
+
+### §9.9 — Tests y documentación
+
+**Tests creados:**
+- `promo-frontend/src/utils/__tests__/syncPreferences.test.js` — 9 tests (readFromUrl, buildPlatformUrl, buildPromoUrl)
+- `frontend/src/utils/__tests__/syncPreferences.test.js` — 7 tests
+- `promo-frontend/src/context/__tests__/LanguageContext.test.jsx` — 6 tests (sync bidireccional)
+
+**Documentación actualizada:**
+- `docs/architecture/cross-origin-sync.md` — actualizado con detalles de `storage.js` y `syncPreferences.js`
+- `AUDIT.md` — esta sección §9.4–§9.9
+
+### Tabla de resultados finales
+
+| Ítem | Estado | Evidencia |
+|---|---|---|
+| §9.5 Sync idioma | ✅ | ambos `LanguageContext.jsx` usan `readFromUrl` + localStorage |
+| §9.6 Storage utility | ✅ | `storage.js` en ambos proyectos; ThemeContext refactorizado |
+| §9.4 Backend endpoints | ✅ | `sitio.py` `Response` fix; `getImageUrl` corregido |
+| §9.8 render.yaml | ✅ | 3 servicios independientes; CORS actualizado |
+| §9.9 Tests | ✅ | 22 tests nuevos (promo + frontend) |

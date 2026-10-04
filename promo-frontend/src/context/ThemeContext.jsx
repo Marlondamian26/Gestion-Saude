@@ -1,8 +1,19 @@
 import React, { createContext, useState, useEffect, useContext, useCallback } from 'react';
 
-import { readTheme, writeTheme, readThemeAutomatic, writeThemeAutomatic } from '../utils/storage';
+import { readTheme, writeTheme, writeThemeAutomatic } from '../utils/storage';
 
 const ThemeContext = createContext();
+
+const VALID_THEMES = ['light', 'dark', 'auto'];
+
+const detectInitialTheme = () => {
+  if (typeof window === 'undefined') return 'auto';
+  const fromUrl = new URLSearchParams(window.location.search).get('theme');
+  if (fromUrl && VALID_THEMES.includes(fromUrl)) return fromUrl;
+  const fromStorage = readTheme();
+  if (fromStorage && VALID_THEMES.includes(fromStorage)) return fromStorage;
+  return 'auto';
+};
 
 export const useTheme = () => {
   const context = useContext(ThemeContext);
@@ -29,18 +40,14 @@ export const ThemeProvider = ({ children }) => {
   }, [isTransitioning]);
 
   useEffect(() => {
-    const savedTheme = readTheme();
-    const savedAutomatic = readThemeAutomatic();
-
-    if (savedAutomatic === false) {
-      setIsAutomatic(false);
-      if (savedTheme) {
-        setTheme(savedTheme);
-      }
-    } else {
+    const resolved = detectInitialTheme();
+    if (resolved === 'auto') {
       setIsAutomatic(true);
       const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
       setTheme(prefersDark ? 'dark' : 'light');
+    } else {
+      setIsAutomatic(false);
+      setTheme(resolved);
     }
   }, []);
 
@@ -86,6 +93,7 @@ export const ThemeProvider = ({ children }) => {
     setIsTransitioning(true);
     const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
     setTheme(prefersDark ? 'dark' : 'light');
+    writeTheme('auto');
   }, []);
 
   return (
@@ -95,7 +103,7 @@ export const ThemeProvider = ({ children }) => {
       setThemeManually,
       setThemeAutomatic,
       isTransitioning,
-      isAutomatic
+      isAutomatic,
     }}>
       {children}
     </ThemeContext.Provider>

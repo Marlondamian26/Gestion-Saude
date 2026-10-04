@@ -1,42 +1,30 @@
 import React from 'react';
-import { useLocation, Link, useNavigate } from 'react-router-dom';
 import { FaGlobe } from 'react-icons/fa';
 import { useLanguage } from '../context/LanguageContext';
+import { useTheme } from '../context/ThemeContext';
+import { buildPromoUrl } from '../utils/syncPreferences';
 
 const PromocionalToggle = () => {
-  const location = useLocation();
-  const navigate = useNavigate();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
+  const { theme, isAutomatic } = useTheme();
 
-  const isPromocional = location.pathname === '/promocional';
-
-  const handleClick = () => {
-    if (isPromocional) {
-      navigate('/dashboard');
-    }
+  const handleGoToPromo = () => {
+    const baseUrl = import.meta.env.VITE_PROMO_URL || 'https://belkis-saude-promo.onrender.com';
+    const themeParam = isAutomatic ? 'auto' : theme;
+    window.location.href = buildPromoUrl(baseUrl, { language, theme: themeParam });
   };
 
-  if (isPromocional) {
-    return (
-      <button
-        onClick={handleClick}
-        style={styles.button}
-        title={t('backToDashboard')}
-        aria-label={t('backToDashboard')}
-      >
-        <span style={styles.icon}>
-          <FaGlobe />
-        </span>
-      </button>
-    );
-  }
-
   return (
-    <Link to="/promocional" style={styles.button} title="Ver sitio web promocional" aria-label="Ver sitio web promocional">
+    <button
+      onClick={handleGoToPromo}
+      style={styles.button}
+      title={t('viewPromoSite') || 'Ver sitio promocional'}
+      aria-label={t('viewPromoSite') || 'Ver sitio promocional'}
+    >
       <span style={styles.icon}>
         <FaGlobe />
       </span>
-    </Link>
+    </button>
   );
 };
 

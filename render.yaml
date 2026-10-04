@@ -22,9 +22,9 @@ services:
       - key: ALLOWED_HOSTS
         value: "gestion-saude-backend.onrender.com,localhost,127.0.0.1"
       - key: CSRF_TRUSTED_ORIGINS
-        value: "https://gestion-saude.onrender.com,https://gestion-saude-backend.onrender.com"
+        value: "https://gestion-saude.onrender.com,https://gestion-saude-backend.onrender.com,https://belkis-saude-promo.onrender.com,https://garantia-saude-promo.onrender.com"
       - key: CORS_ALLOWED_ORIGINS
-        value: "https://gestion-saude.onrender.com,https://gestion-saude-backend.onrender.com,https://gestion-saude-promo.onrender.com"
+        value: "https://gestion-saude.onrender.com,https://gestion-saude-backend.onrender.com,https://gestion-saude-promo.onrender.com,https://belkis-saude-promo.onrender.com,https://garantia-saude-promo.onrender.com"
       # REDIS_URL — Render generates a Redis URL if a Redis add-on is attached
       - key: REDIS_URL
         generateValue: true
@@ -34,6 +34,7 @@ services:
       - key: DEMO_PATIENT_PASSWORD
         value: "patient123"
 
+  # Frontend — plataforma principal (React)
   - type: static
     name: Gestion-Saude-frontend
     region: oregon
@@ -45,24 +46,26 @@ services:
       - key: VITE_API_URL
         value: https://gestion-saude-backend.onrender.com/api
       - key: VITE_PROMO_URL
-        value: https://gestion-saude-promo.onrender.com
+        value: https://belkis-saude-promo.onrender.com
     routes:
       - type: rewrite
         source: /*
         destination: /index.html
 
-  # Landing page promocional (sitio independiente)
-  - type: web
+  # Promo frontend — sitio promocional independiente (FASE 9 §9.8)
+  - type: static
     name: Gestion-Saude-promo
     region: oregon
     plan: free
-    rootDir: frontend
-    buildCommand: npm ci && npm run build:promo
-    startCommand: node server-promo.cjs
+    rootDir: promo-frontend
+    buildCommand: npm ci && npm run build
+    staticPublishPath: dist
     envVars:
+      - key: VITE_API_URL
+        value: https://gestion-saude-backend.onrender.com/api
       - key: VITE_PLATFORM_URL
         value: https://gestion-saude.onrender.com
     routes:
       - type: rewrite
         source: /*
-        destination: /promo.html
+        destination: /index.html

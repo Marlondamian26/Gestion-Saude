@@ -6,6 +6,7 @@ import logging
 from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.response import Response
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
 from ..models import SitioImagen
@@ -66,12 +67,11 @@ class SitioImagenViewSet(viewsets.ModelViewSet):
         """Obtener imágenes del carrusel."""
         imagenes = self.get_queryset().filter(tipo='carousel', activo=True).order_by('orden', '-fecha_creacion')
         serializer = self.get_serializer(imagenes, many=True)
-        return serializer.data
+        return Response(serializer.data)
 
     @action(detail=False, methods=['get'])
     def hero(self, request):
         """Obtener imagen hero."""
-        from rest_framework.response import Response
         imagen = self.get_queryset().filter(tipo='hero', activo=True).first()
         if imagen:
             serializer = self.get_serializer(imagen)

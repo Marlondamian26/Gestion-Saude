@@ -1,8 +1,8 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
-import { platformTranslations as translations } from './translations/platform';
+import { promoTranslations as translations } from './translations/promo';
 import { writeLanguage, readLanguage } from '../utils/storage';
-import { readFromUrl } from '../utils/syncPreferences';
+import { readFromUrl, LS_LANG_KEY } from '../utils/syncPreferences';
 
 const LanguageContext = createContext();
 
@@ -30,27 +30,20 @@ export const LanguageProvider = ({ children }) => {
     htmlElement.lang = langMap[language] || 'pt-BR';
   }, [language]);
 
-  const t = (key, params = {}) => {
-    const langTranslations = translations[language] || translations.pt;
-    let text = langTranslations[key] || translations.pt[key] || key;
-    Object.keys(params).forEach(param => {
-      text = text.replace(new RegExp(`\\{${param}\\}`, 'g'), params[param]);
-    });
-    return text;
-  };
+  const t = (key) => key;
 
   const tPromo = (key, params = {}) => {
     const promoLang = `promo_${language}`;
     const langTranslations = translations[promoLang] || translations.promo_pt;
     let text = langTranslations[key] || translations.promo_pt[key] || key;
-    Object.keys(params).forEach(param => {
+    Object.keys(params).forEach((param) => {
       text = text.replace(new RegExp(`\\{${param}\\}`, 'g'), params[param]);
     });
     return text;
   };
 
   return (
-    <LanguageContext.Provider value={{ language, setLanguage, t, tPromo, translations: translations[language] }}>
+    <LanguageContext.Provider value={{ language, setLanguage, t, tPromo, translations: translations[`promo_${language}`] || translations.promo_pt }}>
       {children}
     </LanguageContext.Provider>
   );
