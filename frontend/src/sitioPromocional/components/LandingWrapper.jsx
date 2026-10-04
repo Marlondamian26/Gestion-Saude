@@ -20,10 +20,9 @@ function PromoThemeToggle() {
   const [isRotating, setIsRotating] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const [showTooltip, setShowTooltip] = useState(false);
-  const { tPromo } = useLanguage();
 
   useEffect(() => {
-    setIsRotating(true);
+    setIsRotating(true); // theme-driven animation trigger
     const timer = setTimeout(() => setIsRotating(false), 500);
     return () => clearTimeout(timer);
   }, [theme]);

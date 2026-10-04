@@ -31,20 +31,20 @@ const AllProviders = ({ children }) => {
 
 describe('Carousel', () => {
   it('muestra skeleton mientras carga', async () => {
-    global.fetch = vi.fn(() => new Promise(() => {}));
+    vi.stubGlobal('fetch', vi.fn(() => new Promise(() => {})));
     render(<Carousel />, { wrapper: AllProviders });
     expect(document.querySelector('.promo-carousel-skeleton')).toBeInTheDocument();
-    global.fetch.mockRestore();
+    vi.unstubAllGlobals();
   });
 
   it('renderiza empty state cuando no hay imágenes', async () => {
-    global.fetch = vi.fn(() =>
+    vi.stubGlobal('fetch', vi.fn(() =>
       Promise.resolve({
         ok: true,
         headers: { get: () => 'application/json' },
         json: () => Promise.resolve([]),
       })
-    );
+    ));
 
     render(<Carousel />, { wrapper: AllProviders });
 
@@ -52,6 +52,6 @@ describe('Carousel', () => {
       expect(screen.getByText('Nenhum dado disponível')).toBeInTheDocument();
     });
 
-    global.fetch.mockRestore();
+    vi.unstubAllGlobals();
   });
 });

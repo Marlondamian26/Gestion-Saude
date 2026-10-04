@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState } from 'react';
 import { FaStethoscope, FaMapMarkerAlt, FaWhatsapp, FaArrowRight } from 'react-icons/fa';
 import { useLanguage } from '../../context/PromoLanguageContext';
 import { DOCTOR_NAME, DOCTOR_SPECIALTY, CLINIC_LOCATION, CLINIC_PHONE, PLATFORM_URL, REGISTRO_URL } from '../config/constants';
@@ -49,7 +49,7 @@ const getImageUrl = (path) => {
 function Hero() {
   const { tPromo } = useLanguage();
   const [heroImage, setHeroImage] = useState(null);
-  const [loadingImage, setLoadingImage] = useState(true);
+  const [, setLoadingImage] = useState(true);
   const [imgLoaded, setImgLoaded] = useState(false);
   const [ref, isInView] = useInView({ threshold: 0.1 });
 
@@ -69,6 +69,7 @@ function Hero() {
           setHeroImage(data);
         }
       } catch {
+        void 0;
       } finally {
         if (!cancelled) setLoadingImage(false);
       }

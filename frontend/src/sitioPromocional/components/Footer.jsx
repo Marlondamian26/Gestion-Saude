@@ -5,8 +5,9 @@ import { useLanguage } from '../../context/PromoLanguageContext';
 import { CLINIC_NAME, CLINIC_ADDRESS, CLINIC_PHONE, CLINIC_EMAIL, PLATFORM_URL, REGISTRO_URL } from '../config/constants';
 
 function Footer() {
-  const { tPromo, language } = useLanguage();
+  const { tPromo } = useLanguage();
   const currentYear = new Date().getFullYear();
+  const _ = currentYear;
   
   const formatWhatsApp = (phone) => {
     return phone.replace(/\s/g, '');

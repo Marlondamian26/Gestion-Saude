@@ -5,6 +5,7 @@ export function useInView(options = {}) {
   const ref = useRef(null);
 
   useEffect(() => {
+    const node = ref.current;
     if (typeof window === 'undefined' || !window.IntersectionObserver) {
       return;
     }
@@ -17,21 +18,19 @@ export function useInView(options = {}) {
       ([entry]) => {
         if (entry.isIntersecting) {
           setIsInView(true);
-          if (ref.current) {
-            observer.unobserve(ref.current);
-          }
+          observer.unobserve(entry.target);
         }
       },
       { threshold: 0.1, ...options }
     );
 
-    if (ref.current) {
-      observer.observe(ref.current);
+    if (node) {
+      observer.observe(node);
     }
 
     return () => {
-      if (ref.current) {
-        observer.unobserve(ref.current);
+      if (node) {
+        observer.unobserve(node);
       }
     };
   }, [options]);

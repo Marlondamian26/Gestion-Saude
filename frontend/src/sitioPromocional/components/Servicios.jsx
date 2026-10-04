@@ -36,8 +36,6 @@ function Servicios() {
       <div className="promo-servicios-grid">
         {servicios.map((servicio, index) => {
           const IconComponent = iconMap[servicio.icon] || FaStethoscope;
-          const translatedService = serviceList[index] || servicio;
-
           return (
             <div
               key={servicio.id}
@@ -48,8 +46,7 @@ function Servicios() {
                 <IconComponent />
               </div>
               <h3>{serviceList[index]?.title || servicio.nombre}</h3>
-              <p>{serviceList[index]?.description || servicio.descripcion}</p>
-            </div>
+              <p>{serviceList[index]?.description || servicio.descripcion}</p>            </div>
           );
         })}
       </div>

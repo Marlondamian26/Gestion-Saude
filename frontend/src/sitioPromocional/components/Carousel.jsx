@@ -190,8 +190,6 @@ function Carousel() {
     );
   }
 
-  const currentImage = images[currentIndex];
-
   return (
     <section
       className="promo-carousel"
@@ -200,8 +198,7 @@ function Carousel() {
     >
       <div className="promo-carousel-container">
         {images.map((img, index) => {
-          const getImageUrl_ = getImageUrl;
-          const imageUrl = getImageUrl_(img.imagen);
+          const imageUrl = getImageUrl(img.imagen);
           const isActive = index === currentIndex;
           const isPrev = index === (currentIndex - 1 + images.length) % images.length;
 
