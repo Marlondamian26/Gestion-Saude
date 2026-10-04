@@ -10,8 +10,10 @@ export const DOCTOR_NAME = 'Dra. Belkis Morejón Acosta';
 export const DOCTOR_TITLE = 'Médica Especialista';
 export const DOCTOR_SPECIALTY = 'Medicina General';
 
-export const PLATFORM_URL = '/login';
-export const REGISTRO_URL = '/registro';
+// URLs externas — la promo se despliega como sitio independiente
+const PLATFORM_BASE = import.meta.env.VITE_PLATFORM_URL || 'https://gestion-saude-platform.onrender.com';
+export const PLATFORM_URL = `${PLATFORM_BASE}/login`;
+export const REGISTRO_URL = `${PLATFORM_BASE}/registro`;
 
 export const CONFIG = {
   hero: {

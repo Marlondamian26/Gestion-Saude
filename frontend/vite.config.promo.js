@@ -30,9 +30,13 @@ export default defineConfig({
         promo: path.resolve(__dirname, 'promo.html'),
       },
       output: {
-        manualChunks: {
-          vendor: ['react', 'react-dom'],
-          router: ['react-router-dom'],
+        manualChunks(id) {
+          if (id.includes('node_modules/react') && !id.includes('react-router')) {
+            return 'vendor-react';
+          }
+          if (id.includes('node_modules/react-router')) {
+            return 'vendor-router';
+          }
         },
       },
     },
