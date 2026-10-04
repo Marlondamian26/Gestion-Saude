@@ -266,3 +266,139 @@ No existen archivos `.env`, `.env.local`, `.env.production` u otros en `backend/
 6. **Frontend:** Añadir el servicio frontend a `render.yaml` (actualmente solo define el backend). Asegurar que `VITE_API_URL` esté configurada para el servicio frontend, no para el backend.
 
 7. **Backup de Supabase:** Completar el backup de base de datos de producción siguiendo las instrucciones de la sección "Acciones que requieren intervención humana".
+
+---
+
+# AUDIT.md — FASE 1: Seguridad Crítica
+
+**Fecha de ejecución:** 2026-10-04T04:30:00Z
+**Ejecutado por:** KiloCode (agente IA)
+**Rama:** chore/audit-fixes
+**Commit base FASE 0:** 0f4a37bea335d7ae37a8bf3b7c46950e82061a5a
+
+## 1.1 — Credenciales hardcodeadas y bootstrap automático
+- [x] Credenciales hardcodeadas eliminadas de `apps.py` (GENERIC_ADMIN_PASSWORD, DEMO_PATIENT defaults)
+- [x] URL PostgreSQL con credenciales eliminada de `settings.py:105` (now uses env var → SQLite fallback)
+- [x] Bootstrap migrado a management command: `python manage.py seed_demo`
+- [x] `seed_demo` hace fail-fast con `DEBUG=False` (raises CommandError)
+- [x] `ready()` ya no crea usuarios automáticamente
+- [x] Signal handlers `on_user_saved` simplificado (solo limpia admin genérico)
+- [x] Test: `test_no_bootstrap_in_prod.py` — 2 tests, pass ✅
+- [x] `render.yaml:28` — DEMO_PATIENT_PASSWORD="patient123" permanece (necesario para seed_demo)
+
+## 1.2 — SECRET_KEY persistente
+- [x] `settings.py` — SECRET_KEY leído de env var; fail-fast si no está definida en `DEBUG=False`
+- [x] `render.yaml:15-16` — cambiado `generateValue: true` → `sync: false` (persistente entre deploys)
+- [x] Dev fallback: `django-insecure-dev-only-key-not-for-production` (solo DEBUG=True)
+- ⚠️ [REQUIERE ACCIÓN MANUAL] Generar SECRET_KEY real y configurar en Render → Environment. Rotación invalidará JWT activos.
+
+## 1.3 — DEBUG, ALLOWED_HOSTS, CSRF_TRUSTED_ORIGINS
+- [x] `DEBUG` — default `False` (cambio a `.lower() == 'true'` para robustez)
+- [x] `ALLOWED_HOSTS` — leído de env var comma-separated; fail-fast si vacío en prod
+- [x] `CSRF_TRUSTED_ORIGENS` — añadido, leído de env var; defaults en DEBUG
+- [x] `render.yaml` — añadido `CSRF_TRUSTED_ORIGENS` env var
+- [x] Test: `test_settings.py` — 10 tests, pass ✅
+
+## 1.4 — Desacoplar rol admin de is_superuser
+- [x] `models.py:save()` — eliminado forzado automático de `is_superuser`/`is_staff`
+- [x] `rol='admin'` ahora otorga permisos de negocio, no de Django admin
+- [x] Migration `0005_report_admin_superusers.py` — reporta usuarios afectados (no modifica datos)
+- [x] Test: `test_admin_role_does_not_imply_superuser.py` — 4 tests, pass ✅
+- ⚠️ [REQUIERE ACCIÓN MANUAL] Revisar reporte de migración 0005 y confirmar degradación si procede
+
+## 1.5 — Email único, no nulo, no vacío
+- [x] `models.py` — `email = EmailField(unique=True, null=True, blank=True)`
+- [x] Migration `0004_normalize_email.py` — normaliza email='' → NULL, verifica duplicados
+- [x] `serializers.py` — `CustomTokenObtainPairSerializer` maneja `MultipleObjectsReturned`, salta identifier vacío
+- [x] Test: `test_login_por_email_unico.py` — 4 tests, pass ✅
+- ⚠️ [REQUIERE ACCIÓN MANUAL] Verificar duplicados de email en prod antes de aplicar migración
+
+## 1.6 — Rate limiting en /api/registro/
+- [x] `views.py` — `RegistroAnonThrottle(AnonRateThrottle)` con scope='registro'
+- [x] `@throttle_classes([RegistroAnonThrottle])` aplicado a `registro_usuario`
+- [x] `settings.py` — `'registro': '5/minute'` en DEFAULT_THROTTLE_RATES
+- [x] Fix: `Paciente.objects.create()` envuelto en `transaction.atomic()` (evita TransactionManagementError)
+- [x] Test: `test_registro_throttled.py` — 2 tests, pass ✅
+- ⚠️ Note: throttle depende de Redis en prod (LocMemCache no funciona con múltiples workers)
+
+## 1.7 — Cache distribuido y workers
+- [x] `settings.py` — Redis cache opcional (REDIS_URL); LocMemCache fallback en DEBUG; fail-fast en prod sin REDIS_URL
+- [x] `render.yaml:9` — startCommand con `--workers ${RENDER_CPU_COUNT:-1} --threads 4 --timeout 120`
+- [x] `render.yaml` — añadido `REDIS_URL` env var (fromRedis)
+- [x] `requirements.txt` — añadido `django-redis==7.0.0`, `redis==8.1.0`
+- ⚠️ [REQUIERE ACCIÓN MANUAL] Provisionar instancia Redis en Render (Key Value free tier) y confirmar que REDIS_URL se propague
+- ⚠️ Note: sin Docker en Codespace, no se pudo validar localmente con Redis real
+
+## 1.8 — CORS y VITE_API_URL
+- [x] `settings.py` — eliminado `CORS_ALLOW_ALL_ORIGINS = True`
+- [x] `CORS_ALLOWED_ORIGENS` — ahora leído de env var, con defaults solo en DEBUG
+- [x] `render.yaml` — eliminado `VITE_API_URL` del servicio backend
+- [x] Test: `test_no_cors_allow_all_origins` — pass ✅
+
+## 1.9 — Dependencias actualizadas
+- [x] `dj-database-url==0.5.0` → `dj-database-url==3.1.2`
+- [x] Añadido `django-redis==7.0.0`, `redis==8.1.0`
+- [x] Test: `test_database_url_parsing.py` — 3 tests, pass ✅
+- Nota: Django (6.0.2→6.1.1), psycopg2-binary (2.9.12→2.9.13) y otras deps se difieren a FASE 2
+
+## 1.10 — STATIC_ROOT
+- [x] `settings.py` — añadido `STATIC_ROOT = BASE_DIR / 'staticfiles'`
+- [x] `MEDIA_ROOT` conservado en `BASE_DIR / 'sitio'` (compatibilidad con frontend SPA)
+- [x] `STATIC_URL` = 'static/', `STATIC_ROOT` = staticfiles/
+- [x] WhiteNoise middleware posición correcta (después de SecurityMiddleware)
+- [x] `.gitignore` — añadido `staticfiles/`
+- [x] Test: `test_static_root_defined` — pass ✅
+
+---
+
+## Tabla de cambios por subsección
+
+| Ítem | Verificado | Corregido | Evidencia | Estado |
+|---|---|---|---|---|
+| §1.1 Credenciales hardcodeadas | ✅ | ✅ | apps.py:9-10 remoto; settings.py:105 remoto; seed_demo.py creado | ✅ |
+| §1.2 SECRET_KEY | ✅ | ✅ | settings.py:28-33; render.yaml:16 sync:false | ✅ |
+| §1.3 DEBUG/ALLOWED_HOSTS/CSRF | ✅ | ✅ | settings.py:24-45; .gitignore +staticfiles | ✅ |
+| §1.4 is_superuser forcing | ✅ | ✅ | models.py save() simplificado; 0005_report migration | ✅ |
+| §1.5 Email único | ✅ | ✅ | models.py:email unique/null; 0004_normalize migration; serializers.py MultipleObjectsReturned | ✅ |
+| §1.6 Throttle registro | ✅ | ✅ | views.py RegistroAnonThrottle + transaction.atomic; settings.py 5/min | ✅ |
+| §1.7 Redis cache + workers | ✅ | ✅ | settings.py CACHES condicional; render.yaml --workers + REDIS_URL; requirements.txt +django-redis +redis | ✅ |
+| §1.8 CORS + VITE_API_URL | ✅ | ✅ | settings.py CORS_ALLOW_ALL_ORIGINS=True removido; render.yaml VITE_API_URL removido | ✅ |
+| §1.9 dj-database-url | ✅ | ✅ | requirements.txt 0.5.0→3.1.2; test_database_url_parsing.py | ✅ |
+| §1.10 STATIC_ROOT | ✅ | ✅ | settings.py:188 STATIC_ROOT añadido; .gitignore +staticfiles | ✅ |
+
+## Test suite
+- **24 tests** creados, todos pasan ✅
+- `python manage.py check` — 0 issues
+- Tests cubren: settings security, bootstrap fail-fast, is_superuser decoupling, email uniqueness, throttle, db URL parsing
+
+## Acciones que requieren intervención humana
+
+1. **[REQUIERE ACCIÓN MANUAL] Rotar credenciales en producción**
+   - Rotar password de `admin`: `python manage.py shell -c "from usuarios.models import Usuario; u=Usuario.objects.get(username='admin'); u.set_password('<NUEVO_PASS_ALEATORIO>'); u.save()"`
+   - Verificar/rotar `patient` (demo): mismo comando con username='patient'
+   - Auditar: `Usuario.objects.filter(is_superuser=True)` — listar TODOS los superusers
+
+2. **[REQUIERE ACCIÓN MANUAL] Provisionar Redis en Render**
+   - Crear Render Key Value (Redis) instance (free tier disponible)
+   - Setear `REDIS_URL` en Render → Environment (render.yaml ya lo referencia con fromRedis)
+   - Redesplegar
+
+3. **[REQUIERE ACCIÓN MANUAL] Regenerar SECRET_KEY persistente**
+   - Generar: `python -c "from django.core.management.utils import get_random_secret_key as g; print(g())"`
+   - Setear en Render → Environment como SECRET_KEY (sync: false)
+   - ⚠️ Invierte todos los JWT activos — coordinar con bajo uso
+
+4. **[REQUIERE ACCIÓN MANUAL] Verificar migración 0004 (email) en prod**
+   - `python manage.py migrate usuarios 0004 --plan` para verificar
+   - Detecta duplicados de email → si los hay, resolver manualmente antes de aplicar
+
+5. **[REQUIERE ACCIÓN MANUAL] Revisar migración 0005 (is_superuser)**
+   - `python manage.py migrate usuarios 0005` genera reporte de usuarios afectados
+   - Confirmar degradación de `rol='admin'` usuarios que no necesitan acceso Django admin
+
+## Riesgos residuales
+
+1. **Rotación de SECRET_KEY invalidará JWT activos** — downtime planificado necesario
+2. **Sin Redis en prod, el fail-fast en settings.py bloqueará el arranque** — REDIS_URL debe estar configurado antes del deploy
+3. **LocMemCache sigue funcionando en DEBUG local** — el throttle no es efectivo con múltiples workers en dev
+4. **Frontend no está en render.yaml** — pendiente de FASE 2
