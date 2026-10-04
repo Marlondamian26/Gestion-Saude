@@ -20,6 +20,20 @@ from .models import (
     Especialidad, Horario, Cita
 )
 
+# [FASE 5 §5.5] Instrumentación de métricas (logging estructurado, no cambia lógica)
+try:
+    from .chat_metrics import log_event, log_session_started, log_intent_detected, \
+        log_intent_unrecognized, log_cita_creada, log_abandoned, log_error
+except Exception:
+    # Fallback si chat_metrics no está disponible
+    def log_event(*a, **kw): pass
+    def log_session_started(*a, **kw): pass
+    def log_intent_detected(*a, **kw): pass
+    def log_intent_unrecognized(*a, **kw): pass
+    def log_cita_creada(*a, **kw): pass
+    def log_abandoned(*a, **kw): pass
+    def log_error(*a, **kw): pass
+
 
 class EstadoConversacion:
     """Estados do fluxo de conversacao"""
@@ -664,6 +678,13 @@ class ServicioIA:
                 'hora': None
             }
             
+            # [FASE 5 §5.5] Loggear cita creada
+            try:
+                cita_id = cita_nueva.id if cita_nueva else None
+                log_cita_creada(self.paciente.usuario, cita_id)
+            except Exception:
+                pass
+
             return (
                 f"🎉 **¡Cita confirmada!**\n\n"
                 f"Tu cita ha sido creada exitosamente.\n\n"
@@ -884,6 +905,7 @@ def obtener_servicio(paciente_id: int) -> Optional[ServicioIA]:
         if estado_serializado is None:
             # Crear nueva instancia
             servicio = ServicioIA().inicializar(paciente)
+            log_session_started(paciente.usuario)
             # Guardar solo el estado serializable
             cache.set(f"{CACHE_KEY_PREFIX}{paciente_id}", servicio.get_estado_serializable(), CLEANUP_INTERVAL)
             cache.set(f"{CACHE_KEY_PREFIX}{paciente_id}_ts", time.time(), CLEANUP_INTERVAL)
@@ -940,7 +962,24 @@ def procesar_chat(paciente_id: int, mensaje: str) -> str:
         
         respuesta, nuevo_estado = servicio.procesar_mensaje(mensaje)
         logger.debug(f"Estado cambiado a: {nuevo_estado}")
-        
+
+        # [FASE 5 §5.5] Loggear intención detectada
+        _usuario = paciente.usuario if hasattr(paciente, 'usuario') else None
+        if nuevo_estado == EstadoConversacion.CONFIRMAR:
+            log_intent_detected(_usuario, 'confirmar', mensaje)
+        elif nuevo_estado == EstadoConversacion.ESPECIALIDAD:
+            log_intent_detected(_usuario, 'seleccionar_especialidad', mensaje)
+        elif nuevo_estado == EstadoConversacion.DATA:
+            log_intent_detected(_usuario, 'seleccionar_fecha', mensaje)
+        elif nuevo_estado == EstadoConversacion.HORA:
+            log_intent_detected(_usuario, 'seleccionar_hora', mensaje)
+        elif nuevo_estado == EstadoConversacion.MEDICO:
+            log_intent_detected(_usuario, 'seleccionar_medico', mensaje)
+        elif nuevo_estado == EstadoConversacion.CANCELAR:
+            log_intent_detected(_usuario, 'cancelar', mensaje)
+        elif nuevo_estado == EstadoConversacion.VER_HORARIOS:
+            log_intent_detected(_usuario, 'ver_horarios', mensaje)
+
         servicio.estado_actual = nuevo_estado
         
         # Guardar estado actualizado en cache para persistencia entre requests
@@ -956,6 +995,11 @@ def procesar_chat(paciente_id: int, mensaje: str) -> str:
             exc_info=True,
             extra={'paciente_id': paciente_id, 'mensaje_length': len(mensaje)}
         )
+        # [FASE 5 §5.5] Loggear error
+        try:
+            log_error(paciente.usuario if servicio else None, e, context='procesar_chat')
+        except Exception:
+            pass
         return "😔 Hubo un problema con los datos proporcionados. Por favor, intenta de nuevo."
     except Exception as e:
         logger.error(
@@ -963,5 +1007,10 @@ def procesar_chat(paciente_id: int, mensaje: str) -> str:
             exc_info=True,
             extra={'paciente_id': paciente_id, 'mensaje_length': len(mensaje)}
         )
+        # [FASE 5 §5.5] Loggear error
+        try:
+            log_error(paciente.usuario if servicio else None, e, context='procesar_chat')
+        except Exception:
+            pass
         return "😔 Ocurrió un error inesperado. Por favor, intenta de nuevo o contacta al administrador."
 
