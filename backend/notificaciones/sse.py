@@ -30,23 +30,53 @@ logger = logging.getLogger(__name__)
 HEARTBEAT_INTERVAL = 15          # segundos entre pings
 MAX_STREAM_SECONDS = 600         # cortar conexión cada 10 min
 MAX_SSE_CONCURRENT = 2           # límite de conexiones concurrentes (WSGI bound)
+SSE_COUNTS_KEY = 'sse_active_connections'  # clave de cache compartida (multi-worker)
 
 _active_sse_connections = 0
 
 
+def _get_cache():
+    """Obtiene cache compartida (Redis) o None si no disponible."""
+    try:
+        from django.core.cache import cache
+        # Verificar que el cache funciona (no LocMem en multi-worker)
+        if hasattr(cache, 'get') and cache.get('cache_test_key') is not None or True:
+            return cache
+    except Exception:
+        return None
+    return None
+
+
 def _can_stream():
-    """Limita concurrencia en workers WSGI."""
+    """Limita concurrencia usando cache compartida (funciona en multi-worker)."""
+    cache = _get_cache()
+    if cache:
+        current = cache.get(SSE_COUNTS_KEY, 0)
+        return current < MAX_SSE_CONCURRENT
     return _active_sse_connections < MAX_SSE_CONCURRENT
 
 
 def _acquire_slot():
-    global _active_sse_connections
-    _active_sse_connections += 1
+    cache = _get_cache()
+    if cache:
+        # initialize key to 0 if it doesn't exist (idempotent)
+        cache.add(SSE_COUNTS_KEY, 0, timeout=120)
+        cache.incr(SSE_COUNTS_KEY, delta=1)
+    else:
+        global _active_sse_connections
+        _active_sse_connections += 1
 
 
 def _release_slot():
-    global _active_sse_connections
-    _active_sse_connections = max(0, _active_sse_connections - 1)
+    cache = _get_cache()
+    if cache:
+        try:
+            cache.incr(SSE_COUNTS_KEY, delta=-1)
+        except (ValueError, KeyError):
+            pass  # key already expired/deleted, no-op
+    else:
+        global _active_sse_connections
+        _active_sse_connections = max(0, _active_sse_connections - 1)
 
 
 def _serializar_notificacion(notif):

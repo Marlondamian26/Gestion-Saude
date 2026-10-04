@@ -6,7 +6,7 @@ services:
     plan: free
     workingDirectory: backend
     buildCommand: set -e && echo "Installing requirements..." && pip install -r requirements.txt && echo "Running deploy checks..." && python manage.py check --deploy --fail-level WARNING && echo "Migrating..." && python manage.py migrate --noinput --verbosity=2 && echo "Collecting static..." && python manage.py collectstatic --noinput
-    startCommand: gunicorn core.wsgi:application --bind 0.0.0.0:$PORT --workers ${RENDER_CPU_COUNT:-1} --threads 4 --timeout 120
+    startCommand: gunicorn core.wsgi:application --bind 0.0.0.0:$PORT --workers ${RENDER_CPU_COUNT:-1} --threads 4 --timeout 120  # WSGI; alternativa ASGI: uvicorn core.asgi:application --host 0.0.0.0 --port $PORT --workers 1 --limit-concurrency 1000
     envVars:
       - key: DATABASE_URL
         fromDatabase:
