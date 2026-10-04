@@ -237,6 +237,52 @@ try:
 except Exception as e:
     print(f"Warning: Could not create media directories: {e}")
 
+# [FASE 7 §7.4] Storage backend con feature flag
+# Si MEDIA_STORAGE=s3, usa S3 (Cloudflare R2/Supabase Storage/AWS S3)
+# Si no, usa FileSystemStorage (default, para dev)
+# VER NOTA: django-storages y boto3 están en requirements.txt como comentados;
+# instalar con: pip install django-storages[s3] boto3
+if os.environ.get('MEDIA_STORAGE') == 's3':
+    try:
+        STORAGES = {
+            'default': {
+                'BACKEND': 'storages.backends.s3.S3Storage',
+                'OPTIONS': {
+                    'access_key': os.environ.get('AWS_ACCESS_KEY_ID'),
+                    'secret_key': os.environ.get('AWS_SECRET_ACCESS_KEY'),
+                    'bucket_name': os.environ.get('AWS_STORAGE_BUCKET_NAME'),
+                    'endpoint_url': os.environ.get('AWS_S3_ENDPOINT_URL'),
+                    'region_name': os.environ.get('AWS_S3_REGION_NAME', 'auto'),
+                    'default_acl': None,
+                    'querystring_auth': True,
+                    'file_overwrite': False,
+                    'object_parameters': {'CacheControl': 'max-age=86400'},
+                },
+            },
+            'staticfiles': {
+                'BACKEND': 'whitenoise.storage.CompressedManifestStaticFilesStorage',
+            },
+        }
+    except ImportError:
+        print('[FASE 7 §7.4] django-storages no instalado; usando FileSystemStorage')
+        STORAGES = {
+            'default': {
+                'BACKEND': 'django.core.files.storage.FileSystemStorage',
+            },
+            'staticfiles': {
+                'BACKEND': 'whitenoise.storage.CompressedManifestStaticFilesStorage',
+            },
+        }
+else:
+    STORAGES = {
+        'default': {
+            'BACKEND': 'django.core.files.storage.FileSystemStorage',
+        },
+        'staticfiles': {
+            'BACKEND': 'whitenoise.storage.CompressedManifestStaticFilesStorage',
+        },
+    }
+
 
 # CORS configuration — origins driven by env var CORS_ALLOWED_ORIGINS (comma-separated)
 _default_cors_origins = [
