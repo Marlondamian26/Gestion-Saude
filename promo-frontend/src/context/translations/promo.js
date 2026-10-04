@@ -6,13 +6,20 @@ export const promoTranslations = {
   promo_pt: {
     // Navbar
     navInicio: 'Início',
-    navServicos: 'Serviços',
+    navServicios: 'Serviços',
     navSobreNos: 'Sobre Nós',
     navContacto: 'Contacto',
     navTestimonios: 'Testemunhos',
     navWhatsApp: 'WhatsApp',
     navLogin: 'Entrar',
     menu: 'Menu',
+    close: 'Fechar',
+
+    // Toggle i18n
+    portuguese: 'Português',
+    spanish: 'Español',
+    english: 'English',
+    language: 'Idioma',
 
     // Hero
     heroBadge: 'Atenção Médica de Qualidade',
@@ -101,6 +108,13 @@ export const promoTranslations = {
     navWhatsApp: 'WhatsApp',
     navLogin: 'Iniciar Sesión',
     menu: 'Menu',
+    close: 'Cerrar',
+
+    // Toggle i18n
+    portuguese: 'Português',
+    spanish: 'Español',
+    english: 'English',
+    language: 'Idioma',
 
     // Hero
     heroBadge: 'Atención Médica de Calidad',
@@ -189,6 +203,13 @@ export const promoTranslations = {
     navWhatsApp: 'WhatsApp',
     navLogin: 'Login',
     menu: 'Menu',
+    close: 'Close',
+
+    // Toggle i18n
+    portuguese: 'Portuguese',
+    spanish: 'Spanish',
+    english: 'English',
+    language: 'Language',
 
     // Hero
     heroBadge: 'Quality Medical Care',
