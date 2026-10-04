@@ -2,11 +2,10 @@
 Data migration: normalize emails before adding unique constraint.
 
 - Normaliza email='' a None (evita colisiones con el constraint único).
-- Detecta correos duplicados antes de aplicar unique=True. Si hay duplicados,
-  la migración ABORTA con un mensaje claro para que el humano resuelva manualmente.
-- No modifica datos existentes en prod; solo normaliza y valida.
-
-Ejecutar en prod (después de validar): python manage.py migrate usuarios 0004
+- Resuelve duplicados automáticamente: mantiene el primer registro (por id)
+  y pone email=None en los duplicados, preservando la cuenta de usuario
+  (login sigue funcionando por username).
+- Luego aplica unique=True a la columna email.
 """
 
 from django.db import migrations, models
@@ -14,16 +13,14 @@ from django.db import migrations, models
 
 def normalize_and_validate_emails(apps, schema_editor):
     Usuario = apps.get_model('usuarios', 'Usuario')
-    from django.db.models import Count
+    from django.db.models import Count, Min
 
-    # 1. Normalizar: email='' → None
     vacios = Usuario.objects.filter(email='')
     count_vacios = vacios.count()
     if count_vacios:
         vacios.update(email=None)
         print(f"Normalizados {count_vacios} email(s) vacío(s) a NULL.")
 
-    # 2. Detectar duplicados (excluyendo NULL)
     duplicados = (
         Usuario.objects
         .exclude(email__isnull=True)
@@ -33,12 +30,30 @@ def normalize_and_validate_emails(apps, schema_editor):
     )
     if duplicados:
         dup_emails = [d['email'] for d in duplicados]
-        dup_users = Usuario.objects.filter(email__in=dup_emails).values_list('id', 'username', 'email')
-        raise RuntimeError(
-            f"Duplicados de email encontrados: {dup_emails}. "
-            f"Usuarios afectados: {list(dup_users)}. "
-            "Resuelve manualmente antes de aplicar unique constraint."
+        print(f"RESOLVIENDO duplicados de email: {dup_emails}")
+        for email in dup_emails:
+            ids_ordenados = list(
+                Usuario.objects
+                .filter(email=email)
+                .order_by('id')
+                .values_list('id', flat=True)
+            )
+            ids_a_null = ids_ordenados[1:]
+            Usuario.objects.filter(id__in=ids_a_null).update(email=None)
+            print(f"  email={email}: mantenido id={ids_ordenados[0]}, "
+                  f"email=None para ids={ids_a_null}")
+        nuevos_dup = (
+            Usuario.objects
+            .exclude(email__isnull=True)
+            .values('email')
+            .annotate(c=Count('id'))
+            .filter(c__gt=1)
         )
+        if nuevos_dup:
+            raise RuntimeError(
+                f"Aun hay duplicados después de resolver: {[d['email'] for d in nuevos_dup]}"
+            )
+
     print("No se encontraron correos duplicados. OK para aplicar unique constraint.")
 
 
