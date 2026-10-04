@@ -273,6 +273,12 @@ class Horario(models.Model):
         ordering = ['doctor', 'dia_semana', 'hora_inicio']
         verbose_name = 'Horario'
         verbose_name_plural = 'Horarios'
+        constraints = [
+            models.CheckConstraint(
+                condition=~models.Q(hora_fin__lte=models.F('hora_inicio')),
+                name='horario_hora_fin_mayor_inicio',
+            ),
+        ]
     
     def __str__(self):
         dias = dict(self.DIAS_SEMANA)
