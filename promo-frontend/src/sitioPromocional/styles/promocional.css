@@ -1629,7 +1629,6 @@
   width: 100%;
   height: clamp(400px, 60vh, 620px);
   overflow: hidden;
-  border-radius: var(--promo-radius-lg);
   background: var(--promo-neutral-900);
 }
 
@@ -1637,7 +1636,6 @@
   height: clamp(400px, 60vh, 620px);
   position: relative;
   overflow: hidden;
-  border-radius: var(--promo-radius-lg);
 }
 
 .promo-carousel-skeleton-shimmer {
@@ -1646,7 +1644,6 @@
   background: linear-gradient(90deg, var(--promo-neutral-200) 0%, var(--promo-neutral-300) 50%, var(--promo-neutral-200) 100%);
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite linear;
-  border-radius: var(--promo-radius-lg);
 }
 
 @keyframes shimmer {
@@ -1753,7 +1750,6 @@
     linear-gradient(90deg, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.25) 45%, transparent 100%),
     linear-gradient(180deg, transparent 55%, var(--promo-bg) 100%);
   pointer-events: none;
-  border-radius: var(--promo-radius-lg);
 }
 
 [data-theme='dark'] .promo-carousel-overlay {
@@ -1905,12 +1901,6 @@
 @media (max-width: 768px) {
   .promo-carousel {
     height: clamp(300px, 50vh, 420px);
-    border-radius: 0;
-  }
-  .promo-carousel-slide,
-  .promo-carousel-image,
-  .promo-carousel-overlay {
-    border-radius: 0;
   }
   .promo-carousel-nav {
     display: none;
