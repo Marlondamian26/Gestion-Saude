@@ -141,6 +141,9 @@ if DATABASE_URL_CONFIG:
             ssl_require=True
         )
     }
+    DATABASES['default']['CONN_HEALTH_CHECKS'] = True
+    DATABASES['default']['OPTIONS'] = DATABASES['default'].get('OPTIONS', {})
+    DATABASES['default']['OPTIONS']['connect_timeout'] = 10
 else:
     DATABASES = {
         'default': {
