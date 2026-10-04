@@ -2,7 +2,7 @@
 
 ## Problema
 
-`belkis-saude-promo.onrender.com` y `gestion-saude-frontend.onrender.com` son orígenes distintos. Los siguientes mecanismos **NO funcionan** entre subdominios de `*.onrender.com`:
+`https://gestion-saude-promo.onrender.com` y `https://gestion-saude-frontend.onrender.com` son orígenes distintos. Los siguientes mecanismos **NO funcionan** entre subdominios de `*.onrender.com`:
 
 | Mecanismo | Razón de bloqueo |
 |---|---|

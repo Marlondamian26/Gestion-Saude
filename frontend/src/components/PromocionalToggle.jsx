@@ -9,7 +9,7 @@ const PromocionalToggle = () => {
   const { theme, isAutomatic } = useTheme();
 
   const handleGoToPromo = () => {
-    const baseUrl = import.meta.env.VITE_PROMO_URL || 'https://belkis-saude-promo.onrender.com';
+    const baseUrl = import.meta.env.VITE_PROMO_URL || 'https://gestion-saude-promo.onrender.com';
     const themeParam = isAutomatic ? 'auto' : theme;
     window.location.href = buildPromoUrl(baseUrl, { language, theme: themeParam });
   };

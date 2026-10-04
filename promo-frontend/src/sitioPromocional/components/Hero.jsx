@@ -22,15 +22,21 @@ function Hero() {
         await wakeUpBackend();
         const url = `${API_URL}/sitio-imagenes/hero/`;
         const response = await fetchWithRetry(url, {}, 3, 15000);
-        if (!response.ok) return;
+        if (!response.ok) {
+          if (import.meta.env.DEV) console.error('[Hero] API returned', response.status);
+          return;
+        }
         const contentType = response.headers.get('content-type');
-        if (!contentType || !contentType.includes('application/json')) return;
+        if (!contentType || !contentType.includes('application/json')) {
+          if (import.meta.env.DEV) console.error('[Hero] Response not JSON:', contentType);
+          return;
+        }
         const data = await response.json();
         if (!cancelled && data && data.imagen) {
           setHeroImage(data);
         }
-      } catch {
-        void 0;
+      } catch (err) {
+        if (import.meta.env.DEV) console.error('[Hero] fetch failed:', err.message);
       } finally {
         if (!cancelled) setLoadingImage(false);
       }

@@ -1655,3 +1655,97 @@ grep -rn "sitioPromocional|LandingWrapper" frontend/dist/ → limpio
 | §9.4 Backend endpoints | ✅ | `sitio.py` `Response` fix; `getImageUrl` corregido |
 | §9.8 render.yaml | ✅ | 3 servicios independientes; CORS actualizado |
 | §9.9 Tests | ✅ | 22 tests nuevos (promo + frontend) |
+
+---
+
+## §11 — Diagnostico y fixes finales
+
+### §11.1 — Bug 1: Botón de sitio promocional no navega al deploy correcto
+
+**Síntoma:** El botón "Ver sitio promocional" (`PromocionalToggle.jsx`) redirigía a un dominio inexistente (`belkis-saude-promo.onrender.com`), mostrando error 404/not found.
+
+**Diagnóstico:**
+- `VITE_PROMO_URL` estaba configurado como `https://belkis-saude-promo.onrender.com` — dominio que no existe en Render.
+- El servicio de promo-frontend en `render.yaml` se llama `Gestion-Saude-promo`, que despliega en `https://gestion-saude-promo.onrender.com`.
+- El dominio correcto es `gestion-saude-promo.onrender.com` (prefijo del nombre del servicio sin guiones).
+
+**Archivos afectados y corregidos:**
+
+| Archivo | Before | After |
+|---|---|---|
+| `frontend/.env` | `VITE_PROMO_URL=https://belkis-saude-promo.onrender.com` | `VITE_PROMO_URL=https://gestion-saude-promo.onrender.com` |
+| `frontend/src/components/PromocionalToggle.jsx:12` | fallback `'https://belkis-saude-promo.onrender.com'` | `'https://gestion-saude-promo.onrender.com'` |
+| `render.yaml:49` (frontend envVars) | `VITE_PROMO_URL=https://belkis-saude-promo.onrender.com` | `https://gestion-saude-promo.onrender.com` |
+| `docs/architecture/cross-origin-sync.md` | Referencias a `belkis-saude-promo` | Actualizado a `gestion-saude-promo` |
+
+**CORS ya estaba configurado correctamente** para `gestion-saude-promo.onrender.com` en `render.yaml:24-27` — no necesitaba cambios.
+
+✅ **Estado:** Corregido. El botón ahora navega a `https://gestion-saude-promo.onrender.com/?lang=<lang>&theme=<theme>`.
+
+### §11.2 — Bug 2: Promo frontend no carga imágenes del backend (Hero + Carousel)
+
+**Síntoma:** Las imágenes hero y carousel no se mostraban en el sitio promocional. Los errores eran silenciosos (silently swallowed).
+
+**Diagnóstico de arquitectura de URLs de medios:**
+- Backend devuelve `imagen` como path relativo: `/media/filename.jpg`
+- `getImageUrl()` en `promo-frontend/src/utils/apiUtils.js` (FASE 9) ya corrige esto: usa `API_URL.replace(/\/api$/, '')` para obtener el origen del backend.
+  - Antes (FASE 8): `${API_URL}/media/...` → `https://backend.onrender.com/api/media/...` ❌ (doble `/api`)
+  - Después (FASE 9): `${backendOrigin}/media/...` → `https://backend.onrender.com/media/...` ✅
+
+**Carousel.jsx** (`promo-frontend/src/sitioPromocional/components/Carousel.jsx`) tiene su **propia copia local** de `getImageUrl()` y `API_URL` — ya estaba corregida con la misma lógica de `API_URL.replace(/\/api$/, '')` (líneas 7-49). ✅
+
+**Mejora FASE 11 — Error logging no silencioso:**
+- Antes: errores de fetch eran capturados pero no se registraban (`void 0` / catch vacío).
+- Después: Se añadió `console.error` con guardia `import.meta.env.DEV` en:
+  - `Hero.jsx:26,31,39` — logs para: respuesta no OK, content-type no JSON, error de fetch.
+  - `Carousel.jsx:81,87,95` — logs equivalentes.
+
+**Verificación de endpoints backend:**
+- `/api/sitio-imagenes/hero/` — GET, `AllowAny`, devuelve objeto hero activo ✅
+- `/api/sitio-imagenes/carousel/` — GET, `AllowAny`, devuelve array de imágenes activas ✅ (bug `Response` fix aplicado en FASE 9 §9.4)
+
+⚠️ **Riesgo residual:** Render free tier tiene `MEDIA_ROOT` efímero. Imágenes subidas via Django admin pueden perderse en redeploy. Documentado como riesgo residual.
+
+✅ **Estado:** Arquitectura de URLs corregida en FASE 9. Añadido error logging en FASE 11.
+
+### §11.3 — Bug 3: clave i18n `servicesSubtitle` faltante (texto crudo)
+
+**Síntoma:** La clave `servicesSubtitle` aparecía como texto crudo en el componente Services del sitio promocional.
+
+**Diagnóstico:**
+- `promo-frontend/src/context/translations/promo.js` no contenía la clave `servicesSubtitle` en los objetos `promo_pt`, `promo_es`, `promo_en`.
+- El componente Services llamaba `tPromo('servicesSubtitle')`, que devolvía `undefined` → texto crudo.
+
+**Corrección:** Añadida `servicesSubtitle` en las tres locales:
+
+| Locale | Valor |
+|---|---|
+| `promo_pt` (línea 28) | `'Atendimento integral para todas as idades e necessidades'` |
+| `promo_es` (línea 116) | `'Atención integral para todas las edades y necesidades'` |
+| `promo_en` (línea 204) | `'Comprehensive care for all ages and needs'` |
+
+✅ **Estado:** Corregido. `tPromo('servicesSubtitle')` ahora devuelve el texto traducido.
+
+### §11.4 — Tests y verificación
+
+**Tests unitarios (vitest run):**
+- `frontend`: 46/46 passed ✅
+- `promo-frontend`: 31/31 passed ✅ (e2e Playwright: 1 preexistente fallido por config)
+
+**Lint (eslint):**
+- Errores preexistentes en archivos de test/config (`no-undef` para `vi`, `__dirname`, `global`). No relacionados con FASE 11.
+
+### Tabla de resultados finales — FASE 11
+
+| Ítem | Estado | Evidencia |
+|---|---|---|
+| §11.1 Domain fix | ✅ | `frontend/.env`, `PromocionalToggle.jsx`, `render.yaml` corregidos a `gestion-saude-promo.onrender.com` |
+| §11.2 Error logging | ✅ | `console.error` con guardia DEV en `Hero.jsx` y `Carousel.jsx` |
+| §11.3 servicesSubtitle i18n | ✅ | Añadida en `promo_pt`, `promo_es`, `promo_en` de `promo.js` |
+| §11.4 Tests | ✅ | frontend 46/46, promo-frontend 31/31 |
+
+### Tareas posteriores (requieren acción manual)
+
+- **[REQUIERE ACCIÓN MANUAL]** Push a GitHub — Codespace devuelve 403 (permisos).
+- **[REQUIERE ACCIÓN MANUAL]** Verificar env vars en Render Dashboard que coincidan con `render.yaml`.
+- **[REQUIERE ACCIÓN MANUAL]** Si backend no tiene imágenes en `/media/`, necesario acceso admin a Render para subir imágenes hero/carousel via Django admin.

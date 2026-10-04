@@ -54,13 +54,13 @@ describe('syncPreferences — readFromUrl', () => {
 
 describe('syncPreferences — buildPromoUrl', () => {
   it('añade parámetros de idioma y tema a la URL del promo', () => {
-    const url = buildPromoUrl('https://belkis-saude-promo.onrender.com', { language: 'es', theme: 'dark' });
+    const url = buildPromoUrl('https://gestion-saude-promo.onrender.com', { language: 'es', theme: 'dark' });
     expect(url).toContain('lang=es');
     expect(url).toContain('theme=dark');
   });
 
   it('preserva parámetros existentes en la URL', () => {
-    const url = buildPromoUrl('https://belkis-saude-promo.onrender.com/?ref=nav', { language: 'pt' });
+    const url = buildPromoUrl('https://gestion-saude-promo.onrender.com/?ref=nav', { language: 'pt' });
     expect(url).toContain('ref=nav');
     expect(url).toContain('lang=pt');
   });

@@ -25,6 +25,7 @@ export const promoTranslations = {
     // Servicios
     servicesTitle: 'Nossos Serviços',
     servicesMainTitle: 'Atenção Médica Integral',
+    servicesSubtitle: 'Atendimento integral para todas as idades e necessidades',
     servicios: [
       { title: 'Consulta Médica Geral', description: 'Atenção integral para todas as idades. Diagnóstico, tratamento e acompanhamento de doenças comuns.' },
       { title: 'Cardiologia', description: 'Avaliação e tratamento de doenças do coração e sistema cardiovascular.' },
@@ -112,6 +113,7 @@ export const promoTranslations = {
     // Servicios
     servicesTitle: 'Nuestros Servicios',
     servicesMainTitle: 'Atención Médica Integral',
+    servicesSubtitle: 'Atención integral para todas las edades y necesidades',
     servicios: [
       { title: 'Consulta Médica General', description: 'Atención integral para todas las edades. Diagnóstico, tratamiento y seguimiento de enfermedades comunes.' },
       { title: 'Cardiología', description: 'Evaluación y tratamiento de enfermedades del corazón y sistema cardiovascular.' },
@@ -199,6 +201,7 @@ export const promoTranslations = {
     // Servicios
     servicesTitle: 'Our Services',
     servicesMainTitle: 'Comprehensive Medical Care',
+    servicesSubtitle: 'Comprehensive care for all ages and needs',
     servicios: [
       { title: 'General Medical Consultation', description: 'Comprehensive care for all ages. Diagnosis, treatment and follow-up of common diseases.' },
       { title: 'Cardiology', description: 'Evaluation and treatment of heart and cardiovascular system diseases.' },

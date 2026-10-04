@@ -78,18 +78,21 @@ function Carousel() {
       const url = `${API_URL}/sitio-imagenes/carousel/`;
       const response = await fetchWithTimeout(url, {}, 15000, 3);
       if (!response.ok) {
+        if (import.meta.env.DEV) console.error('[Carousel] API returned', response.status);
         setError(tPromo('errorLoading'));
         return;
       }
       const contentType = response.headers.get('content-type');
       if (!contentType || !contentType.includes('application/json')) {
+        if (import.meta.env.DEV) console.error('[Carousel] Response not JSON:', contentType);
         setError(tPromo('errorLoading'));
         return;
       }
       const data = await response.json();
       setImages(data);
       setError(null);
-    } catch {
+    } catch (err) {
+      if (import.meta.env.DEV) console.error('[Carousel] fetch failed:', err.message);
       setError(tPromo('connectionError'));
     } finally {
       setLoading(false);
