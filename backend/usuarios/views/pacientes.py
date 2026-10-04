@@ -30,20 +30,40 @@ def buscar_pacientes(request):
     Parámetros: query (string).
     Devuelve: Lista de pacientes que coinciden con la búsqueda.
     """
-    from django.db.models import Q
+    from django.db.models import Q, Count
 
     query = request.query_params.get('query', '').strip()
 
     if not query or len(query) < 2:
         return Response({'error': 'La búsqueda debe tener al menos 2 caracteres'}, status=400)
 
-    # Buscar en usuarios con rol patient que coincidan con nombre, apellido o username
+    # [FASE 7 §7.1.2] select_related + batch count para evitar N+1 en el loop
     usuarios_query = Usuario.objects.filter(
         Q(first_name__icontains=query) |
         Q(last_name__icontains=query) |
         Q(username__icontains=query),
         rol='patient'
     ).select_related('perfil_paciente')[:20]
+
+    # Batch: obtener counts de pares (first_name, last_name) en 1 query
+    name_counts = {}
+    if usuarios_query:
+        pares = (
+            Usuario.objects
+            .filter(rol='patient')
+            .values('first_name', 'last_name')
+            .annotate(count=Count('id'))
+        )
+        name_counts = {
+            (p['first_name'], p['last_name']): p['count'] for p in pares
+        }
+
+    resultados = []
+    for usuario in usuarios_query:
+        nombre_completo = f"{usuario.first_name} {usuario.last_name}".strip()
+        usuarios_mismo_nombre = name_counts.get(
+            (usuario.first_name, usuario.last_name), 0
+        )
 
     resultados = []
     for usuario in usuarios_query:

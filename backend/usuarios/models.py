@@ -69,6 +69,10 @@ class Usuario(AbstractUser):
     class Meta:
         verbose_name = 'Usuario'
         verbose_name_plural = 'Usuarios'
+        # [FASE 7 §7.1.4] Índice en rol para queries frecuentes de filtrado por rol
+        indexes = [
+            models.Index(fields=['rol'], name='usuario_rol_idx'),
+        ]
 
 
 # Señales
@@ -283,6 +287,10 @@ class Horario(models.Model):
                 name='horario_hora_fin_mayor_inicio',
             ),
         ]
+        # [FASE 7 §7.1.4] Índice compuesto para consulta de horarios disponibles por doctor + día
+        indexes = [
+            models.Index(fields=['doctor', 'dia_semana', 'activo'], name='horario_doc_dia_activo_idx'),
+        ]
     
     def __str__(self):
         dias = dict(self.DIAS_SEMANA)
@@ -355,6 +363,11 @@ class Cita(models.Model):
                 condition=~models.Q(estado='cancelada'),
                 name='cita_unique_activa',
             ),
+        ]
+        # [FASE 7 §7.1.4] Índices para queries frecuentes: overlap check, filtrado por doctor/paciente/fecha
+        indexes = [
+            models.Index(fields=['doctor', 'fecha', 'estado'], name='cita_doc_fecha_estado_idx'),
+            models.Index(fields=['paciente', 'fecha'], name='cita_paciente_fecha_idx'),
         ]
     
     def __str__(self):

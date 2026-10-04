@@ -25,6 +25,11 @@ class CitaViewSet(viewsets.ModelViewSet):
         user = self.request.user
         queryset = Cita.objects.all().order_by('-fecha', '-hora')
 
+        # [FASE 7 §7.1.3] select_related para eliminar N+1 en paciente_nombre y doctor_nombre
+        queryset = queryset.select_related(
+            'paciente__usuario', 'doctor__usuario'
+        )
+
         paciente_id = self.request.query_params.get('paciente')
         doctor_id = self.request.query_params.get('doctor')
         if paciente_id:

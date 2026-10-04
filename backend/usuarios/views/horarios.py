@@ -39,6 +39,8 @@ class HorarioViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         queryset = super().get_queryset()
+        # [FASE 7 §7.1.3] select_related para eliminar N+1 en doctor_nombre
+        queryset = queryset.select_related('doctor__usuario')
         doctor_id = self.request.query_params.get('doctor')
         if doctor_id:
             queryset = queryset.filter(doctor_id=doctor_id)

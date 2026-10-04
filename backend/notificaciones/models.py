@@ -37,6 +37,11 @@ class Notificacion(models.Model):
     
     class Meta:
         ordering = ['-fecha_creacion']
+        # [FASE 7 §7.1.4] Índices para queries frecuentes: listado por usuario + filtro leida/estado
+        indexes = [
+            models.Index(fields=['usuario', 'leida'], name='notif_usuario_leida_idx'),
+            models.Index(fields=['usuario', 'estado'], name='notif_usuario_estado_idx'),
+        ]
         
     def __str__(self):
         return f"{self.titulo} - {self.usuario.username}"
