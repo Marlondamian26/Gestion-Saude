@@ -53,6 +53,9 @@ class TestApiContract(TestCase):
         cls.paciente = Paciente.objects.get(usuario=cls.patient_user)
 
     def setUp(self):
+        from django.core.cache import cache
+        cache.clear()  # Limpiar throttle state entre tests
+
         self.anon_client = APIClient()
         self.admin_client = APIClient()
         self.admin_client.force_authenticate(user=self.admin)
