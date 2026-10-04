@@ -1,0 +1,13 @@
+# Backend development dependencies.
+# Install: pip install -r requirements.txt -r requirements-dev.txt
+
+-r requirements.txt
+
+pytest==9.1.1
+pytest-django==4.14.0
+pytest-cov==6.3.0
+django-debug-toolbar==5.1.0
+
+# API schema tooling (no se usa en runtime de producción)
+drf-spectacular==0.29.0
+drf-spectacular-sidecar==2026.3.1
