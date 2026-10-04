@@ -40,8 +40,8 @@ describe('LandingWrapper', () => {
     localStorage.setItem('theme-automatic', 'true');
   });
   it('renderiza navegación y toggles', () => {
-    render(<LandingWrapper />, { wrapper: AllProviders });
-    expect(screen.getByRole('navigation')).toBeInTheDocument();
+    const { container } = render(<LandingWrapper />, { wrapper: AllProviders });
+    expect(container.querySelector('.promo-navbar')).toBeInTheDocument();
   });
 
   it('aplica data-theme al contenedor principal', () => {

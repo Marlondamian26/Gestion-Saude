@@ -23,11 +23,14 @@ export const promoTranslations = {
 
     // Hero
     heroBadge: 'Atenção Médica de Qualidade',
-    heroTitle: 'Cuidamos da sua saúde com profissionalismo e dedicação',
+    heroTitleBefore: 'Cuidamos da sua',
+    heroTitleEm: 'saúde',
+    heroTitleAfter: 'com profissionalismo e dedicação',
     heroSubtitle: 'Na nossa clínica encontrará uma atenção médica integral, personalizada e humana. O seu bem-estar e o da sua família são a nossa máxima prioridade.',
     heroLogin: 'Entrar',
     heroRegister: 'Registar',
     heroWhatsApp: 'WhatsApp',
+    heroSectionLabel: 'Início',
 
     // Servicios
     servicesTitle: 'Nossos Serviços',
@@ -67,12 +70,14 @@ export const promoTranslations = {
     ],
 
     // Contacto
+    contactEyebrow: 'Contacto',
     contactTitle: 'Contacte-nos',
     contactSubtitle: 'Estamos prontos para atender. Pode visitar-nos, ligar-nos ou escrever-nos.',
     contactAddress: 'Benfica, Luanda, Angola',
     contactPhone: '+244 947 711 002',
     contactEmail: 'angobelkis72@gmail.com',
     contactHours: 'Segunda a Sexta: 8:00 - 18:00',
+    contactHoursValue: 'Segunda a Sexta: 8:00 - 18:00',
 
     // CTA
     ctaTitle: 'Pronto para cuidar da sua saúde?',
@@ -81,9 +86,18 @@ export const promoTranslations = {
     ctaRegister: 'Registar',
 
     // Footer
-    footerDescription: 'Consultório médico da Dra. Belkis Morejón Acosta. Comprometidos com a sua saúde e bem-estar em Benfica, Luanda.',
+    footerBrandText: 'Consultório médico da Dra. Belkis Morejón Acosta. Comprometidos com a sua saúde e bem-estar em Benfica, Luanda.',
+    footerServicesTitle: 'Serviços',
+    footerLegalTitle: 'Legal',
+    footerContactTitle: 'Contacto',
+    footerRights: 'Todos os direitos reservados.',
+    footerCredit: 'Desenvolvido com ♥ para a comunidade de Benfica.',
     footerQuickLinks: { inicio: 'Início', servicos: 'Serviços', sobreNos: 'Sobre Nós', contacto: 'Contacto' },
     footerServices: { consulta: 'Consulta Médica', cardiologia: 'Cardiologia', emergencias: 'Emergências', vacinacao: 'Vacinação', analise: 'Análises Clínicas' },
+    socialFacebook: 'Facebook',
+    socialInstagram: 'Instagram',
+    socialLinkedin: 'LinkedIn',
+    socialYoutube: 'YouTube',
     footerCopyright: '',
     footerDesigned: 'Cuidando da sua saúde com amor e dedicação',
     autoMode: 'Modo automático (segue preferência do sistema)',
@@ -93,8 +107,19 @@ export const promoTranslations = {
     connectionError: 'Erro de conexão',
     noDataAvailable: 'Nenhum dado disponível',
     carouselImage: 'Imagem do carrossel',
+    // Carousel
+    carouselSectionLabel: 'Galeria de imagenes',
+    ariaNavPrev: 'Slide anterior',
+    ariaNavNext: 'Proximo slide',
+    ariaSlideLabel: 'Slide',
+    of: 'de',
+    ariaPlayCarousel: 'Reproducir',
+    ariaPauseCarousel: 'Pausar',
     prevSlide: 'Slide anterior',
-    nextSlide: 'Próximo slide'
+    nextSlide: 'Proximo slide',
+
+    // Navbar
+    navMenuAria: 'Navegacao principal',
   },
 
   // Spanish (sitio promocional)
@@ -118,11 +143,14 @@ export const promoTranslations = {
 
     // Hero
     heroBadge: 'Atención Médica de Calidad',
-    heroTitle: 'Cuidamos de tu salud con profesionalismo y dedicación',
+    heroTitleBefore: 'Cuidamos de tu',
+    heroTitleEm: 'salud',
+    heroTitleAfter: 'con profesionalismo y dedicación',
     heroSubtitle: 'En nuestra clínica encontrarás una atención médica integral, personalizada y humana. Tu bienestar y el de tu familia son nuestra máxima prioridad.',
     heroLogin: 'Iniciar Sesión',
     heroRegister: 'Registrarse',
     heroWhatsApp: 'WhatsApp',
+    heroSectionLabel: 'Inicio',
 
     // Servicios
     servicesTitle: 'Nuestros Servicios',
@@ -162,12 +190,14 @@ export const promoTranslations = {
     ],
 
     // Contacto
+    contactEyebrow: 'Contacto',
     contactTitle: 'Contáctenos',
     contactSubtitle: 'Estamos listos para atenderte. Puedes visitarnos, llamarnos o escribirnos.',
     contactAddress: 'Benfica, Luanda, Angola',
     contactPhone: '+244 947 711 002',
     contactEmail: 'angobelkis72@gmail.com',
     contactHours: 'Lunes a Viernes: 8:00 - 18:00',
+    contactHoursValue: 'Lunes a Viernes: 8:00 - 18:00',
 
     // CTA
     ctaTitle: '¿Listo para cuidar tu salud?',
@@ -176,9 +206,18 @@ export const promoTranslations = {
     ctaRegister: 'Registrarse',
 
     // Footer
-    footerDescription: 'Consultorio médico de la Dra. Belkis Morejón Acosta. Comprometidos con tu salud y bienestar en Benfica, Luanda.',
+    footerBrandText: 'Consultorio médico de la Dra. Belkis Morejón Acosta. Comprometidos con tu salud y bienestar en Benfica, Luanda.',
+    footerServicesTitle: 'Servicios',
+    footerLegalTitle: 'Legal',
+    footerContactTitle: 'Contacto',
+    footerRights: 'Todos los derechos reservados.',
+    footerCredit: 'Desarrollado con ♥ para la comunidad de Benfica.',
     footerQuickLinks: { inicio: 'Inicio', servicos: 'Servicios', sobreNos: 'Sobre Nosotros', contacto: 'Contacto' },
     footerServices: { consulta: 'Consulta Médica', cardiologia: 'Cardiología', emergencias: 'Emergencias', vacinacion: 'Vacunación', analise: 'Análisis Clínicos' },
+    socialFacebook: 'Facebook',
+    socialInstagram: 'Instagram',
+    socialLinkedin: 'LinkedIn',
+    socialYoutube: 'YouTube',
     footerCopyright: '',
     footerDesigned: 'Cuidando de tu salud con amor y dedicación',
     autoMode: 'Modo automático (sigue preferencia del sistema)',
@@ -189,7 +228,19 @@ export const promoTranslations = {
     noDataAvailable: 'No hay datos disponibles',
     carouselImage: 'Imagen del carrusel',
     prevSlide: 'Diapositiva anterior',
-    nextSlide: 'Diapositiva siguiente'
+    nextSlide: 'Diapositiva siguiente',
+
+    // Carousel
+    carouselSectionLabel: 'Galeria de imagenes',
+    ariaNavPrev: 'Diapositiva anterior',
+    ariaNavNext: 'Diapositiva siguiente',
+    ariaSlideLabel: 'Diapositiva',
+    of: 'de',
+    ariaPlayCarousel: 'Reproducir',
+    ariaPauseCarousel: 'Pausar',
+
+    // Navbar
+    navMenuAria: 'Navegacion principal',
   },
 
   // English (sitio promocional)
@@ -213,11 +264,14 @@ export const promoTranslations = {
 
     // Hero
     heroBadge: 'Quality Medical Care',
-    heroTitle: 'We take care of your health with professionalism and dedication',
+    heroTitleBefore: 'We take care of your',
+    heroTitleEm: 'health',
+    heroTitleAfter: 'with professionalism and dedication',
     heroSubtitle: 'At our clinic you will find comprehensive, personalized and human medical care. Your well-being and that of your family are our top priority.',
     heroLogin: 'Login',
     heroRegister: 'Register',
     heroWhatsApp: 'WhatsApp',
+    heroSectionLabel: 'Home',
 
     // Servicios
     servicesTitle: 'Our Services',
@@ -257,12 +311,14 @@ export const promoTranslations = {
     ],
 
     // Contacto
+    contactEyebrow: 'Contact',
     contactTitle: 'Contact Us',
     contactSubtitle: 'We are ready to assist you. You can visit us, call us or write to us.',
     contactAddress: 'Benfica, Luanda, Angola',
     contactPhone: '+244 947 711 002',
     contactEmail: 'angobelkis72@gmail.com',
     contactHours: 'Monday to Friday: 8:00 - 18:00',
+    contactHoursValue: 'Monday to Friday: 8:00 - 18:00',
 
     // CTA
     ctaTitle: 'Ready to take care of your health?',
@@ -271,9 +327,18 @@ export const promoTranslations = {
     ctaRegister: 'Register',
 
     // Footer
-    footerDescription: 'Medical office of Dr. Belkis Morejon Acosta. Committed to your health and well-being in Benfica, Luanda.',
+    footerBrandText: 'Medical office of Dr. Belkis Morejon Acosta. Committed to your health and well-being in Benfica, Luanda.',
+    footerServicesTitle: 'Services',
+    footerLegalTitle: 'Legal',
+    footerContactTitle: 'Contact',
+    footerRights: 'All rights reserved.',
+    footerCredit: 'Developed with ♥ for the Benfica community.',
     footerQuickLinks: { inicio: 'Home', servicos: 'Services', sobreNos: 'About Us', contacto: 'Contact' },
     footerServices: { consulta: 'Medical Consultation', cardiologia: 'Cardiology', emergencias: 'Emergencies', vacinacao: 'Vaccination', analise: 'Clinical Analysis' },
+    socialFacebook: 'Facebook',
+    socialInstagram: 'Instagram',
+    socialLinkedin: 'LinkedIn',
+    socialYoutube: 'YouTube',
     footerCopyright: '',
     footerDesigned: 'Caring for your health with love and dedication',
     autoMode: 'Automatic mode (follows system preference)',
@@ -285,6 +350,18 @@ export const promoTranslations = {
     carouselImage: 'Carousel image',
     prevSlide: 'Previous slide',
     nextSlide: 'Next slide',
+
+    // Carousel
+    carouselSectionLabel: 'Image gallery',
+    ariaNavPrev: 'Previous slide',
+    ariaNavNext: 'Next slide',
+    ariaSlideLabel: 'Slide',
+    of: 'of',
+    ariaPlayCarousel: 'Play',
+    ariaPauseCarousel: 'Pause',
+
+    // Navbar
+    navMenuAria: 'Main navigation',
     // [FASE 4 §4.3.4] Claves faltantes de en (paridad con pt)
     next: 'Next',
     previous: 'Previous',

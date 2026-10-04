@@ -46,7 +46,7 @@ describe('Carousel', () => {
     vi.unstubAllGlobals();
   });
 
-  it('renderiza empty state cuando no hay imágenes', async () => {
+  it('no renderiza nada cuando no hay imágenes', async () => {
     vi.stubGlobal('fetch', vi.fn(() =>
       Promise.resolve({
         ok: true,
@@ -55,10 +55,10 @@ describe('Carousel', () => {
       })
     ));
 
-    render(<Carousel />, { wrapper: AllProviders });
+    const { container } = render(<Carousel />, { wrapper: AllProviders });
 
     await waitFor(() => {
-      expect(screen.getByText('Nenhum dado disponível')).toBeInTheDocument();
+      expect(container.querySelector('.promo-carousel')).not.toBeInTheDocument();
     });
 
     vi.unstubAllGlobals();

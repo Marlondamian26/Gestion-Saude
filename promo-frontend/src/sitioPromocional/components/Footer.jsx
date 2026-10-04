@@ -1,91 +1,140 @@
 import React from 'react';
-import { FaFacebook, FaInstagram, FaWhatsapp, FaStethoscope, FaArrowRight } from 'react-icons/fa';
+import { FaFacebookF, FaInstagram, FaLinkedinIn, FaYoutube, FaArrowRight, FaEnvelope, FaPhone, FaMapMarkerAlt } from 'react-icons/fa';
 import { useLanguage } from '../../context/LanguageContext';
-import { useTheme } from '../../context/ThemeContext';
-import { CLINIC_NAME, CLINIC_ADDRESS, CLINIC_PHONE, CLINIC_EMAIL, PLATFORM_URL, REGISTRO_URL, buildPlatformUrl } from '../config/constants';
+import { useInView } from '../hooks/useInView';
+import { CONFIG } from '../config/constants';
 
 function Footer() {
   const { tPromo, language } = useLanguage();
-  const { theme, isAutomatic } = useTheme();
-  const currentYear = new Date().getFullYear();
-  const themeParam = isAutomatic ? 'auto' : theme;
-  
-  const formatWhatsApp = (phone) => {
-    return phone.replace(/\s/g, '');
-  };
+  const [ref, isInView] = useInView({ threshold: 0.05 });
+
+  const year = new Date().getFullYear();
+
+  const currentLang = language === 'pt' ? 'pt' : 'en';
+
+  const footerLinks = [
+    { title: tPromo('footerServicesTitle'), href: `/#servicios?lang=${currentLang}` },
+    { title: tPromo('footerAboutTitle') || tPromo('footerServicesTitle'), href: `/#sobre-nosotros?lang=${currentLang}` },
+    { title: tPromo('footerContactTitle'), href: `/#contacto?lang=${currentLang}` },
+    { title: tPromo('footerPrivacy'), href: `?lang=${currentLang}&page=privacy` },
+    { title: tPromo('footerTerms'), href: `?lang=${currentLang}&page=terms` },
+  ];
 
   return (
-    <footer className="promo-footer">
+    <footer
+      ref={ref}
+      className={`promo-footer ${isInView ? 'animate-in' : ''}`}
+      role="contentinfo"
+    >
       <div className="promo-footer-content">
-        <div className="promo-footer-brand">
-          <h3 style={{ color: '#ffffff', display: 'flex', alignItems: 'center', margin: 0, padding: 0 }}>
-            <FaStethoscope style={{ marginRight: '0.5rem', color: '#ffffff' }} />
-            {CLINIC_NAME}
-          </h3>
+        <div className={`promo-footer-brand ${isInView ? 'animate-fade-left' : ''}`}>
+          <div className="promo-footer-logo">
+            <div className="promo-footer-logo-icon">✓</div>
+            <span className="promo-footer-logo-text">MisProyectos</span>
+          </div>
           <p>
-            {tPromo('footerDescription')}
+            {tPromo('footerBrandText')}
           </p>
           <div className="promo-footer-social">
-            <a href="#" aria-label="Facebook">
-              <FaFacebook />
-            </a>
-            <a href="#" aria-label="Instagram">
-              <FaInstagram />
-            </a>
-            <a href={`https://wa.me/${formatWhatsApp(CLINIC_PHONE)}`} target="_blank" rel="noopener noreferrer" aria-label="WhatsApp">
-              <FaWhatsapp />
-            </a>
+            {CONFIG.social?.facebook && (
+              <a
+                href={CONFIG.social.facebook}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={tPromo('socialFacebook')}
+              >
+                <FaFacebookF />
+              </a>
+            )}
+            {CONFIG.social?.instagram && (
+              <a
+                href={CONFIG.social.instagram}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={tPromo('socialInstagram')}
+              >
+                <FaInstagram />
+              </a>
+            )}
+            {CONFIG.social?.linkedin && (
+              <a
+                href={CONFIG.social.linkedin}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={tPromo('socialLinkedin')}
+              >
+                <FaLinkedinIn />
+              </a>
+            )}
+            {CONFIG.social?.youtube && (
+              <a
+                href={CONFIG.social.youtube}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={tPromo('socialYoutube')}
+              >
+                <FaYoutube />
+              </a>
+            )}
           </div>
         </div>
-        
-        <div className="promo-footer-section">
-          <h4>{tPromo('navInicio')}</h4>
-          <div className="promo-footer-links">
-            <a href={buildPlatformUrl(PLATFORM_URL, { language, theme: themeParam })} rel="noopener">
-              <FaArrowRight style={{ marginRight: '0.5rem', fontSize: '0.75rem' }} />
-              {tPromo('navLogin')}
-            </a>
-            <a href={buildPlatformUrl(REGISTRO_URL, { language, theme: themeParam })} rel="noopener">
-              <FaArrowRight style={{ marginRight: '0.5rem', fontSize: '0.75rem' }} />
-              {tPromo('ctaRegister')}
-            </a>
-            <a href="#servicios">
-              <FaArrowRight style={{ marginRight: '0.5rem', fontSize: '0.75rem' }} />
-              {tPromo('navServicos')}
-            </a>
-            <a href="#contacto">
-              <FaArrowRight style={{ marginRight: '0.5rem', fontSize: '0.75rem' }} />
-              {tPromo('navContacto')}
-            </a>
-          </div>
+
+        <div className={`promo-footer-column ${isInView ? 'animate-fade-up' : ''}`}>
+          <h4>{tPromo('footerServicesTitle')}</h4>
+          <ul className="promo-footer-links">
+            {footerLinks.slice(0, 3).map((link) => (
+              <li key={link.href}>
+                <a href={link.href}>
+                  <FaArrowRight />
+                  {link.title}
+                </a>
+              </li>
+            ))}
+          </ul>
         </div>
-        
-        <div className="promo-footer-section">
-          <h4>{tPromo('navServicos')}</h4>
-          <div className="promo-footer-links">
-            <a href="#servicios">{tPromo('footerServices').consulta}</a>
-            <a href="#servicios">{tPromo('footerServices').cardiologia}</a>
-            <a href="#servicios">{tPromo('footerServices').emergencias}</a>
-            <a href="#servicios">{tPromo('footerServices').vacinacao}</a>
-            <a href="#servicios">{tPromo('footerServices').analise}</a>
-          </div>
+
+        <div className={`promo-footer-column ${isInView ? 'animate-fade-up' : ''}`}>
+          <h4>{tPromo('footerLegalTitle')}</h4>
+          <ul className="promo-footer-links">
+            {footerLinks.slice(3).map((link) => (
+              <li key={link.href}>
+                <a href={link.href}>
+                  <FaArrowRight />
+                  {link.title}
+                </a>
+              </li>
+            ))}
+          </ul>
         </div>
-        
-        <div className="promo-footer-section">
-          <h4>{tPromo('contactTitle')}</h4>
-          <div className="promo-footer-links">
-            <p style={{ color: 'var(--text-muted)', fontSize: '0.875rem' }}>{tPromo('contactAddress')}</p>
-            <p style={{ color: 'var(--text-muted)', fontSize: '0.875rem' }}>{tPromo('contactPhone')}</p>
-            <p style={{ color: 'var(--text-muted)', fontSize: '0.875rem' }}>{tPromo('contactEmail')}</p>
-          </div>
+
+        <div className={`promo-footer-column ${isInView ? 'animate-fade-right' : ''}`}>
+          <h4>{tPromo('footerContactTitle')}</h4>
+          <ul className="promo-footer-links">
+            <li>
+              <a href={`mailto:${CONFIG.contact.email}`}>
+                <FaEnvelope />
+                {CONFIG.contact.email}
+              </a>
+            </li>
+            <li>
+              <a href={`tel:${CONFIG.contact.phone.replace(/\s/g, '')}`}>
+                <FaPhone />
+                {CONFIG.contact.phone}
+              </a>
+            </li>
+            <li>
+              <a href={`https://maps.google.com/?q=Benfica+Luanda+Angola`} target="_blank" rel="noopener noreferrer">
+                <FaMapMarkerAlt />
+                {CONFIG.contact.address}
+              </a>
+            </li>
+          </ul>
         </div>
       </div>
-      
-      <div className="promo-footer-bottom">
-        <p>{tPromo('footerCopyright')}</p>
-        <p style={{ marginTop: '0.5rem' }}>
-          {tPromo('footerDesigned')}
-        </p>
+
+      <div className={`promo-footer-bottom ${isInView ? 'animate-fade-up' : ''}`}>
+        <p>© {year} MisProyectos. {tPromo('footerRights')}</p>
+        <p>{tPromo('footerCredit')}</p>
       </div>
     </footer>
   );

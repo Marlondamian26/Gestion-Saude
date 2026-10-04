@@ -125,6 +125,12 @@ export const CONFIG = {
       'Vacunación',
       'Análisis Clínicos'
     ],
-    copyright: `© ${new Date().getFullYear()} ${CLINIC_NAME}. Todos los derechos reservados.`
+    copyright: `© ${new Date().getFullYear()} ${CLINIC_NAME}. Todos los derechos reservados.`,
+    social: {
+      facebook: 'https://www.facebook.com/',
+      instagram: 'https://www.instagram.com/',
+      linkedin: 'https://www.linkedin.com/',
+      youtube: 'https://www.youtube.com/'
+    }
   }
 };

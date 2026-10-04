@@ -1,7 +1,8 @@
 import React, { useEffect, useState, useRef, useCallback } from 'react';
-import { FaPause, FaPlay } from 'react-icons/fa';
+import { FaPause, FaPlay, FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 import { useLanguage } from '../../context/LanguageContext';
 import { useTheme } from '../../context/ThemeContext';
+import { usePrefersReducedMotion } from '../hooks/usePrefersReducedMotion';
 import { wakeUpBackend } from '../../utils/apiUtils';
 
 const getApiUrl = () => {
@@ -24,17 +25,14 @@ const fetchWithTimeout = async (url, options = {}, timeout = 30000, retries = 2)
   for (let attempt = 0; attempt <= retries; attempt++) {
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), timeout);
-
     try {
       const response = await fetch(url, { ...options, signal: controller.signal });
+      clearTimeout(timer);
       return response;
     } catch (err) {
-      if (attempt === retries) {
-        throw err;
-      }
-      await new Promise(resolve => setTimeout(resolve, Math.pow(2, attempt) * 1000));
-    } finally {
       clearTimeout(timer);
+      if (attempt === retries) throw err;
+      await new Promise(resolve => setTimeout(resolve, Math.pow(2, attempt) * 1000));
     }
   }
 };
@@ -48,71 +46,59 @@ const getImageUrl = (path) => {
   return `${backendOrigin}/media/${path}`;
 };
 
-const AUTOPLAY_INTERVAL = 5000;
-const PAUSE_DURATION = 8000;
+const AUTOPLAY_INTERVAL = 6000;
+const PAUSE_DURATION = 10000;
 
 function Carousel() {
   const { tPromo } = useLanguage();
+  const prefersReduced = usePrefersReducedMotion();
   const [images, setImages] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isHovered, setIsHovered] = useState(false);
   const [isPlaying, setIsPlaying] = useState(true);
-  const [reducedMotion, setReducedMotion] = useState(false);
+  const [touchStart, setTouchStart] = useState(null);
   const autoPlayRef = useRef(null);
   const pauseRef = useRef(null);
+  const containerRef = useRef(null);
 
   useEffect(() => {
-    const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
-    setReducedMotion(mediaQuery.matches);
-    const handler = (e) => setReducedMotion(e.matches);
-    mediaQuery.addEventListener('change', handler);
-    return () => mediaQuery.removeEventListener('change', handler);
-  }, []);
-
-  const fetchCarouselImages = useCallback(async () => {
-    try {
-      setLoading(true);
-      await wakeUpBackend();
-      const url = `${API_URL}/sitio-imagenes/carousel/`;
-      const response = await fetchWithTimeout(url, {}, 15000, 3);
-      if (!response.ok) {
-        if (import.meta.env.DEV) console.error('[Carousel] API returned', response.status);
-        setError(tPromo('errorLoading'));
-        return;
+    const fetchCarouselImages = async () => {
+      try {
+        setLoading(true);
+        await wakeUpBackend();
+        const response = await fetchWithTimeout(`${API_URL}/sitio-imagenes/carousel/`, {}, 15000, 3);
+        if (!response.ok) {
+          setError(tPromo('errorLoading'));
+          return;
+        }
+        const contentType = response.headers.get('content-type');
+        if (!contentType || !contentType.includes('application/json')) {
+          setError(tPromo('errorLoading'));
+          return;
+        }
+        const data = await response.json();
+        setImages(data);
+        setError(null);
+      } catch {
+        setError(tPromo('connectionError'));
+      } finally {
+        setLoading(false);
       }
-      const contentType = response.headers.get('content-type');
-      if (!contentType || !contentType.includes('application/json')) {
-        if (import.meta.env.DEV) console.error('[Carousel] Response not JSON:', contentType);
-        setError(tPromo('errorLoading'));
-        return;
-      }
-      const data = await response.json();
-      setImages(data);
-      setError(null);
-    } catch (err) {
-      if (import.meta.env.DEV) console.error('[Carousel] fetch failed:', err.message);
-      setError(tPromo('connectionError'));
-    } finally {
-      setLoading(false);
-    }
-  }, [tPromo]);
-
-  useEffect(() => {
+    };
     fetchCarouselImages();
-  }, [fetchCarouselImages]);
+  }, [tPromo]);
 
   const startAutoplay = useCallback(() => {
     if (autoPlayRef.current) clearInterval(autoPlayRef.current);
     if (pauseRef.current) clearTimeout(pauseRef.current);
     setIsPlaying(true);
+    if (prefersReduced || images.length <= 1) return;
     autoPlayRef.current = setInterval(() => {
-      if (images.length > 1) {
-        setCurrentIndex((prev) => (prev + 1) % images.length);
-      }
+      setCurrentIndex((prev) => (prev + 1) % images.length);
     }, AUTOPLAY_INTERVAL);
-  }, [images.length]);
+  }, [images.length, prefersReduced]);
 
   const stopAutoplay = useCallback(() => {
     if (autoPlayRef.current) clearInterval(autoPlayRef.current);
@@ -125,7 +111,7 @@ function Carousel() {
   }, [startAutoplay, stopAutoplay]);
 
   useEffect(() => {
-    if (reducedMotion || images.length <= 1) return;
+    if (prefersReduced || images.length <= 1) return;
     if (isHovered) {
       stopAutoplay();
     } else {
@@ -135,7 +121,19 @@ function Carousel() {
       if (autoPlayRef.current) clearInterval(autoPlayRef.current);
       if (pauseRef.current) clearTimeout(pauseRef.current);
     };
-  }, [isHovered, reducedMotion, images.length, startAutoplay, stopAutoplay]);
+  }, [isHovered, prefersReduced, images.length, startAutoplay, stopAutoplay]);
+
+  useEffect(() => {
+    const handleVisibility = () => {
+      if (document.hidden) {
+        stopAutoplay();
+      } else if (!isHovered) {
+        startAutoplay();
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibility);
+    return () => document.removeEventListener('visibilitychange', handleVisibility);
+  }, [isHovered, startAutoplay, stopAutoplay]);
 
   const goToPrevious = () => {
     if (images.length <= 1) return;
@@ -162,9 +160,23 @@ function Carousel() {
     }
   };
 
+  const handleTouchStart = (e) => {
+    setTouchStart(e.touches[0].clientX);
+  };
+
+  const handleTouchEnd = (e) => {
+    if (touchStart === null) return;
+    const diff = touchStart - e.changedTouches[0].clientX;
+    if (Math.abs(diff) > 50) {
+      if (diff > 0) goToNext();
+      else goToPrevious();
+    }
+    setTouchStart(null);
+  };
+
   if (loading) {
     return (
-      <section className="promo-carousel promo-carousel-skeleton">
+      <section className="promo-carousel promo-carousel-skeleton" aria-label={tPromo('carouselSectionLabel') || 'Carrusel'}>
         <div className="promo-carousel-skeleton-shimmer" />
         <div className="promo-carousel-dots-skeleton">
           {Array.from({ length: 3 }).map((_, i) => (
@@ -177,7 +189,7 @@ function Carousel() {
 
   if (error) {
     return (
-      <section className="promo-carousel promo-carousel-error">
+      <section className="promo-carousel promo-carousel-error" aria-label={tPromo('carouselSectionLabel')}>
         <div className="promo-carousel-error-message">
           <p>{error}</p>
         </div>
@@ -186,32 +198,32 @@ function Carousel() {
   }
 
   if (images.length === 0) {
-    return (
-      <section className="promo-carousel promo-carousel-empty">
-        <div className="promo-carousel-empty-message">
-          <p>{tPromo('noDataAvailable')}</p>
-        </div>
-      </section>
-    );
+    return null;
   }
 
   return (
     <section
       className="promo-carousel"
+      aria-roledescription="carousel"
+      aria-label={tPromo('carouselSectionLabel') || 'Imágenes'}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
+      ref={containerRef}
     >
       <div className="promo-carousel-container">
         {images.map((img, index) => {
           const imageUrl = getImageUrl(img.imagen);
           const isActive = index === currentIndex;
-          const isPrev = index === (currentIndex - 1 + images.length) % images.length;
-
           return (
             <div
               key={img.id || index}
-              className={`promo-carousel-slide ${isActive ? 'active' : isPrev ? 'prev' : ''}`}
+              className={`promo-carousel-slide ${isActive ? 'active' : ''}`}
               aria-hidden={!isActive}
+              role="group"
+              aria-roledescription="slide"
+              aria-label={`${tPromo('ariaSlideLabel') || 'Slide'} ${index + 1} ${tPromo('of') || 'de'} ${images.length}`}
             >
               <img
                 src={imageUrl}
@@ -221,10 +233,11 @@ function Carousel() {
                 decoding="async"
                 fetchPriority={index === 0 ? 'high' : undefined}
               />
-              {img.titulo && (
-                <div className="promo-carousel-caption">
-                  <h3>{img.titulo}</h3>
-                  {img.descripcion && <p>{img.descripcion}</p>}
+              <div className="promo-carousel-overlay" />
+              {(img.titulo || img.descripcion) && (
+                <div className="promo-carousel-caption promo-container-narrow">
+                  {img.titulo && <h3 className="promo-carousel-caption-title">{img.titulo}</h3>}
+                  {img.descripcion && <p className="promo-carousel-caption-desc">{img.descripcion}</p>}
                 </div>
               )}
             </div>
@@ -234,41 +247,43 @@ function Carousel() {
         {images.length > 1 && (
           <>
             <button
-              className="promo-carousel-arrow promo-carousel-prev"
+              className="promo-carousel-nav promo-carousel-prev"
               onClick={goToPrevious}
-              aria-label={tPromo('prevSlide') || 'Previous slide'}
-              disabled={reducedMotion}
+              aria-label={tPromo('ariaNavPrev') || 'Anterior'}
+              disabled={prefersReduced}
             >
-              ◀
+              <FaChevronLeft />
             </button>
 
             <button
-              className="promo-carousel-arrow promo-carousel-next"
+              className="promo-carousel-nav promo-carousel-next"
               onClick={goToNext}
-              aria-label={tPromo('nextSlide') || 'Next slide'}
-              disabled={reducedMotion}
+              aria-label={tPromo('ariaNavNext') || 'Siguiente'}
+              disabled={prefersReduced}
             >
-              ▶
+              <FaChevronRight />
             </button>
 
             <div className="promo-carousel-controls">
-              {!reducedMotion && (
+              {!prefersReduced && (
                 <button
                   className="promo-carousel-playpause"
                   onClick={togglePlayPause}
-                  aria-label={isPlaying ? 'Pause autoplay' : 'Play autoplay'}
+                  aria-label={isPlaying ? (tPromo('ariaPauseCarousel') || 'Pausar') : (tPromo('ariaPlayCarousel') || 'Reproducir')}
                 >
                   {isPlaying ? <FaPause /> : <FaPlay />}
                 </button>
               )}
-              <div className="promo-carousel-dots">
+              <div className="promo-carousel-dots" role="tablist">
                 {images.map((_, index) => (
                   <button
                     key={index}
                     className={`promo-carousel-dot ${index === currentIndex ? 'active' : ''}`}
                     onClick={() => goToSlide(index)}
-                    aria-label={`Go to slide ${index + 1}`}
-                    aria-current={index === currentIndex}
+                    role="tab"
+                    aria-selected={index === currentIndex}
+                    aria-label={`${tPromo('ariaSlideLabel') || 'Slide'} ${index + 1}`}
+                    tabIndex={index === currentIndex ? 0 : -1}
                   />
                 ))}
               </div>

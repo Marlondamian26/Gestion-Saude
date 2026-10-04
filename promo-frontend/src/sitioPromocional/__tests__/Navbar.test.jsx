@@ -28,12 +28,15 @@ vi.mock('../../context/LanguageContext', async () => {
       tPromo: (key) => {
         const translations = {
           navInicio: 'Início',
-          navServicos: 'Serviços',
+          navServicios: 'Serviços',
           navSobreNos: 'Sobre Nós',
           navTestimonios: 'Testemunhos',
           navContacto: 'Contacto',
           navWhatsApp: 'WhatsApp',
           navLogin: 'Entrar',
+          menu: 'Menu',
+          close: 'Fechar',
+          navMenuAria: 'Navegacao principal',
         };
         return translations[key] || key;
       },
@@ -53,11 +56,11 @@ const AllProviders = ({ children }) => (
 describe('Navbar', () => {
   it('renderiza enlaces de navegación', () => {
     render(<Navbar />, { wrapper: AllProviders });
-    expect(screen.getByText('Início')).toBeInTheDocument();
-    expect(screen.getByText('Serviços')).toBeInTheDocument();
-    expect(screen.getByText('Sobre Nós')).toBeInTheDocument();
-    expect(screen.getByText('Testemunhos')).toBeInTheDocument();
-    expect(screen.getByText('Contacto')).toBeInTheDocument();
+    expect(screen.getAllByText('Início').length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText('Serviços').length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText('Sobre Nós').length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText('Testemunhos').length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText('Contacto').length).toBeGreaterThanOrEqual(1);
   });
 
   it('renderiza botón de WhatsApp', () => {
@@ -68,12 +71,14 @@ describe('Navbar', () => {
 
   it('renderiza botón de menú móvil', () => {
     render(<Navbar />, { wrapper: AllProviders });
-    expect(screen.getByLabelText(/menu|fechar/i)).toBeInTheDocument();
+    const toggle = screen.getByRole('button', { name: /menu|fechar/i });
+    expect(toggle).toBeInTheDocument();
   });
 
   it('alterna menú móvil al hacer clic', () => {
     render(<Navbar />, { wrapper: AllProviders });
-    const toggle = screen.getByLabelText(/menu|fechar/i);
+    const toggle = screen.getByRole('button', { name: /menu|fechar/i });
     fireEvent.click(toggle);
+    expect(toggle).toHaveAttribute('aria-expanded', 'true');
   });
 });
