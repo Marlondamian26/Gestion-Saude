@@ -20,6 +20,9 @@ local_settings.py
 db.sqlite3
 media/
 
+# Backups (audit + supabase dumps)
+backups/
+
 # VS Code
 .vscode/
 *.code-workspace
