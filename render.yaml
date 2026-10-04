@@ -6,22 +6,26 @@ services:
     plan: free
     workingDirectory: backend
     buildCommand: set -e && echo "Installing requirements..." && pip install -r requirements.txt && echo "Making migrations..." && python manage.py makemigrations && echo "Migrating..." && python manage.py migrate --noinput --verbosity=2 && echo "Showing migrations..." && python manage.py showmigrations && echo "Collecting static..." && python manage.py collectstatic --noinput
-    startCommand: gunicorn core.wsgi:application --bind 0.0.0.0:$PORT
+    startCommand: gunicorn core.wsgi:application --bind 0.0.0.0:$PORT --workers ${RENDER_CPU_COUNT:-1} --threads 4 --timeout 120
     envVars:
       - key: DATABASE_URL
         fromDatabase:
           name: Gestion-Saude-Base_de_Datos
           property: connectionString
       - key: SECRET_KEY
-        generateValue: true
+        sync: false
       - key: DEBUG
         value: "False"
       - key: ALLOWED_HOSTS
         value: "gestion-saude-backend.onrender.com,localhost,127.0.0.1"
-      - key: CORS_ALLOWED_ORIGINS
+      - key: CSRF_TRUSTED_ORIGENS
         value: "https://gestion-saude.onrender.com,https://gestion-saude-backend.onrender.com"
-      - key: VITE_API_URL
-        value: "https://gestion-saude-backend.onrender.com/api"
+      - key: CORS_ALLOWED_ORIGENS
+        value: "https://gestion-saude.onrender.com,https://gestion-saude-backend.onrender.com"
+      - key: REDIS_URL
+        fromRedis:
+          name: Gestion-Saude-Redis
+          property: connectionString
       - key: DEMO_PATIENT_USERNAME
         value: "patient"
       - key: DEMO_PATIENT_PASSWORD
