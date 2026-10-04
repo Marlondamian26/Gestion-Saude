@@ -1,6 +1,6 @@
 import React from 'react';
 import { FaStethoscope, FaHeart, FaAmbulance, FaSyringe, FaFlask, FaFileMedical, FaCheck } from 'react-icons/fa';
-import { useLanguage } from '../../context/LanguageContext';
+import { useLanguage } from '../../context/PromoLanguageContext';
 import { CONFIG } from '../config/constants';
 
 const iconMap = {

@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { FaFacebook, FaInstagram, FaWhatsapp, FaStethoscope, FaArrowRight } from 'react-icons/fa';
-import { useLanguage } from '../../context/LanguageContext';
+import { useLanguage } from '../../context/PromoLanguageContext';
 import { CLINIC_NAME, CLINIC_ADDRESS, CLINIC_PHONE, CLINIC_EMAIL, PLATFORM_URL, REGISTRO_URL } from '../config/constants';
 
 function Footer() {

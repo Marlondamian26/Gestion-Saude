@@ -1,6 +1,6 @@
 import React from 'react';
 import { FaStar } from 'react-icons/fa';
-import { useLanguage } from '../../context/LanguageContext';
+import { useLanguage } from '../../context/PromoLanguageContext';
 import { CONFIG } from '../config/constants';
 
 function Testimonios() {

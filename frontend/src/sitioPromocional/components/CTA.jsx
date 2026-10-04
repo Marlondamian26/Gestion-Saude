@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { FaCalendarCheck, FaUserPlus, FaWhatsapp } from 'react-icons/fa';
-import { useLanguage } from '../../context/LanguageContext';
+import { useLanguage } from '../../context/PromoLanguageContext';
 import { PLATFORM_URL, REGISTRO_URL, CLINIC_PHONE } from '../config/constants';
 
 function CTA() {

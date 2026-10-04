@@ -5,6 +5,7 @@ import { ThemeProvider } from './context/ThemeContext';
 import { LanguageProvider } from './context/PromoLanguageContext';
 import PromoApp from './PromoApp';
 import './sitioPromocional/styles/promo-tokens.css';
+import './sitioPromocional/styles/promo-tokens.css';
 import './sitioPromocional/styles/promocional.css';
 import './sitioPromocional/styles/promo-responsive.css';
 

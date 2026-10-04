@@ -1,6 +1,6 @@
 import React from 'react';
 import { FaCheck, FaUserMd, FaClock, FaHeart, FaAward } from 'react-icons/fa';
-import { useLanguage } from '../../context/LanguageContext';
+import { useLanguage } from '../../context/PromoLanguageContext';
 import { DOCTOR_NAME, DOCTOR_TITLE, CONFIG } from '../config/constants';
 
 function SobreNosotros() {

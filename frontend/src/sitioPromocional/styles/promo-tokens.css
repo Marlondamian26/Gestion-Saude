@@ -1,64 +1,100 @@
 /* promo-tokens.css — Sistema de tokens visuales del sitio promocional */
 
 :root {
-  --promo-primary: #2563eb;
-  --promo-primary-dark: #1d4ed8;
-  --promo-secondary: #0f7173;
-  --promo-accent: #8b5cf6;
-  --promo-bg: #ffffff;
-  --promo-bg-alt: #f8fafc;
-  --promo-text: #0f172a;
-  --promo-text-muted: #64748b;
-  --promo-border: #e2e8f0;
-  --promo-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-  --promo-radius: 0.75rem;
-  --promo-radius-lg: 1rem;
-  --promo-font-sans: 'Inter', system-ui, -apple-system, sans-serif;
-  --promo-gradient-bg: linear-gradient(135deg, #e0f2fe 0%, #f0fdfa 50%, #f3e5f5 100%);
-}
+  /* Primary scale (base: #00a896 / #02c4ac) */
+  --promo-primary-50: #e6f7f5;
+  --promo-primary-100: #b3e8e2;
+  --promo-primary-300: #4fd3c4;
+  --promo-primary-500: #00a896;
+  --promo-primary-700: #007d70;
+  --promo-primary-900: #005248;
 
-/* Tema oscuro opcional */
-[data-theme='dark'] {
-  --promo-primary: #60a5fa;
-  --promo-bg: #0f172a;
-  --promo-bg-alt: #1e293b;
-  --promo-text: #f1f5f9;
-  --promo-text-muted: #94a3b8;
-  --promo-border: #334155;
-}
+  /* Neutral scale */
+  --promo-neutral-50: #f8fafb;
+  --promo-neutral-100: #f0f2f4;
+  --promo-neutral-200: #e4e7eb;
+  --promo-neutral-300: #cbd3d8;
+  --promo-neutral-500: #6b7780;
+  --promo-neutral-700: #3d4650;
+  --promo-neutral-900: #1a1f24;
 
-/* Tipografía responsive */
-@media (max-width: 768px) {
-  :root {
-    --promo-font-size-sm: 0.875rem;
-    --promo-font-size-base: 1rem;
-    --promo-font-size-lg: 1.25rem;
-    --promo-font-size-xl: 1.5rem;
-    --promo-font-size-2xl: 1.75rem;
-    --promo-font-size-3xl: 2rem;
-  }
-}
+  /* Semantic */
+  --promo-bg: var(--promo-neutral-50);
+  --promo-surface: #ffffff;
+  --promo-surface-elevated: #ffffff;
+  --promo-text: var(--promo-neutral-900);
+  --promo-text-muted: var(--promo-neutral-500);
+  --promo-border: var(--promo-neutral-200);
 
-@media (min-width: 769px) {
-  :root {
-    --promo-font-size-sm: 0.875rem;
-    --promo-font-size-base: 1rem;
-    --promo-font-size-lg: 1.125rem;
-    --promo-font-size-xl: 1.25rem;
-    --promo-font-size-2xl: 1.5rem;
-    --promo-font-size-3xl: 1.875rem;
-  }
-}
+  /* Gradients */
+  --promo-gradient-primary: linear-gradient(135deg, #00a896 0%, #02c4ac 100%);
+  --promo-gradient-hero: linear-gradient(135deg, rgba(0, 168, 150, 0.08) 0%, rgba(2, 196, 172, 0.12) 60%, rgba(0, 0, 0, 0.05) 100%);
+  --promo-gradient-soft: linear-gradient(180deg, #ffffff 0%, #f8fafb 100%);
 
-/* Spacing tokens */
-:root {
+  /* Shadows */
+  --promo-shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --promo-shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.06);
+  --promo-shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+  --promo-shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.10);
+  --promo-shadow-primary: 0 8px 24px rgba(0, 168, 150, 0.18);
+
+  /* Radii */
+  --promo-radius-sm: 6px;
+  --promo-radius-md: 12px;
+  --promo-radius-lg: 20px;
+  --promo-radius-xl: 28px;
+  --promo-radius-full: 9999px;
+
+  /* Spacing scale */
   --promo-space-1: 0.25rem;
   --promo-space-2: 0.5rem;
   --promo-space-3: 0.75rem;
   --promo-space-4: 1rem;
-  --promo-space-5: 1.25rem;
   --promo-space-6: 1.5rem;
   --promo-space-8: 2rem;
-  --promo-space-10: 2.5rem;
   --promo-space-12: 3rem;
+  --promo-space-16: 4rem;
+  --promo-space-24: 6rem;
+
+  /* Typography */
+  --promo-font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --promo-font-display: 'Inter', system-ui, -apple-system, sans-serif;
+  --promo-text-xs: clamp(0.75rem, 0.7rem + 0.25vw, 0.875rem);
+  --promo-text-sm: clamp(0.875rem, 0.8rem + 0.35vw, 1rem);
+  --promo-text-base: clamp(1rem, 0.95rem + 0.35vw, 1.125rem);
+  --promo-text-lg: clamp(1.125rem, 1rem + 0.5vw, 1.375rem);
+  --promo-text-xl: clamp(1.25rem, 1.1rem + 0.75vw, 1.75rem);
+  --promo-text-2xl: clamp(1.5rem, 1.2rem + 1.25vw, 2.25rem);
+  --promo-text-3xl: clamp(2rem, 1.5rem + 2vw, 3rem);
+  --promo-text-4xl: clamp(2.5rem, 1.75rem + 3vw, 4rem);
+
+  /* Transitions */
+  --promo-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --promo-ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --promo-duration-fast: 150ms;
+  --promo-duration-base: 250ms;
+  --promo-duration-slow: 400ms;
+}
+
+/* Tema Oscuro */
+[data-theme='dark'] {
+  --promo-primary-500: #02c4ac;
+  --promo-primary-700: #00a896;
+  --promo-neutral-50: #0f1114;
+  --promo-neutral-100: #16191d;
+  --promo-neutral-200: #2a2f36;
+  --promo-neutral-300: #3d4650;
+  --promo-neutral-500: #94a3b8;
+  --promo-neutral-700: #cbd5e1;
+  --promo-neutral-900: #f1f5f9;
+  --promo-bg: #0f1114;
+  --promo-surface: #1a1d21;
+  --promo-surface-elevated: #1e2228;
+  --promo-text: #f1f5f9;
+  --promo-text-muted: #94a3b8;
+  --promo-border: #2a2f36;
+  --promo-gradient-hero: linear-gradient(135deg, rgba(2, 196, 172, 0.10) 0%, rgba(0, 168, 150, 0.05) 100%);
+  --promo-gradient-soft: linear-gradient(180deg, #0f1114 0%, #16191d 100%);
+  --promo-shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4);
+  --promo-shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.5);
 }

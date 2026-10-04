@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { FaStethoscope, FaUser, FaNotesMedical, FaEnvelope, FaPhone, FaClock } from 'react-icons/fa';
-import { useLanguage } from '../../context/LanguageContext';
+import { useLanguage } from '../../context/PromoLanguageContext';
 import { CLINIC_NAME, CLINIC_PHONE, CLINIC_WHATSAPP, PLATFORM_URL } from '../config/constants';
 
 function Navbar() {

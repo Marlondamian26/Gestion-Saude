@@ -79,7 +79,11 @@ export const promoTranslations = {
     toggleTheme: 'Alternar para modo escuro',
     changeLanguage: 'Clique para mudar o idioma',
     errorLoading: 'Erro ao carregar',
-    connectionError: 'Erro de conexão'
+    connectionError: 'Erro de conexão',
+    noDataAvailable: 'Nenhum dado disponível',
+    carouselImage: 'Imagem do carrossel',
+    prevSlide: 'Slide anterior',
+    nextSlide: 'Próximo slide'
   },
 
   // Spanish (sitio promocional)
@@ -159,7 +163,11 @@ export const promoTranslations = {
     toggleTheme: 'Cambiar a modo oscuro',
     changeLanguage: 'Haz clic para cambiar el idioma',
     errorLoading: 'Error al cargar',
-    connectionError: 'Error de conexión'
+    connectionError: 'Error de conexión',
+    noDataAvailable: 'No hay datos disponibles',
+    carouselImage: 'Imagen del carrusel',
+    prevSlide: 'Diapositiva anterior',
+    nextSlide: 'Diapositiva siguiente'
   },
 
   // English (sitio promocional)
@@ -240,6 +248,10 @@ export const promoTranslations = {
     changeLanguage: 'Click to change language',
     errorLoading: 'Error loading',
     connectionError: 'Connection error',
+    noDataAvailable: 'No data available',
+    carouselImage: 'Carousel image',
+    prevSlide: 'Previous slide',
+    nextSlide: 'Next slide',
     // [FASE 4 §4.3.4] Claves faltantes de en (paridad con pt)
     next: 'Next',
     previous: 'Previous',
