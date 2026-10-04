@@ -1314,6 +1314,41 @@ frontend/
 | `vendor-react` | 66.55 KB |
 | **Total** | **~95.09 KB** ✅ (≤120 KB objetivo) |
 
+### §8.6.2 — Hero redesign
+- [x] Hero.jsx rewritten: full-bleed image with gradient overlay + dot pattern
+- [x] Skeleton loading fallback with doctor avatar
+- [x] Animation entry: fadeInUp on text, fadeInRight on image (via useInView)
+- [x] WhatsApp button, image lazy-loading with eager fetchPriority
+- [x] CSS: `.promo-hero-bg-gradient`, `.promo-hero-dots`, `.promo-hero-img-overlay`
+- [x] Dark mode backgrounds via `[data-theme="dark"]`
+
+### §8.7 — Section redesigns
+- [x] **Navbar**: mobile menu toggle (`FaBars`/`FaTimes`), smooth-scroll anchors, WhatsApp button
+- [x] **Servicios**: `useInView` fade-up animations with stagger delays
+- [x] **SobreNosotros**: `useInView` animations (fade-left/right), `FaUserMd` icon
+- [x] **Testimonios**: `useInView` animations, fixed subtitle to use `testimonialsSubtitle`
+- [x] **Contacto**: `useInView` animations, refactored to data-driven contact items array
+- [x] **CTA**: `useInView` animations, removed unused Link import
+- [x] **Footer**: Fixed unused variable, data-theme support
+- [x] Translations: Added `testimonialsSubtitle`, `heroWhatsApp`, `navTestimonios`, `menu`, `noDataAvailable`, `carouselImage`, `prevSlide`, `nextSlide` (pt/es/en)
+
+### §8.8 — Tests & lint cleanup
+- [x] `Carousel.test.jsx`: Replaced `global.fetch` with `vi.stubGlobal` for proper mock cleanup
+- [x] `useInView.js`: Fixed ref warning by capturing `node` reference outside effect
+- [x] Lint errors in promo files fixed (unused vars, empty catch, etc.)
+- [x] Lint error count reduced: 211 → 205 problems
+
 ### Tests
-- 31/31 frontend tests pass ✅
-- 8/8 test files pass ✅
+- 36/36 frontend tests pass ✅
+- 10/10 test files pass ✅
+
+### Build results §8.7 (post-redesign)
+
+| Archivo | Gzip |
+|---|---|
+| `promo.html` | 0.58 KB |
+| `promo-*.css` | 5.67 KB |
+| `vendor-router` | 12.95 KB |
+| `promo-*.js` | 12.05 KB |
+| `vendor-react` | 66.85 KB |
+| **Total** | **~98.10 KB** ✅ (≤120 KB objetivo)
