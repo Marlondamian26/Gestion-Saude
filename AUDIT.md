@@ -1204,3 +1204,92 @@ frontend/
 |---|---|---|---|---|
 | §8.0.1 Baseline bundle | ✅ | ✅ | Build 439 KB JS + 24.6 KB CSS; LandingWrapper 20.86 KB | ✅ |
 | §8.0.2 Decisión arquitectónica | ✅ | ✅ | Opción B elegida; ver docs/architecture/evaluation-promo-separation.md | ✅ |
+
+---
+
+## §8.1 — Entry point y build independiente
+
+- [x] `frontend/promo.html` creado (entry HTML → `/src/promo-main.jsx`)
+- [x] `frontend/src/promo-main.jsx` creado (ThemeProvider + PromoLanguageProvider + PromoApp + CSS imports)
+- [x] `frontend/src/PromoApp.jsx` creado (BrowserRouter + Routes: `/` y `/promocional` → LandingWrapper; `*` → redirect a `/`)
+- [x] `frontend/vite.config.promo.js` creado → output `dist-promo/`
+- [x] `App.jsx` refactorizado: rutas `/promocional` eliminadas; `/` ahora → `/dashboard`
+- [x] Archivo huérfano `frontend/sitioPromocional.jsx` eliminado (importaba de `./src/sitioPromocional/App` que no existía)
+- [x] `package.json` scripts: `dev:promo` (`vite --config vite.config.promo.js --port 5174`), `build:promo` (`vite build --config vite.config.promo.js`)
+- [x] `.gitignore`: `dist-promo` ya incluido
+
+### Build promocional (post-§8.3.5)
+
+| Chunk | Tipo | Tamaño | Gzip |
+|---|---|---|---|
+| `promo.html` | Entry HTML | 1.42 KB | 0.58 KB |
+| `promo-*.css` | Promo CSS | 19.92 KB | 3.90 KB |
+| `vendor-react-*.js` | React + ReactDOM | 207.28 KB | 66.16 KB |
+| `vendor-router-*.js` | react-router-dom | 36.04 KB | 12.95 KB |
+| `promo-*.js` | App code | 37.19 KB | 10.21 KB |
+
+**Total promo:** ~93.8 KB gzip — **≤120 KB objetivo** ✅
+
+### Dev server
+
+- `npm run dev:promo` inicia Vite con middleware que redirige `/` → `/promo.html`.
+- HMR funciona en `http://localhost:5174/`.
+- Los módulos (`promo-main.jsx`, CSS) se sirven correctamente (HTTP 200).
+
+### Tests
+
+- 31/31 tests frontend pasan (incl. LanguageContext.test.jsx actualizado para leer `translations/platform.js`).
+
+---
+
+## §8.2 — Separación de traducciones
+
+- [x] `src/context/translations/platform.js` creado: `pt`, `es`, `en` (1225 líneas)
+- [x] `src/context/translations/promo.js` creado: `promo_pt`, `promo_es`, `promo_en` (280 líneas)
+- [x] `LanguageContext.jsx` reducido de 2015 → 69 líneas (importa `platformTranslations`)
+- [x] `src/context/PromoLanguageContext.jsx` creado: contexto i18n exclusivo para promo
+- [x] Corrección de paridad de claves: añadidas 35 claves faltantes a `en` (next, previous, yes, no, close, confirm, search, filter, noResults, required, verMais, myAppointments, invalidPhone, etc.)
+
+### Tests
+
+- `LanguageContext.test.jsx` actualizado: lee de `translations/platform.js` en lugar de `LanguageContext.jsx`
+- 5 tests de paridad pt/es/en pass ✅
+
+---
+
+## §8.3 — Navegación externa y configuración de despliegue
+
+- [x] `src/sitioPromocional/config/constants.js`: `PLATFORM_URL` y `REGISTRO_URL` usan `VITE_PLATFORM_URL` (absolute URLs)
+- [x] `src/components/PromocionalToggle.jsx`: navegación externa vía `window.location.href` a `VITE_PROMO_URL` (no usa useNavigate)
+- [x] `frontend/.env.example`: añadidas `VITE_PLATFORM_URL` y `VITE_PROMO_URL`
+- [x] `vite.config.promo.js`: `manualChunks` function-based → `vendor-react` (66 KB gzip) + `vendor-router` (13 KB gzip) + `promo` (10 KB gzip)
+
+---
+
+## §8.4 — Configuración de despliegue (Render)
+
+- [x] `render.yaml`: añadido servicio `Gestion-Saude-promo` (type: static)
+  - Build: `npm ci && npm run build:promo`
+  - Publish: `dist-promo/`
+  - Env: `VITE_PLATFORM_URL=https://gestion-saude.onrender.com`
+  - Routes: rewrite `/*` → `/promo.html` (SPA fallback)
+- [x] `render.yaml`: backend CORS actualizado — añadido `gestion-saude-promo.onrender.com` a `CORS_ALLOWED_ORIGENS`
+- [x] `render.yaml`: frontend service — añadido `VITE_PROMO_URL=https://gestion-saude-promo.onrender.com` env var
+- [x] `src/sitioPromocional/styles/promo-tokens.css`: sistema de tokens CSS (18 variables) + dark mode + responsive tips
+
+---
+
+## §8.5 — Tabla de cambios FASE 8
+
+| Ítem | Verificado | Corregido | Evidencia | Estado |
+|---|---|---|---|---|
+| §8.0 Baseline bundle | ✅ | ✅ | Build 439 KB JS + 24.6 KB CSS | ✅ |
+| §8.0.2 Decisión arquitectónica | ✅ | ✅ | Opción B elegida | ✅ |
+| §8.1 Entry point independiente | ✅ | ✅ | promo.html, promo-main.jsx, PromoApp.jsx, vite.config.promo.js | ✅ |
+| §8.1.7 Archivo huérfano eliminado | ✅ | ✅ | sitioPromocional.jsx borrado | ✅ |
+| §8.2 Separación traducciones | ✅ | ✅ | platform.js + promo.js + PromoLanguageContext.jsx | ✅ |
+| §8.2 Paridad claves en | ✅ | ✅ | +35 keys añadidas a en | ✅ |
+| §8.3 Navegación externa | ✅ | ✅ | constants.js + PromocionalToggle.jsx | ✅ |
+| §8.3.5 Vendor chunk split | ✅ | ✅ | vendor-react (66 kB) + vendor-router (13 kB) | ✅ |
+| §8.4 Render Static Site | ✅ | ✅ | render.yaml + CORS + env vars | ✅ |
+| §8.4 Tokens CSS | ✅ | ✅ | promo-tokens.css (18 variables) | ✅ |
