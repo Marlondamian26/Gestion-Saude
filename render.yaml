@@ -28,3 +28,18 @@ services:
         value: "patient"
       - key: DEMO_PATIENT_PASSWORD
         value: "patient123"
+
+  - type: static
+    name: Gestion-Saude-frontend
+    region: oregon
+    plan: free
+    rootDir: frontend
+    buildCommand: npm ci && npm run build
+    staticPublishPath: dist
+    envVars:
+      - key: VITE_API_URL
+        value: https://gestion-saude-backend.onrender.com/api
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html

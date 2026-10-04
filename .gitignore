@@ -21,6 +21,9 @@ db.sqlite3
 media/
 staticfiles/
 
+# Legacy frontend build dir (reemplazado por Static Site separado §2.4)
+backend/sitio/
+
 # Backups (audit + supabase dumps)
 backups/
 

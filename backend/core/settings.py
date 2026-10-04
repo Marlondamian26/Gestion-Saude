@@ -112,7 +112,7 @@ ROOT_URLCONF = 'core.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'sitio'],  # Agregar directorio donde se sirve el frontend
+        'DIRS': [],  # Frontend servido como Static Site separado (§2.4)
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -187,12 +187,12 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
-# Media files (uploaded images)
-MEDIA_URL = '/sitio/'
-MEDIA_ROOT = BASE_DIR / 'sitio'
+# Media files (uploaded images) — separated from frontend build (§2.4)
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
 
 # Ensure media directories exist
 import os
