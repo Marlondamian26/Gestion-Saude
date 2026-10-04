@@ -108,6 +108,6 @@ frontend/
 | `LanguageContext` importa algo del dashboard | Auditar imports (§8.2.1) |
 | `data-theme` no se aplica en promo | PromoApp incluye ThemeProvider; verifica `document.documentElement.setAttribute` |
 | localStorage compartido en dev (localhost) | OK en dev; en prod son dominios distintos → independencia deseada |
-| CORS bloquea imágenes de `/sitio-imagenes/` desde dominio promo | Añadir dominio promo a `CORS_ALLOWED_ORIGENS` en Render |
+| CORS bloquea imágenes de `/sitio-imagenes/` desde dominio promo | Añadir dominio promo a `CORS_ALLOWED_ORIGINS` en Render |
 | `PromocionalToggle` navega con `useNavigate` → roto en promo | Cambiar a `window.location.href` (redirect externo) |
 | Entry punto raíz `sitioPromocional.jsx` huérfano | Eliminar (importa de `./src/sitioPromocional/App` que no existe) |

@@ -295,7 +295,7 @@ No existen archivos `.env`, `.env.local`, `.env.production` u otros en `backend/
 ## 1.3 — DEBUG, ALLOWED_HOSTS, CSRF_TRUSTED_ORIGINS
 - [x] `DEBUG` — default `False` (cambio a `.lower() == 'true'` para robustez)
 - [x] `ALLOWED_HOSTS` — leído de env var comma-separated; fail-fast si vacío en prod
-- [x] `CSRF_TRUSTED_ORIGENS` — añadido, leído de env var; defaults en DEBUG
+- [x] `CSRF_TRUSTED_ORIGENS` (env var) — añadido, leído de env var; defaults en DEBUG
 - [x] `render.yaml` — añadido `CSRF_TRUSTED_ORIGENS` env var
 - [x] Test: `test_settings.py` — 10 tests, pass ✅
 
@@ -331,7 +331,7 @@ No existen archivos `.env`, `.env.local`, `.env.production` u otros en `backend/
 
 ## 1.8 — CORS y VITE_API_URL
 - [x] `settings.py` — eliminado `CORS_ALLOW_ALL_ORIGINS = True`
-- [x] `CORS_ALLOWED_ORIGENS` — ahora leído de env var, con defaults solo en DEBUG
+- [x] `CORS_ALLOWED_ORIGINS` — ahora leído de env var, con defaults solo en DEBUG
 - [x] `render.yaml` — eliminado `VITE_API_URL` del servicio backend
 - [x] Test: `test_no_cors_allow_all_origins` — pass ✅
 
@@ -1273,7 +1273,7 @@ frontend/
   - Publish: `dist-promo/`
   - Env: `VITE_PLATFORM_URL=https://gestion-saude.onrender.com`
   - Routes: rewrite `/*` → `/promo.html` (SPA fallback)
-- [x] `render.yaml`: backend CORS actualizado — añadido `gestion-saude-promo.onrender.com` a `CORS_ALLOWED_ORIGENS`
+- [x] `render.yaml`: backend CORS actualizado — añadido `gestion-saude-promo.onrender.com` a `CORS_ALLOWED_ORIGINS`
 - [x] `render.yaml`: frontend service — añadido `VITE_PROMO_URL=https://gestion-saude-promo.onrender.com` env var
 - [x] `src/sitioPromocional/styles/promo-tokens.css`: sistema de tokens CSS (18 variables) + dark mode + responsive tips
 

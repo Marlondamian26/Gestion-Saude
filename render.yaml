@@ -21,9 +21,9 @@ services:
         value: "False"
       - key: ALLOWED_HOSTS
         value: "gestion-saude-backend.onrender.com,localhost,127.0.0.1"
-      - key: CSRF_TRUSTED_ORIGENS
+      - key: CSRF_TRUSTED_ORIGINS
         value: "https://gestion-saude.onrender.com,https://gestion-saude-backend.onrender.com"
-      - key: CORS_ALLOWED_ORIGENS
+      - key: CORS_ALLOWED_ORIGINS
         value: "https://gestion-saude.onrender.com,https://gestion-saude-backend.onrender.com,https://gestion-saude-promo.onrender.com"
       # REDIS_URL — Render generates a Redis URL if a Redis add-on is attached
       - key: REDIS_URL

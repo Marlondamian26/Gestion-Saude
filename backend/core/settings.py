@@ -83,9 +83,9 @@ if not ALLOWED_HOSTS:
         raise ImproperlyConfigured("ALLOWED_HOSTS must be set in production")
 
 # CSRF trusted origins — must include frontend domains for cross-origin POST
-CSRF_TRUSTED_ORIGENS = [o.strip() for o in os.environ.get('CSRF_TRUSTED_ORIGENS', '').split(',') if o.strip()]
-if not CSRF_TRUSTED_ORIGENS and DEBUG:
-    CSRF_TRUSTED_ORIGENS = ['http://localhost:5173', 'http://127.0.0.1:5173']
+CSRF_TRUSTED_ORIGINS = [o.strip() for o in os.environ.get('CSRF_TRUSTED_ORIGINS', '').split(',') if o.strip()]
+if not CSRF_TRUSTED_ORIGINS and DEBUG:
+    CSRF_TRUSTED_ORIGINS = ['http://localhost:5173', 'http://127.0.0.1:5173']
 
 # Cache configuration for rate limiting and session management
 # Uses Redis in production (REDIS_URL env var); falls back to LocMemCache in development
@@ -314,9 +314,11 @@ _default_cors_origins = [
     "http://127.0.0.1:5174",
     "http://localhost:5175",
     "http://127.0.0.1:5175",
+    "https://gestion-saude.onrender.com",
+    "https://gestion-saude-promo.onrender.com",
 ]
 _env_cors = [o.strip() for o in os.environ.get('CORS_ALLOWED_ORIGINS', '').split(',') if o.strip()]
-CORS_ALLOWED_ORIGENS = _env_cors if _env_cors else _default_cors_origins
+CORS_ALLOWED_ORIGINS = _env_cors if _env_cors else _default_cors_origins
 
 # Si hay credenciales permitidas, los hosts permitidos deben coincidir
 CORS_ALLOW_CREDENTIALS = True

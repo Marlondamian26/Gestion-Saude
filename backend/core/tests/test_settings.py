@@ -22,8 +22,8 @@ class TestSettingsSecurity(TestCase):
         self.assertFalse(getattr(settings, 'CORS_ALLOW_ALL_ORIGINS', False))
 
     def test_cors_allowed_origins_is_list(self):
-        self.assertIsInstance(settings.CORS_ALLOWED_ORIGENS, list)
-        self.assertTrue(len(settings.CORS_ALLOWED_ORIGENS) > 0)
+        self.assertIsInstance(settings.CORS_ALLOWED_ORIGINS, list)
+        self.assertTrue(len(settings.CORS_ALLOWED_ORIGINS) > 0)
 
     def test_cors_credentials_allowed(self):
         self.assertTrue(getattr(settings, 'CORS_ALLOW_CREDENTIALS', False))
@@ -41,7 +41,7 @@ class TestSettingsSecurity(TestCase):
             self.assertTrue(settings.SECRET_KEY is not None)
 
     def test_csrf_trusted_origins_configured(self):
-        self.assertTrue(hasattr(settings, 'CSRF_TRUSTED_ORIGENS'))
+        self.assertTrue(hasattr(settings, 'CSRF_TRUSTED_ORIGINS'))
 
     def test_throttle_rate_registro_defined(self):
         rates = settings.REST_FRAMEWORK.get('DEFAULT_THROTTLE_RATES', {})
