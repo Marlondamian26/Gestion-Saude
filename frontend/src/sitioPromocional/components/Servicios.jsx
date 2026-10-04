@@ -1,7 +1,8 @@
 import React from 'react';
-import { FaStethoscope, FaHeart, FaAmbulance, FaSyringe, FaFlask, FaFileMedical, FaCheck } from 'react-icons/fa';
+import { FaStethoscope, FaHeart, FaAmbulance, FaSyringe, FaFlask, FaFileMedical } from 'react-icons/fa';
 import { useLanguage } from '../../context/PromoLanguageContext';
 import { CONFIG } from '../config/constants';
+import { useInView } from '../hooks/useInView';
 
 const iconMap = {
   stethoscope: FaStethoscope,
@@ -13,28 +14,36 @@ const iconMap = {
 };
 
 function Servicios() {
-  const { tPromo, language } = useLanguage();
+  const { tPromo } = useLanguage();
+  const [ref, isInView] = useInView({ threshold: 0.1 });
   const servicios = CONFIG.services || [];
-
   const serviceList = tPromo('servicios');
 
   return (
-    <section className="promo-servicios" id="servicios">
-      <div className="promo-section-header">
+    <section
+      ref={ref}
+      className={`promo-servicios ${isInView ? 'animate-in' : ''}`}
+      id="servicios"
+    >
+      <div className={`promo-section-header ${isInView ? 'animate-fade-up' : ''}`}>
         <span className="promo-section-label">{tPromo('servicesTitle')}</span>
         <h2 className="promo-section-title">{tPromo('servicesMainTitle')}</h2>
         <p className="promo-section-subtitle">
           {tPromo('servicesSubtitle')}
         </p>
       </div>
-      
+
       <div className="promo-servicios-grid">
         {servicios.map((servicio, index) => {
           const IconComponent = iconMap[servicio.icon] || FaStethoscope;
           const translatedService = serviceList[index] || servicio;
-          
+
           return (
-            <div key={servicio.id} className="promo-servicio-card">
+            <div
+              key={servicio.id}
+              className={`promo-servicio-card ${isInView ? 'animate-fade-up' : ''}`}
+              style={{ animationDelay: `${index * 0.1}s` }}
+            >
               <div className="promo-servicio-icon">
                 <IconComponent />
               </div>

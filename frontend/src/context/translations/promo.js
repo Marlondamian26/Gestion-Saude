@@ -9,8 +9,10 @@ export const promoTranslations = {
     navServicos: 'Serviços',
     navSobreNos: 'Sobre Nós',
     navContacto: 'Contacto',
+    navTestimonios: 'Testemunhos',
     navWhatsApp: 'WhatsApp',
     navLogin: 'Entrar',
+    menu: 'Menu',
 
     // Hero
     heroBadge: 'Atenção Médica de Qualidade',
@@ -50,6 +52,7 @@ export const promoTranslations = {
 
     // Testimonios
     testimonialsTitle: 'O que nossos pacientes dizem',
+    testimonialsSubtitle: 'Depoimentos reais de pacientes que confiam no nosso cuidado',
     testimonials: [
       { name: 'Maria Garcia', text: 'Excelente atenção. A Dra. Belkis é muito profissional e dedicada. Sempre me sinto bem atendida em cada consulta.' },
       { name: 'João Pedro', text: 'Muito bom serviço. O consultório está bem equipado e o pessoal é muito amável. Recomendado.' },
@@ -94,8 +97,10 @@ export const promoTranslations = {
     navServicos: 'Servicios',
     navSobreNos: 'Sobre Nosotros',
     navContacto: 'Contacto',
+    navTestimonios: 'Testimonios',
     navWhatsApp: 'WhatsApp',
     navLogin: 'Iniciar Sesión',
+    menu: 'Menu',
 
     // Hero
     heroBadge: 'Atención Médica de Calidad',
@@ -135,6 +140,7 @@ export const promoTranslations = {
 
     // Testimonios
     testimonialsTitle: 'Lo que dicen nuestros pacientes',
+    testimonialsSubtitle: 'Testimonios reales de pacientes que confían en nuestro cuidado',
     testimonials: [
       { name: 'Maria Garcia', text: 'Excelente atención. La Dra. Belkis es muy profesional y dedicada. Siempre me siento bien atendida en cada consulta.' },
       { name: 'Joao Pedro', text: 'Muy buen servicio. El consultorio está bien equipado y el personal es muy amable. Recomendado.' },
@@ -179,8 +185,10 @@ export const promoTranslations = {
     navServicos: 'Services',
     navSobreNos: 'About Us',
     navContacto: 'Contact',
+    navTestimonios: 'Testimonials',
     navWhatsApp: 'WhatsApp',
     navLogin: 'Login',
+    menu: 'Menu',
 
     // Hero
     heroBadge: 'Quality Medical Care',
@@ -220,6 +228,7 @@ export const promoTranslations = {
 
     // Testimonios
     testimonialsTitle: 'What our patients say',
+    testimonialsSubtitle: 'Real testimonials from patients who trust our care',
     testimonials: [
       { name: 'Maria Garcia', text: 'Excellent care. Dr. Belkis is very professional and dedicated. I always feel well attended at each consultation.' },
       { name: 'Joao Pedro', text: 'Very good service. The clinic is well equipped and the staff is very friendly. Recommended.' },
