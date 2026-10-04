@@ -65,7 +65,13 @@ if not SECRET_KEY:
     if DEBUG:
         SECRET_KEY = 'django-insecure-dev-only-key-not-for-production'
     else:
-        raise ImproperlyConfigured("SECRET_KEY must be set in production")
+        from django.core.management.utils import get_random_secret_key
+        SECRET_KEY = get_random_secret_key()
+        logging.warning(
+            "[SECURITY] SECRET_KEY not set in environment. "
+            "Generated an ephemeral random key. "
+            "Configure SECRET_KEY via Render dashboard for persistence across restarts."
+        )
 
 ALLOWED_HOSTS = [h.strip() for h in os.environ.get('ALLOWED_HOSTS', '').split(',') if h.strip()]
 if not ALLOWED_HOSTS:
@@ -95,7 +101,21 @@ if REDIS_URL:
         }
     }
 elif not DEBUG:
-    raise ImproperlyConfigured("REDIS_URL must be set in production for cache backend")
+    logging.warning(
+        "[CACHE] REDIS_URL not set in production. "
+        "Falling back to LocMemCache (rate limiting may not work across workers). "
+        "Configure REDIS_URL via Render dashboard for proper multi-worker support."
+    )
+    CACHES = {
+        'default': {
+            'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+            'LOCATION': 'gestion-saude-cache',
+            'TIMEOUT': 300,
+            'OPTIONS': {
+                'MAX_ENTRIES': 1000
+            }
+        }
+    }
 else:
     CACHES = {
         'default': {

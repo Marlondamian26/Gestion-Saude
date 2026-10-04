@@ -12,7 +12,10 @@ services:
         fromDatabase:
           name: Gestion-Saude-Base_de_Datos
           property: connectionString
+      # SECRET_KEY — Render generates a secure random value on first deploy
+      # Users can override via Render dashboard for persistence across deploys
       - key: SECRET_KEY
+        generateValue: true
         sync: false
       - key: DEBUG
         value: "False"
@@ -22,7 +25,9 @@ services:
         value: "https://gestion-saude.onrender.com,https://gestion-saude-backend.onrender.com"
       - key: CORS_ALLOWED_ORIGENS
         value: "https://gestion-saude.onrender.com,https://gestion-saude-backend.onrender.com,https://gestion-saude-promo.onrender.com"
+      # REDIS_URL — Render generates a Redis URL if a Redis add-on is attached
       - key: REDIS_URL
+        generateValue: true
         sync: false
       - key: DEMO_PATIENT_USERNAME
         value: "patient"

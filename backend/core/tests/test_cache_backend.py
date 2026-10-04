@@ -3,7 +3,7 @@ Tests for cache backend configuration (§2.1).
 
 Verifies:
 - With REDIS_URL set -> backend is RedisCache.
-- Without REDIS_URL + DEBUG=False -> ImproperlyConfigured (fail-fast).
+- Without REDIS_URL + DEBUG=False -> falls back to LocMemCache with warning (degraded but functional).
 - Without REDIS_URL + DEBUG=True -> LocMemCache (dev fallback).
 - Redis cache config has KEY_PREFIX.
 """
@@ -51,10 +51,10 @@ class TestCacheBackendConfig(TestCase):
             self.assertIn('KEY_PREFIX', settings.CACHES['default'])
             self.assertTrue(settings.CACHES['default']['KEY_PREFIX'])
 
-    def test_prod_without_redis_url_fails(self):
-        """En producción (DEBUG=False), sin REDIS_URL debe lanzar ImproperlyConfigured."""
+    def test_prod_without_redis_url_falls_back_to_locmem(self):
+        """En producción (DEBUG=False) sin REDIS_URL, usa LocMemCache con warning (no falla)."""
         env = dict(os.environ)
-        env.pop('DJANGO_SETTINGS_MODULE', None)  # forzar uso de core.settings en subprocess
+        env.pop('DJANGO_SETTINGS_MODULE', None)
         env['DEBUG'] = 'false'
         env.pop('REDIS_URL', None)
         env['SECRET_KEY'] = 'test-fail-fast'
@@ -63,15 +63,18 @@ class TestCacheBackendConfig(TestCase):
         result = subprocess.run(
             [sys.executable, '-c',
              'import os, django; os.environ.setdefault("DJANGO_SETTINGS_MODULE", "core.settings"); '
-             'django.setup()'],
+             'django.setup(); from django.conf import settings; '
+             'print(settings.CACHES["default"]["BACKEND"])'],
             env=env,
             capture_output=True,
             text=True,
             cwd=str(BACKEND_DIR),
         )
+        self.assertEqual(result.returncode, 0,
+                         f"stderr: {result.stderr}, stdout: {result.stdout}")
         combined = result.stderr + result.stdout
-        self.assertIn('ImproperlyConfigured', combined)
-        self.assertIn('REDIS_URL must be set', combined)
+        self.assertIn('LocMemCache', combined)
+        self.assertIn('REDIS_URL not set', combined)
 
     def test_dev_without_redis_url_uses_locmem(self):
         """En desarrollo (DEBUG=True), sin REDIS_URL usa LocMemCache."""
