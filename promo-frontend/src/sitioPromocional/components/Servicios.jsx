@@ -24,10 +24,12 @@ function Servicios() {
       ref={ref}
       className={`promo-servicios ${isInView ? 'animate-in' : ''}`}
       id="servicios"
+      role="region"
+      aria-labelledby="servicios-title"
     >
       <div className={`promo-section-header ${isInView ? 'animate-fade-up' : ''}`}>
         <span className="promo-section-label">{tPromo('servicesTitle')}</span>
-        <h2 className="promo-section-title">{tPromo('servicesMainTitle')}</h2>
+        <h2 id="servicios-title" className="promo-section-title">{tPromo('servicesMainTitle')}</h2>
         <p className="promo-section-subtitle">
           {tPromo('servicesSubtitle')}
         </p>

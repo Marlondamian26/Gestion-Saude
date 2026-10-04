@@ -114,6 +114,21 @@
   box-sizing: border-box;
 }
 
+/* Scrollbar theme-aware */
+.sitio-promocional::-webkit-scrollbar {
+  width: 10px;
+}
+.sitio-promocional::-webkit-scrollbar-track {
+  background: var(--promo-bg-alt);
+}
+.sitio-promocional::-webkit-scrollbar-thumb {
+  background: var(--promo-border-strong);
+  border-radius: 5px;
+}
+.sitio-promocional::-webkit-scrollbar-thumb:hover {
+  background: var(--promo-primary-500);
+}
+
 .promo-section-header {
   text-align: center;
   margin-bottom: 3rem;

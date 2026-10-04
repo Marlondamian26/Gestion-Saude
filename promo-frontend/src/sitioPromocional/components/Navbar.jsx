@@ -89,7 +89,7 @@ function Navbar() {
           <button
             className="promo-navbar-toggle"
             aria-expanded={menuOpen}
-            aria-label={menuOpen ? (tPromo('close') || 'Fechar') : (tPromo('menu') || 'Menu')}
+            aria-label={menuOpen ? tPromo('ariaCloseMenu') : tPromo('ariaOpenMenu')}
             onClick={() => setMenuOpen(!menuOpen)}
           >
             {menuOpen ? <FaTimes /> : <FaBars />}

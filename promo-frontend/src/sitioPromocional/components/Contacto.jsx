@@ -49,10 +49,12 @@ function Contacto() {
       ref={ref}
       className={`promo-contacto ${isInView ? 'animate-in' : ''}`}
       id="contacto"
+      role="region"
+      aria-labelledby="contacto-title"
     >
       <div className={`promo-section-header ${isInView ? 'animate-fade-up' : ''}`}>
         <span className="promo-eyebrow">{tPromo('contactEyebrow') || tPromo('contactTitle')}</span>
-        <h2 className="promo-heading">{tPromo('contactTitle')}</h2>
+        <h2 id="contacto-title" className="promo-heading">{tPromo('contactTitle')}</h2>
         <p className="promo-body">
           {tPromo('contactSubtitle')}
         </p>

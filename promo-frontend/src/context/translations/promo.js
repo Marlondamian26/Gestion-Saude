@@ -14,6 +14,8 @@ export const promoTranslations = {
     navLogin: 'Entrar',
     menu: 'Menu',
     close: 'Fechar',
+    ariaOpenMenu: 'Abrir menu de navegação',
+    ariaCloseMenu: 'Fechar menu de navegação',
 
     // Toggle i18n
     portuguese: 'Português',
@@ -23,6 +25,7 @@ export const promoTranslations = {
 
     // Hero
     heroBadge: 'Atenção Médica de Qualidade',
+    heroImageAlt: 'Consultório médico da Dra. Belkis Morejón Acosta em Benfica, Luanda',
     heroTitleBefore: 'Cuidamos da sua',
     heroTitleEm: 'saúde',
     heroTitleAfter: 'com profissionalismo e dedicação',
@@ -34,6 +37,7 @@ export const promoTranslations = {
 
     // Servicios
     servicesTitle: 'Nossos Serviços',
+    servicesEyebrow: 'Serviços',
     servicesMainTitle: 'Atenção Médica Integral',
     servicesSubtitle: 'Atendimento integral para todas as idades e necessidades',
     servicios: [
@@ -47,6 +51,7 @@ export const promoTranslations = {
 
     // Sobre Nosotros
     aboutTitle: 'Comprometidos com a sua Saúde e Bem-estar',
+    aboutEyebrow: 'Sobre Nós',
     aboutDescription: 'Desde a nossa fundação, dedicamo-nos a fornecer atenção médica de excelência à comunidade de Benfica, Luanda. A nossa missão é fornecer atenção médica integral, humana e personalizada a cada paciente.',
     aboutDoctorDescription: 'A Dra. Belkis Morejón Acosta lidera a nossa equipa com uma visão clara: oferecer atenção médica acessível, de qualidade e centrada no paciente. A nossa equipa está comprometida com o seu bem-estar integral.',
     aboutFeatures: [
@@ -62,6 +67,7 @@ export const promoTranslations = {
 
     // Testimonios
     testimonialsTitle: 'O que nossos pacientes dizem',
+    testimonialsEyebrow: 'Testemunhos',
     testimonialsSubtitle: 'Depoimentos reais de pacientes que confiam no nosso cuidado',
     testimonials: [
       { name: 'Maria Garcia', text: 'Excelente atenção. A Dra. Belkis é muito profissional e dedicada. Sempre me sinto bem atendida em cada consulta.' },
@@ -81,6 +87,7 @@ export const promoTranslations = {
 
     // CTA
     ctaTitle: 'Pronto para cuidar da sua saúde?',
+    ctaEyebrow: 'Comece Agora',
     ctaSubtitle: 'Registe-se na nossa plataforma para gerir as suas consultas e aceder ao seu histórico médico.',
     ctaLogin: 'Entrar',
     ctaRegister: 'Registar',
@@ -92,6 +99,8 @@ export const promoTranslations = {
     footerContactTitle: 'Contacto',
     footerRights: 'Todos os direitos reservados.',
     footerCredit: 'Desenvolvido com ♥ para a comunidade de Benfica.',
+    footerPrivacy: 'Política de Privacidade',
+    footerTerms: 'Termos de Uso',
     footerQuickLinks: { inicio: 'Início', servicos: 'Serviços', sobreNos: 'Sobre Nós', contacto: 'Contacto' },
     footerServices: { consulta: 'Consulta Médica', cardiologia: 'Cardiologia', emergencias: 'Emergências', vacinacao: 'Vacinação', analise: 'Análises Clínicas' },
     socialFacebook: 'Facebook',
@@ -107,6 +116,7 @@ export const promoTranslations = {
     connectionError: 'Erro de conexão',
     noDataAvailable: 'Nenhum dado disponível',
     carouselImage: 'Imagem do carrossel',
+    carouselImageAlt: 'Galeria de imagens do consultório médico',
     // Carousel
     carouselSectionLabel: 'Galeria de imagenes',
     ariaNavPrev: 'Slide anterior',
@@ -126,6 +136,7 @@ export const promoTranslations = {
   promo_es: {
     // Navbar
     navInicio: 'Inicio',
+    navServicios: 'Servicios',
     navServicos: 'Servicios',
     navSobreNos: 'Sobre Nosotros',
     navContacto: 'Contacto',
@@ -134,6 +145,8 @@ export const promoTranslations = {
     navLogin: 'Iniciar Sesión',
     menu: 'Menu',
     close: 'Cerrar',
+    ariaOpenMenu: 'Abrir menú de navegación',
+    ariaCloseMenu: 'Cerrar menú de navegación',
 
     // Toggle i18n
     portuguese: 'Português',
@@ -143,6 +156,7 @@ export const promoTranslations = {
 
     // Hero
     heroBadge: 'Atención Médica de Calidad',
+    heroImageAlt: 'Consultorio médico de la Dra. Belkis Morejón Acosta en Benfica, Luanda',
     heroTitleBefore: 'Cuidamos de tu',
     heroTitleEm: 'salud',
     heroTitleAfter: 'con profesionalismo y dedicación',
@@ -154,6 +168,7 @@ export const promoTranslations = {
 
     // Servicios
     servicesTitle: 'Nuestros Servicios',
+    servicesEyebrow: 'Servicios',
     servicesMainTitle: 'Atención Médica Integral',
     servicesSubtitle: 'Atención integral para todas las edades y necesidades',
     servicios: [
@@ -167,6 +182,7 @@ export const promoTranslations = {
 
     // Sobre Nosotros
     aboutTitle: 'Comprometidos con tu Salud y Bienestar',
+    aboutEyebrow: 'Sobre Nosotros',
     aboutDescription: 'Desde nuestra fundación, nos hemos dedicado a proporcionar atención médica de excelencia a la comunidad de Benfica, Luanda. Nuestra misión es proporcionar atención médica integral, humana y personalizada a cada paciente.',
     aboutDoctorDescription: 'La Dra. Belkis Morejón Acosta lidera nuestro equipo con una visión clara: ofrecer atención médica accesible, de calidad y centrada en el paciente. Nuestro equipo está comprometido con tu bienestar integral.',
     aboutFeatures: [
@@ -182,6 +198,7 @@ export const promoTranslations = {
 
     // Testimonios
     testimonialsTitle: 'Lo que dicen nuestros pacientes',
+    testimonialsEyebrow: 'Testimonios',
     testimonialsSubtitle: 'Testimonios reales de pacientes que confían en nuestro cuidado',
     testimonials: [
       { name: 'Maria Garcia', text: 'Excelente atención. La Dra. Belkis es muy profesional y dedicada. Siempre me siento bien atendida en cada consulta.' },
@@ -201,6 +218,7 @@ export const promoTranslations = {
 
     // CTA
     ctaTitle: '¿Listo para cuidar tu salud?',
+    ctaEyebrow: 'Comienza Ahora',
     ctaSubtitle: 'Regístrate en nuestra plataforma para gestionar tus citas y acceder a tu historial médico.',
     ctaLogin: 'Iniciar Sesión',
     ctaRegister: 'Registrarse',
@@ -212,6 +230,8 @@ export const promoTranslations = {
     footerContactTitle: 'Contacto',
     footerRights: 'Todos los derechos reservados.',
     footerCredit: 'Desarrollado con ♥ para la comunidad de Benfica.',
+    footerPrivacy: 'Política de Privacidad',
+    footerTerms: 'Términos de Uso',
     footerQuickLinks: { inicio: 'Inicio', servicos: 'Servicios', sobreNos: 'Sobre Nosotros', contacto: 'Contacto' },
     footerServices: { consulta: 'Consulta Médica', cardiologia: 'Cardiología', emergencias: 'Emergencias', vacinacion: 'Vacunación', analise: 'Análisis Clínicos' },
     socialFacebook: 'Facebook',
@@ -227,6 +247,7 @@ export const promoTranslations = {
     connectionError: 'Error de conexión',
     noDataAvailable: 'No hay datos disponibles',
     carouselImage: 'Imagen del carrusel',
+    carouselImageAlt: 'Galería de imágenes del consultorio médico',
     prevSlide: 'Diapositiva anterior',
     nextSlide: 'Diapositiva siguiente',
 
@@ -247,6 +268,7 @@ export const promoTranslations = {
   promo_en: {
     // Navbar
     navInicio: 'Home',
+    navServicios: 'Services',
     navServicos: 'Services',
     navSobreNos: 'About Us',
     navContacto: 'Contact',
@@ -255,6 +277,8 @@ export const promoTranslations = {
     navLogin: 'Login',
     menu: 'Menu',
     close: 'Close',
+    ariaOpenMenu: 'Open navigation menu',
+    ariaCloseMenu: 'Close navigation menu',
 
     // Toggle i18n
     portuguese: 'Portuguese',
@@ -264,6 +288,7 @@ export const promoTranslations = {
 
     // Hero
     heroBadge: 'Quality Medical Care',
+    heroImageAlt: 'Medical office of Dr. Belkis Morejon Acosta in Benfica, Luanda',
     heroTitleBefore: 'We take care of your',
     heroTitleEm: 'health',
     heroTitleAfter: 'with professionalism and dedication',
@@ -275,6 +300,7 @@ export const promoTranslations = {
 
     // Servicios
     servicesTitle: 'Our Services',
+    servicesEyebrow: 'Services',
     servicesMainTitle: 'Comprehensive Medical Care',
     servicesSubtitle: 'Comprehensive care for all ages and needs',
     servicios: [
@@ -288,6 +314,7 @@ export const promoTranslations = {
 
     // Sobre Nosotros
     aboutTitle: 'Committed to your Health and Well-being',
+    aboutEyebrow: 'About Us',
     aboutDescription: 'Since our foundation, we have been dedicated to providing excellent medical care to the community of Benfica, Luanda. Our mission is to provide comprehensive, human and personalized medical care to each patient.',
     aboutDoctorDescription: 'Dr. Belkis Morejon Acosta leads our team with a clear vision: to offer accessible, quality medical care focused on the patient. Our team is committed to your integral well-being.',
     aboutFeatures: [
@@ -303,6 +330,7 @@ export const promoTranslations = {
 
     // Testimonios
     testimonialsTitle: 'What our patients say',
+    testimonialsEyebrow: 'Testimonials',
     testimonialsSubtitle: 'Real testimonials from patients who trust our care',
     testimonials: [
       { name: 'Maria Garcia', text: 'Excellent care. Dr. Belkis is very professional and dedicated. I always feel well attended at each consultation.' },
@@ -322,6 +350,7 @@ export const promoTranslations = {
 
     // CTA
     ctaTitle: 'Ready to take care of your health?',
+    ctaEyebrow: 'Get Started',
     ctaSubtitle: 'Register on our platform to manage your appointments and access your medical history.',
     ctaLogin: 'Login',
     ctaRegister: 'Register',
@@ -333,6 +362,8 @@ export const promoTranslations = {
     footerContactTitle: 'Contact',
     footerRights: 'All rights reserved.',
     footerCredit: 'Developed with ♥ for the Benfica community.',
+    footerPrivacy: 'Privacy Policy',
+    footerTerms: 'Terms of Service',
     footerQuickLinks: { inicio: 'Home', servicos: 'Services', sobreNos: 'About Us', contacto: 'Contact' },
     footerServices: { consulta: 'Medical Consultation', cardiologia: 'Cardiology', emergencias: 'Emergencies', vacinacao: 'Vaccination', analise: 'Clinical Analysis' },
     socialFacebook: 'Facebook',
@@ -348,6 +379,7 @@ export const promoTranslations = {
     connectionError: 'Connection error',
     noDataAvailable: 'No data available',
     carouselImage: 'Carousel image',
+    carouselImageAlt: 'Medical office gallery images',
     prevSlide: 'Previous slide',
     nextSlide: 'Next slide',
 

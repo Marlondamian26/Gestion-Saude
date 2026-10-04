@@ -18,6 +18,8 @@ function SobreNosotros() {
       ref={ref}
       className={`promo-sobre ${isInView ? 'animate-in' : ''}`}
       id="sobre-nosotros"
+      role="region"
+      aria-labelledby="sobre-title"
     >
       <div className="promo-sobre-content">
         <div className={`promo-sobre-image ${isInView ? 'animate-fade-left' : ''}`}>
@@ -45,7 +47,7 @@ function SobreNosotros() {
 
         <div className={`promo-sobre-text ${isInView ? 'animate-fade-right' : ''}`}>
           <span className="promo-section-label">{tPromo('navSobreNos')}</span>
-          <h2>{tPromo('aboutTitle')}</h2>
+          <h2 id="sobre-title">{tPromo('aboutTitle')}</h2>
           <p>
             {tPromo('aboutDescription')}
           </p>

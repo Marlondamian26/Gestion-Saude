@@ -206,6 +206,7 @@ function Carousel() {
       className="promo-carousel"
       aria-roledescription="carousel"
       aria-label={tPromo('carouselSectionLabel') || 'Imágenes'}
+      aria-live="polite"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       onTouchStart={handleTouchStart}

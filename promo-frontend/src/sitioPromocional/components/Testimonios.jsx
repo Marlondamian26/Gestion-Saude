@@ -20,10 +20,12 @@ function Testimonios() {
       ref={ref}
       className={`promo-testimonios ${isInView ? 'animate-in' : ''}`}
       id="testimonios"
+      role="region"
+      aria-labelledby="testimonios-title"
     >
       <div className={`promo-section-header ${isInView ? 'animate-fade-up' : ''}`}>
         <span className="promo-section-label">{tPromo('testimonialsTitle')}</span>
-        <h2 className="promo-section-title">{tPromo('testimonialsTitle')}</h2>
+        <h2 id="testimonios-title" className="promo-section-title">{tPromo('testimonialsTitle')}</h2>
         <p className="promo-section-subtitle">
           {tPromo('testimonialsSubtitle')}
         </p>

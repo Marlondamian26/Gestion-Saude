@@ -20,9 +20,11 @@ function CTA() {
     <section
       ref={ref}
       className={`promo-cta ${isInView ? 'animate-in' : ''}`}
+      role="region"
+      aria-labelledby="cta-title"
     >
       <div className={`promo-cta-content ${isInView ? 'animate-fade-up' : ''}`}>
-        <h2>{tPromo('ctaTitle')}</h2>
+        <h2 id="cta-title">{tPromo('ctaTitle')}</h2>
         <p>
           {tPromo('ctaSubtitle')}
         </p>
