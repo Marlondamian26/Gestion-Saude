@@ -23,9 +23,7 @@ services:
       - key: CORS_ALLOWED_ORIGENS
         value: "https://gestion-saude.onrender.com,https://gestion-saude-backend.onrender.com"
       - key: REDIS_URL
-        fromRedis:
-          name: Gestion-Saude-Redis
-          property: connectionString
+        sync: false
       - key: DEMO_PATIENT_USERNAME
         value: "patient"
       - key: DEMO_PATIENT_PASSWORD
