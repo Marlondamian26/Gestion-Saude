@@ -219,7 +219,7 @@ class CitaSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'paciente', 'paciente_nombre',
             'doctor', 'doctor_nombre',
-            'fecha', 'hora', 'estado', 'motivo', 'notas_adicionales',
+            'fecha', 'hora', 'duracion_minutos', 'estado', 'motivo', 'notas_adicionales',
             'fecha_creacion', 'fecha_actualizacion'
         ]
         read_only_fields = ['id', 'fecha_creacion', 'fecha_actualizacion']
@@ -254,15 +254,39 @@ class CitaSerializer(serializers.ModelSerializer):
         if doctor and fecha and hora:
             instance_id = self.instance.id if self.instance else None
 
-            # 1. Validar que no exista cita duplicada
+            # 1. Validar que no exista cita duplicada (solo estados activos)
             citas_existentes = Cita.objects.filter(
                 doctor=doctor,
                 fecha=fecha,
-                hora=hora
+                hora=hora,
+                estado__in=['pendiente', 'confirmada'],
             ).exclude(id=instance_id)
 
             if citas_existentes.exists():
                 raise serializers.ValidationError("Ya existe una cita para este doctor en esa fecha y hora")
+
+            # 2b. Validar solapamiento con duración
+            from datetime import timedelta, datetime as dt_class
+            DURACION_DEFAULT = 30
+            duracion = data.get('duracion_minutos', getattr(self.instance, 'duracion_minutos', DURACION_DEFAULT) if self.instance else DURACION_DEFAULT)
+
+            inicio_nueva = dt_class.combine(fecha, hora)
+            fin_nueva = inicio_nueva + timedelta(minutes=duracion)
+
+            citas_solapadas = Cita.objects.filter(
+                doctor=doctor,
+                fecha=fecha,
+                estado__in=['pendiente', 'confirmada'],
+            ).exclude(id=instance_id)
+
+            for c in citas_solapadas:
+                inicio_existente = dt_class.combine(c.fecha, c.hora)
+                fin_existente = inicio_existente + timedelta(minutes=c.duracion_minutos)
+                if inicio_nueva < fin_existente and inicio_existente < fin_nueva:
+                    raise serializers.ValidationError({
+                        'hora': f'Se solapa con la cita existente de {c.hora.strftime("%H:%M")} ({c.duracion_minutos}min).'
+                    })
+
 
             # 2. Validar que la fecha/hora estén dentro de los horarios activos del doctor para ese día
             dia_semana = fecha.weekday()  # 0=Lunes, 6=Domingo

@@ -1,5 +1,6 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
+from django.core.validators import MinValueValidator, MaxValueValidator
 
 class Usuario(AbstractUser):
     """
@@ -325,6 +326,12 @@ class Cita(models.Model):
         blank=True,
         verbose_name='Notas internas (solo staff)'
     )
+    duracion_minutos = models.PositiveIntegerField(
+        default=30,
+        validators=[MinValueValidator(10), MaxValueValidator(240)],
+        verbose_name='Duración en minutos',
+        help_text='Duración de la cita. Default: 30 minutos.',
+    )
     fecha_creacion = models.DateTimeField(
         auto_now_add=True,
         verbose_name='Fecha de creación'
@@ -335,10 +342,17 @@ class Cita(models.Model):
     )
     
     class Meta:
-        unique_together = ['doctor', 'fecha', 'hora']  # Evita dobles reservas
         ordering = ['fecha', 'hora']
         verbose_name = 'Cita'
         verbose_name_plural = 'Citas'
+        constraints = [
+            # Unique para citas activas (no canceladas) — permite rebooking de slots liberados
+            models.UniqueConstraint(
+                fields=['doctor', 'fecha', 'hora'],
+                condition=~models.Q(estado='cancelada'),
+                name='cita_unique_activa',
+            ),
+        ]
     
     def __str__(self):
         return f"{self.paciente} con {self.doctor} - {self.fecha} {self.hora}"
