@@ -53,6 +53,11 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
+        migrations.AlterField(
+            model_name='usuario',
+            name='email',
+            field=models.EmailField(blank=True, max_length=254, null=True, verbose_name='Correo electrónico'),
+        ),
         migrations.RunPython(normalize_and_validate_emails, reverse_code=reverse_normalize),
         migrations.AlterField(
             model_name='usuario',
