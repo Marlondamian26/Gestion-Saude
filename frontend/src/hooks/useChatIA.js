@@ -1,14 +1,18 @@
 /**
- * useChatIA.js — Hook que encapsula toda la lógica de estado y negocio del ChatIA.
+ * useChatIA.js — Hook que encapsula toda la lógica de estado y negocio del
+ * Asistente de citas (antes "ChatIA", nombre técnico conservado por compatibilidad).
  * Extraído de ChatIA.jsx (§4.1.2). La máquina de estados y todas las funciones
  * de negocio viven aquí; los componentes solo consumen el estado y llaman handlers.
+ *
+ * NOTA (FASE 12): el asistente es un chatbot basado en reglas y máquina de
+ * estados, no utiliza IA. La arquitectura está preparada para integración futura.
  *
  * Políticas (heredadas del signal §3.4 y validación §3.3):
  * - P1: rol='patient' crea Paciente automáticamente (backend).
  * - P2: admin/doctor pueden seleccionar paciente para gestionar citas ajenas.
  * - P3: citas canceladas no bloquean slots (unique constraint condicional en backend).
  */
-import { useState, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useLanguage } from '../context/LanguageContext';
 import chatService from '../services/chatService';
 
@@ -102,21 +106,31 @@ const useChatIA = () => {
     }
   }, []);
 
-  const buscarPacientes = useCallback(async (query) => {
-    if (!query || query.length < 2) {
+  const buscarPacientes = useCallback((query) => {
+    setBusquedaPaciente(query);
+    setMostrarSugerencias(false);
+  }, []);
+
+  useEffect(() => {
+    if (!busquedaPaciente || busquedaPaciente.length < 2) {
       setSugerenciasPacientes([]);
       setMostrarSugerencias(false);
       return;
     }
-    try {
-      const resultados = await chatService.buscarPacientes(query);
-      setSugerenciasPacientes(resultados);
-      setMostrarSugerencias(true);
-    } catch (error) {
-      console.error('Error buscando pacientes:', error);
-      setSugerenciasPacientes([]);
-    }
-  }, []);
+    const timer = setTimeout(() => {
+      chatService.buscarPacientes(busquedaPaciente)
+        .then((resultados) => {
+          setSugerenciasPacientes(resultados);
+          setMostrarSugerencias(true);
+        })
+        .catch((error) => {
+          console.error('Error buscando pacientes:', error);
+          setSugerenciasPacientes([]);
+          setMostrarSugerencias(false);
+        });
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [busquedaPaciente]);
 
   const seleccionarPaciente = useCallback(async (paciente) => {
     setDatos((prev) => ({ ...prev, paciente }));
@@ -621,7 +635,7 @@ const useChatIA = () => {
       setLoading(false);
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [estado, opciones, especialidades, doctores, historial, datos, horariosDisponibles, citaSeleccionada]);
+  }, [estado, userRole, opciones, especialidades, doctores, historial, datos, horariosDisponibles, citaSeleccionada]);
 
   // Helper para generar opciones de inicio
   const getInicioOpciones = useCallback(() => [

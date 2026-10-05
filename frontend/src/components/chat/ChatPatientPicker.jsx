@@ -1,4 +1,5 @@
 import React from 'react';
+import { useLanguage } from '../../context/LanguageContext';
 import '../ChatIA.css';
 
 const ChatPatientPicker = ({
@@ -9,7 +10,7 @@ const ChatPatientPicker = ({
   onBuscar,
   onSelectar,
 }) => {
-  if (!mostrar && !busqueda) return null;
+  const { t } = useLanguage();
   return (
     <>
       <div className="chat-ia-input chat-paciente-busqueda">
@@ -17,7 +18,7 @@ const ChatPatientPicker = ({
           type="text"
           value={busqueda}
           onChange={(e) => onBuscar(e.target.value)}
-          placeholder="Escribe el nombre del paciente..."
+          placeholder={t('typeToSearchPatient')}
           disabled={loading}
           autoFocus
         />
@@ -43,9 +44,9 @@ const ChatPatientPicker = ({
           ))}
         </div>
       )}
-      {busqueda.length > 0 && mostrar && sugerencias.length === 0 && (
+      {busqueda.length > 0 && mostrar && sugerencias.length === 0 && !loading && (
         <div className="chat-paciente-sin-resultados">
-          No se encontraron pacientes
+          {t('noPatientsFound')}
         </div>
       )}
     </>
