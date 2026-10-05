@@ -1482,10 +1482,10 @@ function AdminDashboard() {
             <button
               onClick={() => setChatbotOpen(true)}
               style={styles.chatbotButton}
-              title="Abrir asistente"
+              title="Abrir asistente de citas"
             >
               <span style={{ fontSize: '22px' }}>🤖</span>
-              <span style={{ fontSize: '10px', fontWeight: 'bold', marginLeft: '8px' }}>{t('assistant')}</span>
+              <span style={{ fontSize: '10px', fontWeight: 'bold' }}>Chat</span>
             </button>
             <div style={styles.dashboardGrid}>
               <div style={styles.dashboardCard}>
