@@ -1,6 +1,6 @@
 # Gestão Saúde — Gestión de Citas Médicas
 
-Plataforma de gestión de citas médicas para pacientes, doctores y enfermeros. El paciente puede agendar, cancelar y posponer citas; el doctor gestiona horarios y la enfermera apoya el proceso. Incluye un asistente de chat (ChatIA) para agendar citas vía interfaz conversacional.
+Plataforma de gestión de citas médicas para pacientes, doctores y enfermeros. El paciente puede agendar, cancelar y posponer citas; el doctor gestiona horarios y la enfermera apoya el proceso. Incluye un asistente conversacional de citas (antes ChatIA) para agendar citas vía interfaz conversacional.
 
 ## Estado actual
 
@@ -129,8 +129,8 @@ Mis_proyectos/
 │   │   └── urls.py
 │   ├── usuarios/               # App de usuarios, doctores, citas
 │   │   ├── models.py           # Usuario, Doctor, Paciente, Cita, Horario
-│   │   ├── ai_service.py       # ChatIA (no modificar, solo instrumentar)
-│   │   ├── chat_metrics.py     # [FASE 5] Métricas ChatIA
+│   │   ├── ai_service.py       # Asistente de citas (no modificar, solo instrumentar)
+│   │   ├── chat_metrics.py     # [FASE 5] Métricas Asistente de citas
 │   │   ├── image_utils.py      # [FASE 5] Optimización WebP
 │   │   ├── views/              # [FASE 3] Paquete de views
 │   │   ├── serializers.py
@@ -144,7 +144,7 @@ Mis_proyectos/
 │   └── pytest.ini
 ├── frontend/                   # React 19 + Vite 7
 │   ├── src/
-│   │   ├── components/         # UI components (incl. ChatIA descompuesto)
+│   │   ├── components/         # UI components (incl. Asistente de citas descompuesto)
 │   │   ├── hooks/              # Custom hooks (incl. useChatIA)
 │   │   ├── services/           # API services + error handler
 │   │   ├── context/            # React Context providers
@@ -232,6 +232,16 @@ kill $(lsof -t -i:8000)
 npx kill-port 5173
 npm run dev
 ```
+
+## Chatbot / Asistente de citas
+
+**Asistente de citas (basado en reglas).** Módulo conversacional que guía al usuario
+a través de una máquina de estados para agendar, cancelar o consultar horarios de
+citas. Utiliza detección de intenciones por palabras clave y procesamiento de
+fechas en lenguaje natural acotado (PT/ES/EN). **No implementa modelos de IA**;
+su arquitectura está diseñada para permitir la integración futura de un modelo de
+lenguaje sin refactor mayor (los estados de la conversación están desacoplados de
+la lógica de intención).
 
 ## Contribuir
 

@@ -1,5 +1,5 @@
 /**
- * Tests de caracterización para ChatIA (§4.1).
+ * Tests de caracterización para el Asistente de citas (§4.1).
  * Capturan comportamiento observable ANTES del refactor.
  * Estos tests deben seguir pasando DESPUÉS de la descomposición.
  */

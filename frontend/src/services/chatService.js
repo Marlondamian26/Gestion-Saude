@@ -1,5 +1,5 @@
 /**
- * chatService.js — Funciones puras para llamadas API del chat IA.
+ * chatService.js — Funciones puras para llamadas API del asistente de citas.
  * Usa la instancia Axios existente (services/auth.js) con interceptors JWT.
  */
 import axiosInstance from '../services/auth';

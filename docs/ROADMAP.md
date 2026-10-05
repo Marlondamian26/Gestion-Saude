@@ -18,7 +18,7 @@
 | **Especialidades** | ✅ Activo | Catálogo médico y de enfermería. Tipos: medica, enfermeria, ambas. |
 | **Citas** | ✅ Activo | Agendar, cancelar, posponer, confirmar. Validación de solapamiento + horario. Histórico. |
 | **Notificaciones** | ✅ Activo | Email (Resend), WhatsApp (Twilio), SMS fallback. Estado: pendiente/enviada/fallida. SSE tiempo real. |
-| **ChatIA** | ✅ Activo | Asistente de agendamiento vía chat. Métricas en logs estructurados. |
+| **Asistente de citas** | ✅ Activo | Chatbot basado en reglas para agendar citas vía interfaz conversacional. Métricas en logs estructurados. |
 | **Panel admin** | ✅ Activo | Dashboard de administración (usuarios, doctores, citas). |
 | **Panel enfermería** | ✅ Activo | Dashboard de enfermería. |
 | **Dashboard médico** | ✅ Activo | Dashboard de doctores. |
@@ -101,7 +101,7 @@
 | **Historia clínica básica** | 5d | Alta | - | 🟨 Pendiente |
 | **Facturación (generación PDF)** | 4d | Media-Alta | - | 🟨 Pendiente |
 | **Reportes y analytics avanzados** | 3d | Media-Alta | - | 🟨 Pendiente |
-| **Mejoras ChatIA** (multi-idioma, más intenciones) | 4d | Media | - | 🟨 Pendiente |
+| **Mejoras Asistente de citas** (multi-idioma, más intenciones) | 4d | Media | - | 🟨 Pendiente |
 | **Test E2E dashboard médico** | 2d | Media | - | 🟨 Pendiente |
 | **Test E2E historial de enfermería** | 2d | Media | - | 🟨 Pendiente |
 
@@ -138,7 +138,7 @@
 | KPI | Objetivo | Baseline | Herramienta | Frecuencia revisión |
 |---|---|---|---|---|
 | Citas creadas/mes | 1000 | N/A | DB query | Mensual |
-| Tasa de conversión ChatIA | ≥ 60% | N/A | Logs ChatIA metrics | Mensual |
+| Tasa de conversión Asistente de citas | ≥ 60% | N/A | Logs de métricas del asistente | Mensual |
 | Tasa de cancelación | < 15% | N/A | DB query | Mensual |
 | Usuarios activos/mes | 500 | N/A | Analytics | Mensual |
 | Tasa de error auth | < 1% | N/A | Sentry | Diario |
@@ -169,7 +169,7 @@
 | Migración a ASGI (Uvicorn) | Alto (escala SSE) | Medio | Baja (actualmente 1-2 usuarios) | Postergado a Horizonte 1, decisión tras proyección de usuarios >50 concurrentes |
 | Migrar media a S3/R2 | Alto (persistencia) | Medio | Media | Feature flag listo; pendiente aprobación |
 | Cambio on_delete (Cita.paciente/doctor → PROTECT) | Medio (integridad) | Alto (migración + validación) | Baja | Documentado en AUDIT.md; pending decisión negocio |
-| Refactorizar ChatIA.jsx (1077l) | Bajo (funciona) | Alto | Baja | Preservado como state machine cohesivo (FASE 4) |
+| Refactorizar ChatIA.jsx (1077l) | Bajo (funciona) | Alto | Baja | Preservado como state machine cohesivo (FASE 4). Nota FASE 12: nombre técnico conservado, reemplazado prosa "IA" → "Asistente de citas basado en reglas".
 | Test E2E admin/doctores/pacientes | Medio | Medio | Media | Planificado Horizonte 1-2 |
 
 ### Priorizada para Horizonte 1

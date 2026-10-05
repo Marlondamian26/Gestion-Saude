@@ -27,7 +27,7 @@
 
 ### 1.3 Problema
 
-Aunque FASE 7 §7.2 implementó lazy loading (components Dashboard, ChatIA, Citas, etc. en chunks separados), **el app shell principal (333 KB) incluye contextos que el visitante anónimo del promo no necesita**:
+Aunque FASE 7 §7.2 implementó lazy loading (components Dashboard, ChatIA/Asistente de citas, Citas, etc. en chunks separados), **el app shell principal (333 KB) incluye contextos que el visitante anónimo del promo no necesita**:
 
 | Contexto/Componente | Necesario para promo | Tamaño estimado |
 |---|---|---|

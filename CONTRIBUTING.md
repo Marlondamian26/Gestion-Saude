@@ -61,8 +61,8 @@ backend/
 │   ├── models.py            # Entidades: Usuario, Doctor, Paciente, Cita, Horario
 │   ├── serializers.py       # Serializers DRF
 │   ├── views/               # Vistas (paquete desde §3.1)
-│   ├── ai_service.py        # ChatIA — SOLO instrumentar, no modificar
-│   ├── chat_metrics.py      # Métricas de ChatIA
+│   ├── ai_service.py        # Asistente de citas — SOLO instrumentar, no modificar
+│   ├── chat_metrics.py      # Métricas del Asistente de citas
 │   ├── image_utils.py       # Optimización de imágenes
 │   └── management/commands/ # Custom commands (seed_demo, seed_e2e)
 └── notificaciones/          # Email, WhatsApp, SSE
@@ -72,7 +72,7 @@ backend/
 ```
 frontend/src/
 ├── components/              # UI components (descompuestos desde §4.1)
-├── hooks/                   # Custom hooks (useChatIA extraído)
+├── hooks/                   # Custom hooks (useChatIA extraído; asistente de citas)
 ├── services/                # API client + error handler
 ├── context/                 # Context providers
 ├── config/                  # Constantes de app

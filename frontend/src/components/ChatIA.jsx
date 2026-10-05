@@ -1,6 +1,7 @@
 /* eslint-disable react-refresh/only-export-components */
 /**
  * ChatIA.jsx — Re-export del component refactorizado.
+ * Asistente de citas basado en reglas (el nombre técnico "ChatIA" se conserva).
  *
  * El componente original (1326 líneas) fue dividido en:
  * - hooks/useChatIA.js             — máquina de estados + lógica de negocio

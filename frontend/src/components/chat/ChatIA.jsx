@@ -1,7 +1,7 @@
 /**
  * ChatIA.jsx — Componente orquestador delgado (~100 líneas).
+ * Asistente de citas basado en reglas (antes "ChatIA").
  * Extraído de components/ChatIA.jsx (§4.1.2).
- * Toda la lógica de estado vive en hooks/useChatIA.js.
  *
  * Responsabilidad: render JSX, delegar handlers al hook.
  * No contiene lógica de negocio ni máquinas de estados.

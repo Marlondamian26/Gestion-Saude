@@ -125,7 +125,7 @@ export const platformTranslations = {
     welcome: 'Bem-vinda',
     nursingDashboard: 'Painel de Enfermagem',
     goToNursingDashboard: 'Ir para Painel de Enfermagem',
-    // Chat IA
+    // Asistente de citas
     chatAssistantTitle: 'Assistente de Consultas',
     scheduleAppointment: 'Agendar consulta médica',
     myAppointments: 'Minhas Consultas',
@@ -382,7 +382,7 @@ export const platformTranslations = {
     savingButton: 'Salvar',
     cancelButton: 'Cancelar',
 
-    // Chat IA additional
+    // Asistente de citas adicional
     chatAssistant: 'Assistente de Consultas',
     typeMessage: 'Digite sua mensagem...',
     loadingSuggestions: 'Carregando sugestões...',
@@ -693,7 +693,7 @@ export const platformTranslations = {
     generalNursing: 'Enfermería General',
     patientsToday: 'Pacientes de Hoy',
     welcome: 'Bienvenida',
-    // Chat IA
+    // Asistente de citas
     chatAssistantTitle: 'Asistente de Citas',
     scheduleAppointment: 'Agendar cita médica',
     myAppointments: 'Mis Citas',
@@ -740,7 +740,7 @@ export const platformTranslations = {
     chatSuggestions: 'Sugerencias',
     writeMessage: 'Escribe tu mensaje...',
 
-    // Chat IA - Cancel and Postpone
+    // Asistente de citas - Cancelar y posponer
     cancelAppointmentOption: 'Cancelar una cita',
     postponeAppointmentOption: 'Posponer una cita',
     selectAppointmentToCancel: 'Selecciona la cita que deseas cancelar:',
@@ -973,7 +973,7 @@ export const platformTranslations = {
     newSchedule: 'Nuevo Horario',
     cancelButton: 'Cancelar',
 
-    // Chat IA additional
+    // Asistente de citas adicional
     chatAssistant: 'Asistente de Citas',
     typeMessage: 'Escribe tu mensaje...',
     loadingSuggestions: 'Cargando sugerencias...',
@@ -1241,7 +1241,7 @@ export const platformTranslations = {
     healing: 'Healing',
     vaccination: 'Vaccination',
     generalNursing: 'General Nursing',
-    // Chat IA
+    // Asistente de citas
     chatAssistantTitle: 'Appointment Assistant',
     scheduleAppointment: 'Schedule medical appointment',
     needHelp: 'I need help',
@@ -1290,7 +1290,7 @@ export const platformTranslations = {
     chatSuggestions: 'Suggestions',
     writeMessage: 'Write your message...',
 
-    // Chat IA - Cancel and Postpone
+    // Asistente de citas - Cancelar y posponer
     cancelAppointmentOption: 'Cancel an appointment',
     postponeAppointmentOption: 'Postpone an appointment',
     selectAppointmentToCancel: 'Select the appointment you want to cancel:',

@@ -58,6 +58,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Tests pending execution.
 
 ### Added — §5.4 ChatIA Metrics (Pending)
+> *Nota FASE 12: el módulo antes llamado ChatIA se documenta ahora como "Asistente de citas basado en reglas".*
 - Metrics endpoint and dashboard widgets planned.
 
 ## [0.1.0] — FASE 1-3 Complete
@@ -72,6 +73,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Tests
 - 75+ backend tests, 31 frontend tests.
-- Characterization tests for ChatIA.
+- Characterization tests for the appointment assistant (formerly ChatIA).
 - i18n parity tests (ES/PT/EN).
 - E2E workflow + seed data.

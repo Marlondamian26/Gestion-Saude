@@ -431,7 +431,7 @@ function Dashboard() {
         )}
       </div>
 
-      {/* Botón flotante del Asistente de IA - Solo para pacientes */}
+      {/* Botón flotante del Asistente de citas — Solo para pacientes */}
       {user?.rol === 'patient' && (
         <>
           <button
