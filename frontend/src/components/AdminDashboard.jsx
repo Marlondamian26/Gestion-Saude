@@ -448,6 +448,21 @@ function AdminDashboard() {
     setShowModal(true)
   }
 
+  const getPatientFormData = (item) => ({
+    ...item,
+    tipo: 'pacientes',
+    username: item.usuario?.username || '',
+    first_name: item.usuario?.first_name || '',
+    last_name: item.usuario?.last_name || '',
+    email: item.usuario?.email || '',
+    telefono: item.usuario?.telefono || '',
+    fecha_nacimiento: item.usuario?.fecha_nacimiento || '',
+    alergias: item.alergias || '',
+    grupo_sanguineo: item.grupo_sanguineo || '',
+    contacto_emergencia: item.contacto_emergencia || '',
+    telefono_emergencia: item.telefono_emergencia || ''
+  })
+
   // Abrir modal para editar
   const handleEdit = (item, tipo) => {
     console.log('Editando:', item, tipo)
@@ -474,15 +489,7 @@ function AdminDashboard() {
         telefono: item.usuario?.telefono || ''
       })
     } else if (tipo === 'pacientes') {
-      setFormData({
-        ...item,
-        tipo,
-        alergias: item.alergias || '',
-        grupo_sanguineo: item.grupo_sanguineo || '',
-        contacto_emergencia: item.contacto_emergencia || '',
-        telefono_emergencia: item.telefono_emergencia || '',
-        fecha_nacimiento: item.usuario?.fecha_nacimiento || ''
-      })
+      setFormData(getPatientFormData(item))
     } else if (tipo === 'citas') {
       const pacienteInfo = usuarios.find(u => u.id === item.paciente && u.rol === 'patient')
       const nombrePaciente = pacienteInfo ? `${pacienteInfo.first_name || ''} ${pacienteInfo.last_name || ''}`.trim() : ''
@@ -542,6 +549,8 @@ function AdminDashboard() {
         email: item.usuario?.email || '',
         telefono: item.usuario?.telefono || ''
       })
+    } else if (tipo === 'pacientes') {
+      setFormData(getPatientFormData(item))
     } else {
       setFormData({ ...item, tipo })
     }
@@ -550,12 +559,19 @@ function AdminDashboard() {
   }
 
   // Eliminar elemento
-  const handleDelete = async (tipo, id) => {
+  const handleDelete = async (tipo, id, usuarioId) => {
     if (!window.confirm(t('confirmDelete', { type: tipo }))) return
 
     try {
       setSaving(true)
-      await axiosInstance.delete(`${tipo}/${id}/`)
+      let endpoint = `${tipo}/${id}/`
+      if (tipo === 'pacientes') {
+        if (!usuarioId) {
+          throw new Error('No se pudo identificar el usuario asociado al paciente')
+        }
+        endpoint = `usuarios/${usuarioId}/`
+      }
+      await axiosInstance.delete(endpoint)
       mostrarMensaje(`✅ ${t('itemDeleted', { type: tipo })}`, 'success')
       await loadAllData()
     } catch (error) {
@@ -1125,24 +1141,26 @@ function AdminDashboard() {
       }
       else if (tipo === 'pacientes') {
         // Actualizar usuario paciente
-        if (selectedItem && selectedItem.usuario) {
-          const usuarioData = {
-            first_name: formData.first_name,
-            last_name: formData.last_name,
-            email: formData.email || '',
-            telefono: formData.telefono || '',
-            fecha_nacimiento: formData.fecha_nacimiento || null
-          }
-          await axiosInstance.patch(`usuarios/${selectedItem.usuario.id}/`, usuarioData)
+        if (!selectedItem?.usuario?.id) {
+          throw new Error('No se pudo identificar el usuario asociado al paciente')
+        }
+        const usuarioData = {
+          username: formData.username,
+          first_name: formData.first_name,
+          last_name: formData.last_name,
+          email: formData.email || '',
+          telefono: formData.telefono || '',
+          fecha_nacimiento: formData.fecha_nacimiento || null
+        }
+        await axiosInstance.patch(`usuarios/${selectedItem.usuario.id}/`, usuarioData)
 
-          // Subir foto de perfil si se proporcionó
-          if (formData.foto_perfil) {
-            const formDataFoto = new FormData()
-            formDataFoto.append('foto', formData.foto_perfil)
-            await axiosInstance.post(`foto-perfil/${selectedItem.usuario.id}/`, formDataFoto, {
-              headers: { 'Content-Type': 'multipart/form-data' }
-            })
-          }
+        // Subir foto de perfil si se proporcionó
+        if (formData.foto_perfil) {
+          const formDataFoto = new FormData()
+          formDataFoto.append('foto', formData.foto_perfil)
+          await axiosInstance.post(`foto-perfil/${selectedItem.usuario.id}/`, formDataFoto, {
+            headers: { 'Content-Type': 'multipart/form-data' }
+          })
         }
         // Actualizar perfil de paciente
         const pacienteData = {
@@ -1726,7 +1744,7 @@ function AdminDashboard() {
                           <button onClick={() => handleEdit(paciente, 'pacientes')} style={styles.editButton} title={t('edit')}>
                             <FaEdit />
                           </button>
-                          <button onClick={() => handleDelete('pacientes', paciente.id)} style={styles.deleteButton} title={t('delete')}>
+                          <button onClick={() => handleDelete('pacientes', paciente.id, paciente.usuario?.id)} style={styles.deleteButton} title={t('delete')}>
                             <FaTrash />
                           </button>
                         </td>
@@ -3886,9 +3904,6 @@ const styles = {
 
 
 export default AdminDashboard
-
-
-
 
 
 
