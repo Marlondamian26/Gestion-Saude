@@ -21,6 +21,13 @@ class PacienteViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
     authentication_classes = [JWTAuthentication]
 
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        usuario_id = self.request.query_params.get('usuario_id')
+        if usuario_id:
+            queryset = queryset.filter(usuario_id=usuario_id)
+        return queryset
+
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])

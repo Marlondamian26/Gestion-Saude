@@ -14,6 +14,9 @@ class OptionalEmailField(serializers.EmailField):
 
 
 class UsuarioSerializer(serializers.ModelSerializer):
+    username = serializers.CharField(
+        validators=[UniqueValidator(queryset=Usuario.objects.all())],
+    )
     password = serializers.CharField(write_only=True, required=False)
     foto_perfil_url = serializers.SerializerMethodField()
     email = OptionalEmailField(
@@ -54,6 +57,9 @@ class UsuarioSerializer(serializers.ModelSerializer):
 
 
 class RegistroUsuarioSerializer(serializers.ModelSerializer):
+    username = serializers.CharField(
+        validators=[UniqueValidator(queryset=Usuario.objects.all())],
+    )
     password = serializers.CharField(write_only=True)
     acepta_terminos = serializers.BooleanField(write_only=True, required=True)
     email = OptionalEmailField(

@@ -77,6 +77,22 @@ class TestEmailVacioEnAltas(TestCase):
         self.assertEqual(response.status_code, 400, response.data)
         self.assertIn('email', response.data)
 
+    def test_username_existente_se_rechaza_con_error_de_validacion(self):
+        response = self.client.post(
+            '/api/usuarios/',
+            {
+                'username': self.admin.username,
+                'password': 'TestPass123!',
+                'first_name': 'Duplicate',
+                'last_name': 'Username',
+                'email': 'new-email@example.com',
+                'rol': 'patient',
+            },
+        )
+
+        self.assertEqual(response.status_code, 400, response.data)
+        self.assertIn('username', response.data)
+
     def test_registro_publico_sin_email_puede_repetirse(self):
         client = APIClient()
         for username in ('public-no-email-1', 'public-no-email-2'):
