@@ -2494,3 +2494,21 @@ Todas las IDs existen y son estables. Falta `scroll-margin-top` para el navbar f
 `git commit -m "docs(13.0): diagnostico del footer del promo (i18n, links, redes)"`
 
 
+
+## FASE 15 — Persistencia de Media con Supabase Storage
+**Fecha inicio:** 2026-11-01  
+**Objetivo:** Migrar almacenamiento de MEDIA_ROOT local a Supabase Storage para persistir imágenes entre redeploys en Render.
+
+### §15.0 — Inventario (FASE 7 §7.4)
+**Verificado:**
+- `backend/core/settings.py:263-320` - Feature flag `MEDIA_STORAGE=s3` preparado. Usa `storages.backends.s3.S3Storage`, vars `AWS_*`, `querystring_auth=True`. Fallback a `FileSystemStorage` si falta `django-storages`.
+- `backend/requirements.txt:32-33` - `django-storages[s3]==1.18.0` y `boto3==1.39.0` comentados (listos para instalar).
+- `backend/usuarios/management/commands/migrate_media_to_s3.py` - Existe comando de migración (dry-run por defecto, requiere `--apply`). Soporta usuarios.foto_perfil y SitioImagen.imagen.
+- `render.yaml` - Sin variables `MEDIA_STORAGE` configuradas actualmente.
+- `backend/.env.example` - No tiene vars de media storage.
+
+**Imágenes actuales:**
+- Local: Se verificará con find/du.
+- Producción: `[REQUIERE ACCIÓN MANUAL]` - Ver instrucciones en §15.2.4
+
+**Estado:** ✅
