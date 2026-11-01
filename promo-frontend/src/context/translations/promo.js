@@ -134,6 +134,105 @@ export const promoTranslations = {
 
     // Navbar
     navMenuAria: 'Navegacao principal',
+
+    // Legal (paginas de privacidad e termos de uso)
+    legalWarning: '⚠️ PLANTILLA GENÉRICA — Pendente de revisão legal antes de publicar.',
+    volverInicio: 'Voltar ao início',
+    legalUltimaActualizacao: 'Última atualização: {FECHA}',
+
+    // Política de Privacidade
+    privacidadTitle: 'Política de Privacidade',
+    privacidadS1Title: '1. Responsável pelo tratamento',
+    privacidadS1Body: [
+      '{{NOMBRE_CLINICA}}. Direção: {{DIRECCION}}. Email: {{EMAIL_CONTACTO}}. Telefone: {{TELEFONO}}.',
+    ],
+    privacidadS2Title: '2. Dados que recolhemos',
+    privacidadS2Body: [
+      '• Dados de identificação: nome, email, telefone, data de nascimento.',
+      '• Dados de saúde: motivo da consulta, histórico de consultas, alergias, grupo sanguíneo (se aplicável).',
+      '• Dados de uso: registos de acesso, endereço IP, tipo de navegador.',
+    ],
+    privacidadS3Title: '3. Finalidade do tratamento',
+    privacidadS3Body: [
+      '• Gestão de consultas médicas.',
+      '• Comunicações relacionadas com o serviço (lembretes, confirmações).',
+      '• Melhoria do serviço (análise agregada, não identificável).',
+    ],
+    privacidadS4Title: '4. Base legal',
+    privacidadS4Body: [
+      '• Consentimento explícito do titular.',
+      '• Execução de um contrato (prestação do serviço médico).',
+      '• Cumprimento de obrigações legais (história clínica).',
+    ],
+    privacidadS5Title: '5. Conservação',
+    privacidadS5Body: [
+      'Os dados são conservados enquanto existir relação com o paciente e durante o prazo legalmente exigível ({{PLAZO_RETENCION}}).',
+    ],
+    privacidadS6Title: '6. Partilha com terceiros',
+    privacidadS6Body: [
+      '• Fornecedores de infraestrutura: {{SUPABASE}} (base de dados), {{RENDER}} (hosting).',
+      '• Fornecedores de comunicação: {{TWILIO}} (WhatsApp/SMS), {{RESEND}} (email).',
+      '• Não se partilham dados com terceiros para fins publicitários.',
+    ],
+    privacidadS7Title: '7. Direitos do titular',
+    privacidadS7Body: [
+      'Pode exercer os seus direitos de acesso, retificação, eliminação, limitação e portabilidade escrevendo para {{EMAIL_CONTACTO}}.',
+    ],
+    privacidadS8Title: '8. Segurança',
+    privacidadS8Body: [
+      'Aplicamos medidas técnicas e organizativas para proteger os dados: cifragem em trânsito (HTTPS), controlo de acesso, backups.',
+    ],
+    privacidadS9Title: '9. Alterações nesta política',
+    privacidadS9Body: [
+      'Qualquer alteração será comunicada nesta página com a respetiva data de atualização.',
+    ],
+    privacidadS10Title: '10. Legislação aplicável',
+    privacidadS10Body: [
+      '{{JURISDICCION}} (ex. Lei n.º 22/11 de Proteção de Dados Pessoais de Angola; RGPD se aplicar).',
+    ],
+
+    // Termos de Uso
+    terminosTitle: 'Termos de Uso',
+    terminosS1Title: '1. Aceitação',
+    terminosS1Body: [
+      'Ao registar-se e utilizar a plataforma, o utilizador aceita estes Termos.',
+    ],
+    terminosS2Title: '2. Descrição do serviço',
+    terminosS2Body: [
+      '{{NOMBRE_CLINICA}} oferece uma plataforma para gerir consultas médicas e comunicar com o consultório. O serviço NÃO substitui a consulta médica presencial nem constitui diagnóstico à distância.',
+    ],
+    terminosS3Title: '3. Registo e conta',
+    terminosS3Body: [
+      'O utilizador é responsável pela veracidade dos seus dados e pela confidencialidade das suas credenciais.',
+    ],
+    terminosS4Title: '4. Uso aceitável',
+    terminosS4Body: [
+      'Proibido: suplantar identidade, utilizar o serviço para fins ilícitos, tentar aceder a dados de outros utilizadores, sobrecarregar a plataforma.',
+    ],
+    terminosS5Title: '5. Propriedade intelectual',
+    terminosS5Body: [
+      'Todos os conteúdos (textos, imagens, código) são propriedade de {{NOMBRE_CLINICA}} ou dos seus licenciantes.',
+    ],
+    terminosS6Title: '6. Limitação de responsabilidade',
+    terminosS6Body: [
+      '{{NOMBRE_CLINICA}} não se responsabiliza por danos indiretos derivados do uso da plataforma. A informação médica publicada é orientativa e não substitui uma consulta profissional.',
+    ],
+    terminosS7Title: '7. Modificações',
+    terminosS7Body: [
+      '{{NOMBRE_CLINICA}} pode modificar estes Termos; as alterações serão comunicadas nesta página.',
+    ],
+    terminosS8Title: '8. Suspensão e cancelamento',
+    terminosS8Body: [
+      '{{NOMBRE_CLINICA}} pode suspender contas que incumpram estes Termos.',
+    ],
+    terminosS9Title: '9. Legislação e jurisdição',
+    terminosS9Body: [
+      'Estes Termos são regidos pelas leis de {{JURISDICCION}}. Qualquer disputa será resolvida nos tribunais de {{CIUDAD}}.',
+    ],
+    terminosS10Title: '10. Contacto',
+    terminosS10Body: [
+      'Para consultas sobre estes Termos: {{EMAIL_CONTACTO}}.',
+    ],
   },
 
   // Spanish (sitio promocional)
@@ -270,6 +369,105 @@ export const promoTranslations = {
 
     // Navbar
     navMenuAria: 'Navegacion principal',
+
+    // Legal (páginas de privacidad y términos de uso)
+    legalWarning: '⚠️ PLANTILLA GENÉRICA — Pendiente de revisión legal antes de publicar.',
+    volverInicio: 'Volver al inicio',
+    legalUltimaActualizacao: 'Última actualización: {FECHA}',
+
+    // Política de Privacidad
+    privacidadTitle: 'Política de Privacidad',
+    privacidadS1Title: '1. Responsable del tratamiento',
+    privacidadS1Body: [
+      '{{NOMBRE_CLINICA}}. Dirección: {{DIRECCION}}. Email: {{EMAIL_CONTACTO}}. Teléfono: {{TELEFONO}}.',
+    ],
+    privacidadS2Title: '2. Datos que recopilamos',
+    privacidadS2Body: [
+      '• Datos de identificación: nombre, email, teléfono, fecha de nacimiento.',
+      '• Datos de salud: motivo de consulta, historial de citas, alergias, grupo sanguíneo (si aplica).',
+      '• Datos de uso: logs de acceso, dirección IP, tipo de navegador.',
+    ],
+    privacidadS3Title: '3. Finalidad del tratamiento',
+    privacidadS3Body: [
+      '• Gestión de citas médicas.',
+      '• Comunicaciones relacionadas con el servicio (recordatorios, confirmaciones).',
+      '• Mejora del servicio (análisis agregado, no identificable).',
+    ],
+    privacidadS4Title: '4. Base legal',
+    privacidadS4Body: [
+      '• Consentimiento explícito del titular.',
+      '• Ejecución de un contrato (prestación del servicio médico).',
+      '• Cumplimiento de obligaciones legales (historia clínica).',
+    ],
+    privacidadS5Title: '5. Conservación',
+    privacidadS5Body: [
+      'Los datos se conservan mientras exista relación con el paciente y durante el plazo legalmente exigible ({{PLAZO_RETENCION}}).',
+    ],
+    privacidadS6Title: '6. Compartición con terceros',
+    privacidadS6Body: [
+      '• Proveedores de infraestructura: {{SUPABASE}} (base de datos), {{RENDER}} (hosting).',
+      '• Proveedores de comunicación: {{TWILIO}} (WhatsApp/SMS), {{RESEND}} (email).',
+      '• No se comparten datos con terceros para fines publicitarios.',
+    ],
+    privacidadS7Title: '7. Derechos del titular',
+    privacidadS7Body: [
+      'Puede ejercer sus derechos de acceso, rectificación, eliminación, limitación y portabilidad escribiendo a {{EMAIL_CONTACTO}}.',
+    ],
+    privacidadS8Title: '8. Seguridad',
+    privacidadS8Body: [
+      'Aplicamos medidas técnicas y organizativas para proteger los datos: cifrado en tránsito (HTTPS), control de acceso, backups.',
+    ],
+    privacidadS9Title: '9. Cambios en esta política',
+    privacidadS9Body: [
+      'Cualquier cambio será comunicado en esta página con fecha de actualización.',
+    ],
+    privacidadS10Title: '10. Legislación aplicable',
+    privacidadS10Body: [
+      '{{JURISDICCION}} (ej. Lei n.º 22/11 de Proteção de Dados Pessoais de Angola; RGPD si aplica).',
+    ],
+
+    // Términos de Uso
+    terminosTitle: 'Términos de Uso',
+    terminosS1Title: '1. Aceptación',
+    terminosS1Body: [
+      'Al registrarse y usar la plataforma, el usuario acepta estos Términos.',
+    ],
+    terminosS2Title: '2. Descripción del servicio',
+    terminosS2Body: [
+      '{{NOMBRE_CLINICA}} ofrece una plataforma para gestionar citas médicas y comunicarse con el consultorio. El servicio NO sustituye la consulta médica presencial ni constituye diagnóstico a distancia.',
+    ],
+    terminosS3Title: '3. Registro y cuenta',
+    terminosS3Body: [
+      'El usuario es responsable de la veracidad de sus datos y de la confidencialidad de sus credenciales.',
+    ],
+    terminosS4Title: '4. Uso aceptable',
+    terminosS4Body: [
+      'Prohibido: suplantar identidad, usar el servicio para fines ilícitos, intentar acceder a datos de otros usuarios, sobrecargar la plataforma.',
+    ],
+    terminosS5Title: '5. Propiedad intelectual',
+    terminosS5Body: [
+      'Todos los contenidos (textos, imágenes, código) son propiedad de {{NOMBRE_CLINICA}} o de sus licenciantes.',
+    ],
+    terminosS6Title: '6. Limitación de responsabilidad',
+    terminosS6Body: [
+      '{{NOMBRE_CLINICA}} no se hace responsable de daños indirectos derivados del uso de la plataforma. La información médica publicada es orientativa y no sustituye una consulta profesional.',
+    ],
+    terminosS7Title: '7. Modificaciones',
+    terminosS7Body: [
+      '{{NOMBRE_CLINICA}} puede modificar estos Términos; los cambios se comunicarán en esta página.',
+    ],
+    terminosS8Title: '8. Suspensión y cancelación',
+    terminosS8Body: [
+      '{{NOMBRE_CLINICA}} puede suspender cuentas que incumplan estos Términos.',
+    ],
+    terminosS9Title: '9. Legislación y jurisdicción',
+    terminosS9Body: [
+      'Estos Términos se rigen por las leyes de {{JURISDICCION}}. Cualquier disputa se resolverá en los tribunales de {{CIUDAD}}.',
+    ],
+    terminosS10Title: '10. Contacto',
+    terminosS10Body: [
+      'Para consultas sobre estos Términos: {{EMAIL_CONTACTO}}.',
+    ],
   },
 
   // English (sitio promocional)
@@ -442,5 +640,104 @@ export const promoTranslations = {
     haveQuestion: 'I have a question',
     untitled: 'Untitled',
     appointment: 'Appointment',
+
+    // Legal (privacy policy and terms of use pages)
+    legalWarning: '⚠️ GENERIC TEMPLATE — Pending legal review before publishing.',
+    volverInicio: 'Back to home',
+    legalUltimaActualizacao: 'Last updated: {FECHA}',
+
+    // Privacy Policy
+    privacidadTitle: 'Privacy Policy',
+    privacidadS1Title: '1. Data controller',
+    privacidadS1Body: [
+      '{{NOMBRE_CLINICA}}. Address: {{DIRECCION}}. Email: {{EMAIL_CONTACTO}}. Phone: {{TELEFONO}}.',
+    ],
+    privacidadS2Title: '2. Data we collect',
+    privacidadS2Body: [
+      '• Identification data: name, email, phone, date of birth.',
+      '• Health data: reason for consultation, appointment history, allergies, blood type (if applicable).',
+      '• Usage data: access logs, IP address, browser type.',
+    ],
+    privacidadS3Title: '3. Purpose of processing',
+    privacidadS3Body: [
+      '• Medical appointment management.',
+      '• Service-related communications (reminders, confirmations).',
+      '• Service improvement (aggregated, non-identifiable analysis).',
+    ],
+    privacidadS4Title: '4. Legal basis',
+    privacidadS4Body: [
+      '• Explicit consent of the data subject.',
+      '• Performance of a contract (provision of medical services).',
+      '• Compliance with legal obligations (medical records).',
+    ],
+    privacidadS5Title: '5. Retention',
+    privacidadS5Body: [
+      'Data is retained while the relationship with the patient exists and for the legally required period ({{PLAZO_RETENCION}}).',
+    ],
+    privacidadS6Title: '6. Sharing with third parties',
+    privacidadS6Body: [
+      '• Infrastructure providers: {{SUPABASE}} (database), {{RENDER}} (hosting).',
+      '• Communication providers: {{TWILIO}} (WhatsApp/SMS), {{RESEND}} (email).',
+      '• No data is shared with third parties for advertising purposes.',
+    ],
+    privacidadS7Title: '7. Data subject rights',
+    privacidadS7Body: [
+      'You may exercise your rights of access, rectification, erasure, restriction and portability by writing to {{EMAIL_CONTACTO}}.',
+    ],
+    privacidadS8Title: '8. Security',
+    privacidadS8Body: [
+      'We apply technical and organisational measures to protect data: encryption in transit (HTTPS), access control, backups.',
+    ],
+    privacidadS9Title: '9. Changes to this policy',
+    privacidadS9Body: [
+      'Any change will be communicated on this page with an update date.',
+    ],
+    privacidadS10Title: '10. Applicable law',
+    privacidadS10Body: [
+      '{{JURISDICCION}} (e.g. Angolan Law No. 22/11 on Personal Data Protection; GDPR if applicable).',
+    ],
+
+    // Terms of Use
+    terminosTitle: 'Terms of Use',
+    terminosS1Title: '1. Acceptance',
+    terminosS1Body: [
+      'By registering and using the platform, the user accepts these Terms.',
+    ],
+    terminosS2Title: '2. Service description',
+    terminosS2Body: [
+      '{{NOMBRE_CLINICA}} offers a platform to manage medical appointments and communicate with the office. The service does NOT replace an in-person medical consultation nor constitutes remote diagnosis.',
+    ],
+    terminosS3Title: '3. Registration and account',
+    terminosS3Body: [
+      'The user is responsible for the accuracy of their data and the confidentiality of their credentials.',
+    ],
+    terminosS4Title: '4. Acceptable use',
+    terminosS4Body: [
+      'Prohibited: impersonating identities, using the service for illegal purposes, attempting to access other users data, overloading the platform.',
+    ],
+    terminosS5Title: '5. Intellectual property',
+    terminosS5Body: [
+      'All content (texts, images, code) is owned by {{NOMBRE_CLINICA}} or its licensors.',
+    ],
+    terminosS6Title: '6. Limitation of liability',
+    terminosS6Body: [
+      '{{NOMBRE_CLINICA}} is not responsible for indirect damages arising from use of the platform. Published medical information is indicative and does not replace a professional consultation.',
+    ],
+    terminosS7Title: '7. Modifications',
+    terminosS7Body: [
+      '{{NOMBRE_CLINICA}} may modify these Terms; changes will be communicated on this page.',
+    ],
+    terminosS8Title: '8. Suspension and cancellation',
+    terminosS8Body: [
+      '{{NOMBRE_CLINICA}} may suspend accounts that breach these Terms.',
+    ],
+    terminosS9Title: '9. Governing law and jurisdiction',
+    terminosS9Body: [
+      'These Terms are governed by the laws of {{JURISDICCION}}. Any dispute will be resolved in the courts of {{CIUDAD}}.',
+    ],
+    terminosS10Title: '10. Contact',
+    terminosS10Body: [
+      'For inquiries about these Terms: {{EMAIL_CONTACTO}}.',
+    ],
   },
 };

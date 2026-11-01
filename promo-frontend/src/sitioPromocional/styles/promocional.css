@@ -1526,6 +1526,105 @@ section[id] {
 }
 
 /* ============================================
+   PAGINAS LEGALES
+   ============================================ */
+.promo-legal-page {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: var(--promo-space-24) var(--promo-gutter);
+  color: var(--promo-text);
+  line-height: var(--promo-lh-relaxed);
+  font-size: var(--promo-fs-base);
+}
+
+.promo-legal-header {
+  display: flex;
+  align-items: center;
+  gap: var(--promo-space-2);
+  margin-bottom: var(--promo-space-16);
+}
+
+.promo-legal-header a {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--promo-space-2);
+  color: var(--promo-primary-600);
+  text-decoration: none;
+  font-size: var(--promo-fs-sm);
+  font-weight: 500;
+}
+
+.promo-legal-header a:hover {
+  text-decoration: underline;
+}
+
+.promo-legal-warning {
+  background: var(--promo-warning-bg, var(--promo-surface-sunken));
+  border-left: 4px solid var(--promo-warning, #f59e0b);
+  color: var(--promo-text);
+  padding: var(--promo-space-6);
+  margin-bottom: var(--promo-space-12);
+  font-size: var(--promo-fs-sm);
+  font-weight: 600;
+  border-radius: var(--promo-radius-sm);
+}
+
+.promo-legal-title {
+  font-family: var(--promo-font-display);
+  font-size: var(--promo-fs-4xl);
+  font-weight: 600;
+  margin-bottom: var(--promo-space-16);
+  color: var(--promo-text);
+}
+
+.promo-legal-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--promo-space-10);
+}
+
+.promo-legal-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--promo-space-4);
+}
+
+.promo-legal-section-title {
+  font-family: var(--promo-font-display);
+  font-size: var(--promo-fs-xl);
+  font-weight: 600;
+  color: var(--promo-primary-700);
+  margin: 0;
+}
+
+[data-theme='dark'] .promo-legal-section-title {
+  color: var(--promo-primary-400);
+}
+
+.promo-legal-paragraph {
+  margin: 0;
+  color: var(--promo-text-muted);
+}
+
+.promo-legal-updated {
+  margin-top: var(--promo-space-16);
+  padding-top: var(--promo-space-8);
+  border-top: 1px solid var(--promo-border);
+  font-size: var(--promo-fs-xs);
+  color: var(--promo-text-muted);
+  text-align: right;
+}
+
+.promo-legal-footer {
+  margin-top: var(--promo-space-24);
+  padding-top: var(--promo-space-8);
+  border-top: 1px solid var(--promo-border);
+  font-size: var(--promo-fs-xs);
+  color: var(--promo-text-muted);
+  text-align: center;
+}
+
+/* ============================================
    ANIMACIONES
    ============================================ */
 @keyframes fadeInUp {
