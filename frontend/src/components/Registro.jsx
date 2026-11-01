@@ -6,7 +6,7 @@ import {
   FaUser, FaEnvelope, FaPhone, FaLock, FaEye, FaEyeSlash,
   FaCheckCircle, FaExclamationTriangle, FaSpinner, FaUserPlus
 } from 'react-icons/fa'
-import { APP_NAME, APP_SLOGAN } from '../config/constants'
+import { APP_NAME, PRIVACY_URL, TERMS_URL } from '../config/constants'
 import { useLanguage } from '../context/LanguageContext'
 import { useAuth } from '../context/AuthContext'
 
@@ -27,6 +27,7 @@ function Registro() {
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
   const [loading, setLoading] = useState(false)
+  const [aceptaTerminos, setAceptaTerminos] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
   const [passwordStrength, setPasswordStrength] = useState({ score: 0, message: '', color: '#e74c3c' })
   // Evitar que el componente se desmonte durante el registro
@@ -125,8 +126,12 @@ function Registro() {
     }
 
     // Validar teléfono (opcional pero con formato)
-    if (formData.telefono && !/^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$/.test(formData.telefono)) {
+    if (formData.telefono && !/^[+]?[(]?[0-9]{3}[)]?[-\s.]?[0-9]{3}[-\s.]?[0-9]{4,6}$/.test(formData.telefono)) {
       newErrors.telefono = t('invalidPhone')
+    }
+
+    if (!aceptaTerminos) {
+      newErrors.acepta_terminos = t('acceptTermsRequired')
     }
 
     setErrors(newErrors)
@@ -152,8 +157,6 @@ function Registro() {
     setError('')
     setSuccess('')
 
-    console.log('Enviando registro:', formData)
-
     try {
       // Configurar timeout más largo (60s) para evitar cancelaciones
       const controller = new AbortController()
@@ -162,7 +165,7 @@ function Registro() {
       // usar axiosInstance para respetar la configuración común
       const response = await axiosInstance.post(
         'registro/', 
-        formData,
+        { ...formData, acepta_terminos: aceptaTerminos },
         {
           signal: controller.signal,
           headers: {
@@ -270,6 +273,15 @@ function Registro() {
       rol: 'patient'
     })
     validatePasswordStrength('Demo123!')
+  }
+
+  const handleTermsChange = (event) => {
+    const accepted = event.target.checked
+    setAceptaTerminos(accepted)
+    if (accepted) {
+      setErrors((previous) => ({ ...previous, acepta_terminos: '' }))
+    }
+    if (error) setError('')
   }
 
   return (
@@ -477,6 +489,37 @@ function Registro() {
           {/* Rol (fijo como patient, oculto) */}
           <input type="hidden" name="rol" value="patient" />
 
+          <div style={styles.termsAcceptance}>
+            <label style={styles.termsAcceptanceLabel} htmlFor="accept-legal">
+              <input
+                id="accept-legal"
+                name="acepta_terminos"
+                type="checkbox"
+                checked={aceptaTerminos}
+                onChange={handleTermsChange}
+                required
+                disabled={loading}
+                aria-invalid={Boolean(errors.acepta_terminos)}
+                aria-describedby={errors.acepta_terminos ? 'accept-legal-error' : undefined}
+              />
+              <span>
+                {t('aceptaTerminosPrefix')}{' '}
+                <a href={TERMS_URL} target="_blank" rel="noopener noreferrer" style={styles.termsLink}>
+                  {t('termsLink')}
+                </a>{' '}
+                {t('and')}{' '}
+                <a href={PRIVACY_URL} target="_blank" rel="noopener noreferrer" style={styles.termsLink}>
+                  {t('privacyLink')}
+                </a>.
+              </span>
+            </label>
+            {errors.acepta_terminos && (
+              <span id="accept-legal-error" role="alert" style={styles.fieldError}>
+                {errors.acepta_terminos}
+              </span>
+            )}
+          </div>
+
           {/* Botón de registro */}
           <button 
             type="submit" 
@@ -484,7 +527,7 @@ function Registro() {
               ...styles.submitButton,
               ...(loading ? styles.submitButtonDisabled : {})
             }}
-            disabled={loading}
+            disabled={!aceptaTerminos || loading}
           >
             {loading ? (
               <>
@@ -500,7 +543,7 @@ function Registro() {
           </button>
 
           {/* Botón de demo (solo desarrollo) */}
-          {process.env.NODE_ENV === 'development' && !loading && (
+          {import.meta.env.DEV && !loading && (
             <button 
               type="button"
               onClick={handleDemoData}
@@ -521,15 +564,6 @@ function Registro() {
           </p>
         </div>
 
-        {/* Términos y condiciones */}
-        <div style={styles.termsContainer}>
-          <p style={styles.termsText}>
-            {t('termsAndConditions')}{' '}
-            <a href="/terminos" style={styles.termsLink}>{t('termsAndConditions')}</a>{' '}
-            e{' '}
-            <a href="/privacidade" style={styles.termsLink}>{t('privacyPolicy')}</a>
-          </p>
-        </div>
       </div>
     </div>
   )
@@ -786,15 +820,19 @@ const styles = {
       textDecoration: 'underline'
     }
   },
-  termsContainer: {
-    marginTop: '15px',
-    textAlign: 'center'
+  termsAcceptance: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '5px',
+    color: 'var(--text-secondary)',
+    fontSize: '13px',
+    lineHeight: 1.5
   },
-  termsText: {
-    color: 'var(--text-muted)',
-    fontSize: '12px',
-    margin: 0,
-    lineHeight: '1.5'
+  termsAcceptanceLabel: {
+    display: 'flex',
+    alignItems: 'flex-start',
+    gap: '9px',
+    cursor: 'pointer'
   },
   termsLink: {
     color: 'var(--text-secondary)',

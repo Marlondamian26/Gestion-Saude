@@ -2610,3 +2610,16 @@ BLOQUE A está completo y validado. BLOQUE B toca backend (`usuarios.models.Usua
 
 #### Commit §14.1
 `feat(14.1): registrar aceptacion legal con fecha y version`
+
+### §14.2 — Plataforma: aceptación en registro (completado)
+- Se añadió una casilla requerida, inicialmente desmarcada, que mantiene deshabilitado el botón de registro hasta aceptar.
+- El payload incluye `acepta_terminos: true`; el backend vuelve a validarlo y registra fecha/versión.
+- Términos y privacidad enlazan al promo mediante `VITE_PROMO_URL`; este ajuste ya existía en `frontend/.env.example`. `constants.js` quita barras finales y usa el dominio de producción del promo como fallback.
+- Se añadieron claves PT/ES/EN para el texto de aceptación, conectores, nombres de enlaces, navegación legal y validación.
+- El verificador `frontend/scripts/check-i18n.js` ahora lee `platformTranslations`, no un `LanguageContext.jsx` antiguo, y valida las claves PT/ES/EN y las nuevas claves legales.
+- Pruebas: Registro 3/3; suite plataforma 58/58; `npm run i18n:check`; `npm run build`.
+
+**Estado:** ✅
+
+#### Commit §14.2
+`feat(14.2): exigir aceptacion legal en registro de plataforma`
