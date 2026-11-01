@@ -11,18 +11,14 @@ Uso:
 [REQUIERE ACCIÓN MANUAL] ejecutar en prod con --apply tras aprobación.
 """
 import os
-from io import BytesIO
 from datetime import timedelta
 
 from django.core.management.base import BaseCommand
 from django.core.files.base import ContentFile
 from django.utils import timezone
-from django.db import transaction
 
 from usuarios.models import Usuario, SitioImagen
-from usuarios.image_utils import validar_imagen, optimizar_imagen
-
-logger = __import__('logging').getLogger(__name__)
+from usuarios.image_utils import optimizar_imagen
 
 
 class Command(BaseCommand):
@@ -37,6 +33,32 @@ class Command(BaseCommand):
             '--max-edad-dias', type=int, default=0,
             help='Solo optimizar imágenes modificadas en los últimos N días'
         )
+
+    def _optimizar_archivo(self, instance, field_name, target_size, max_bytes):
+        image = getattr(instance, field_name)
+        old_name = image.name
+        try:
+            with image.open('rb') as source:
+                content_file = ContentFile(
+                    source.read(),
+                    name=os.path.basename(old_name),
+                )
+                optimized = optimizar_imagen(
+                    content_file,
+                    target_size=target_size,
+                    max_bytes=max_bytes,
+                )
+
+            base_name = os.path.splitext(os.path.basename(old_name))[0]
+            image.save(f'{base_name}.webp', optimized, save=False)
+            new_name = image.name
+            instance.save(update_fields=[field_name])
+            if new_name != old_name:
+                image.storage.delete(old_name)
+            return True
+        except Exception as exc:
+            self.stdout.write(self.style.ERROR(f"    ERROR: {exc}"))
+            return False
 
     def handle(self, *args, **options):
         apply = options['apply']
@@ -58,14 +80,12 @@ class Command(BaseCommand):
 
         optimizados = 0
         for u in usuarios.iterator():
-            file_path = u.foto_perfil.name
-            storage_path = u.foto_perfil.path if hasattr(u.foto_perfil, 'path') else None
-
-            if not storage_path or not os.path.exists(storage_path):
+            image = u.foto_perfil
+            if not image.name:
                 continue
 
-            size = os.path.getsize(storage_path)
-            is_webp = file_path.lower().endswith('.webp')
+            size = image.size
+            is_webp = image.name.lower().endswith('.webp')
 
             if size <= 5 * 1024 * 1024 and is_webp:
                 continue  # ya está optimizada
@@ -74,24 +94,12 @@ class Command(BaseCommand):
             optimizados += 1
 
             if not dry_run:
-                try:
-                    with open(storage_path, 'rb') as f:
-                        content_file = ContentFile(f.read(), name=os.path.basename(file_path))
-                        optimized = optimizar_imagen(content_file, target_size=(512, 512))
-
-                    # Reemplazar archivo
-                    old_name = u.foto_perfil.name
-                    u.foto_perfil.save(os.path.basename(old_name).replace('.jpg', '.webp').replace('.png', '.webp'), optimized, save=True)
-                    u.save()
-
-                    # Borrar archivo antiguo
-                    old_path = os.path.join(os.path.dirname(storage_path), os.path.basename(old_name))
-                    if old_path != u.foto_perfil.path and os.path.exists(old_path):
-                        os.remove(old_path)
-
-                except Exception as e:
-                    self.stdout.write(self.style.ERROR(f"    ERROR: {e}"))
-                    continue
+                self._optimizar_archivo(
+                    u,
+                    'foto_perfil',
+                    target_size=(512, 512),
+                    max_bytes=5 * 1024 * 1024,
+                )
 
         self.stdout.write(self.style.SUCCESS(
             f"Foto perfil: {optimizados}/{total} optimizadas"
@@ -103,13 +111,14 @@ class Command(BaseCommand):
         self.stdout.write(f"\nSitioImagen: {total_site} imágenes")
 
         optimizados_site = 0
+
         for img in imagenes.iterator():
-            storage_path = img.imagen.path if hasattr(img.imagen, 'path') else None
-            if not storage_path or not os.path.exists(storage_path):
+            image = img.imagen
+            if not image.name:
                 continue
 
-            size = os.path.getsize(storage_path)
-            is_webp = img.imagen.name.lower().endswith('.webp')
+            size = image.size
+            is_webp = image.name.lower().endswith('.webp')
 
             if size <= 10 * 1024 * 1024 and is_webp:
                 continue
@@ -118,22 +127,13 @@ class Command(BaseCommand):
             optimizados_site += 1
 
             if not dry_run:
-                try:
-                    with open(storage_path, 'rb') as f:
-                        content_file = ContentFile(f.read(), name=os.path.basename(img.imagen.name))
-                        target = (1920, 1080) if img.tipo == 'hero' else (1200, 800)
-                        optimized = optimizar_imagen(content_file, target_size=target, max_bytes=10*1024*1024)
-
-                    old_name = img.imagen.name
-                    img.imagen.save(os.path.basename(old_name).replace('.jpg', '.webp').replace('.png', '.webp'), optimized, save=True)
-
-                    old_path = storage_path
-                    if old_path != img.imagen.path and os.path.exists(old_path):
-                        os.remove(old_path)
-
-                except Exception as e:
-                    self.stdout.write(self.style.ERROR(f"    ERROR: {e}"))
-                    continue
+                target = (1920, 1080) if img.tipo == 'hero' else (1200, 800)
+                self._optimizar_archivo(
+                    img,
+                    'imagen',
+                    target_size=target,
+                    max_bytes=10 * 1024 * 1024,
+                )
 
         self.stdout.write(self.style.SUCCESS(
             f"SitioImagen: {optimizados_site}/{total_site} optimizadas"

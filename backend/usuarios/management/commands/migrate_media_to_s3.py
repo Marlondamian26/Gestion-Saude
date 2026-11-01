@@ -1,150 +1,111 @@
 """
-Management command: migrate_media_to_s3
+Copy existing MEDIA_ROOT files to the configured S3-compatible storage.
 
-Migra archivos existentes de MEDIA_ROOT (FileSystemStorage) a S3-compatible storage.
-SOLO ejecutar después de activar MEDIA_STORAGE=s3 y provisionar bucket.
-
-Modo:
-  --dry-run (default): muestra qué se migraría sin tocar nada.
-  --apply: ejecuta la migración real.
-
-Uso:
-  python manage.py migrate_media_to_s3 --dry-run
-  python manage.py migrate_media_to_s3 --apply
+Dry-run is the default and works with local filesystem settings. Use --apply
+only after MEDIA_STORAGE=s3 is configured and the target bucket is ready.
 """
-import logging
-import os
-from pathlib import Path
-
-from django.core.files.storage import default_storage, FileSystemStorage
+from django.conf import settings
+from django.core.files.storage import FileSystemStorage, default_storage
 from django.core.management.base import BaseCommand, CommandError
 
-from usuarios.models import Usuario, SitioImagen
-
-logger = logging.getLogger(__name__)
+from usuarios.models import SitioImagen, Usuario
 
 
 class Command(BaseCommand):
-    help = '[FASE 7 §7.4.5] Migrar archivos de MEDIA_ROOT a S3 (modo dry-run por defecto)'
+    help = 'Migra media de MEDIA_ROOT a Supabase Storage (dry-run por defecto)'
 
     def add_arguments(self, parser):
-        parser.add_argument(
+        mode = parser.add_mutually_exclusive_group()
+        mode.add_argument(
             '--apply',
             action='store_true',
-            help='Ejecutar la migración real (por defecto es dry-run)'
+            help='Copiar archivos al storage S3 y actualizar sus referencias',
+        )
+        mode.add_argument(
+            '--dry-run',
+            action='store_true',
+            help='Listar archivos locales sin realizar cambios (opción por defecto)',
         )
         parser.add_argument(
-            '--bucket-prefix',
-            type=str,
-            default='media/',
-            help='Prefijo de carpetas en el bucket S3 (default: media/)'
+            '--model',
+            choices=['usuarios', 'sitio', 'all'],
+            default='all',
+            help='Limitar la migración a fotos de usuario o imágenes del sitio',
         )
 
     def handle(self, *args, **options):
-        if not options['apply']:
-            self.stdout.write(self.style.WARNING(
-                '[DRY RUN] No se escribirán cambios. Usa --apply para ejecutar.'
-            ))
-
-        if not os.environ.get('MEDIA_STORAGE') == 's3':
+        apply = options['apply']
+        if apply and settings.MEDIA_STORAGE != 's3':
             raise CommandError(
-                '[FASE 7 §7.4] MEDIA_STORAGE no es s3. '
-                'Setear MEDIA_STORAGE=s3 y provisionar credenciales antes de migrar.'
+                'Para aplicar la migración, configura MEDIA_STORAGE=s3 y las '
+                'credenciales de Supabase Storage.'
             )
 
-        # Contar objetos
-        usuarios_con_foto = Usuario.objects.exclude(foto_perfil='')
-        sitio_con_imagen = SitioImagen.objects.exclude(imagen='')
+        source_storage = FileSystemStorage(location=settings.MEDIA_ROOT)
+        sources = []
+        if options['model'] in ('usuarios', 'all'):
+            sources.append(
+                (Usuario, 'foto_perfil', Usuario.objects.exclude(foto_perfil=''))
+            )
+        if options['model'] in ('sitio', 'all'):
+            sources.append(
+                (SitioImagen, 'imagen', SitioImagen.objects.exclude(imagen=''))
+            )
 
-        total = usuarios_con_foto.count() + sitio_con_imagen.count()
-        self.stdout.write(f'\nObjetos a migrar: {total}')
-
-        migrated = 0
-        errors = 0
-
-        # Migrar fotos de perfil
-        for usuario in usuarios_con_foto.iterator():
-            if not usuario.foto_perfil.name:
-                continue
-
-            old_path = usuario.foto_perfil.name
-            old_storage = FileSystemStorage()
-
-            try:
-                if not old_storage.exists(old_path):
-                    self.stdout.write(self.style.WARNING(
-                        f'  ⚠  Archivo no encontrado en disco: {old_path}'
-                    ))
-                    errors += 1
+        total = migrated = skipped = failed = 0
+        for model, field_name, queryset in sources:
+            for obj in queryset.iterator():
+                field = getattr(obj, field_name)
+                name = field.name
+                if not name:
                     continue
+                total += 1
 
-                # Leer contenido del archivo
-                with old_storage.open(old_path) as f:
-                    file_data = f.read()
+                try:
+                    if apply and default_storage.exists(name):
+                        skipped += 1
+                        self.stdout.write(f'  [SKIP] Ya existe en destino: {name}')
+                        continue
 
-                if options['apply']:
-                    # Upload to default (S3) storage
-                    new_name = default_storage.save(old_path, file_data)
-                    # Update DB reference
-                    Usuario.objects.filter(id=usuario.id).update(foto_perfil=new_name)
-                    self.stdout.write(self.style.SUCCESS(
-                        f'  ✓ Foto de perfil migrada: {old_path} → {new_name}'
-                    ))
-                else:
-                    self.stdout.write(f'  → Foto de perfil: {old_path}')
+                    if not source_storage.exists(name):
+                        failed += 1
+                        self.stderr.write(
+                            self.style.ERROR(
+                                f'  [ERROR] Archivo de origen no encontrado: {name}'
+                            )
+                        )
+                        continue
 
-                migrated += 1
+                    if not apply:
+                        self.stdout.write(f'  [DRY] {model.__name__}#{obj.pk}: {name}')
+                        migrated += 1
+                        continue
 
-            except Exception as e:
-                self.stdout.write(self.style.ERROR(
-                    f'  ✗ Error migrando {old_path}: {e}'
-                ))
-                errors += 1
+                    with source_storage.open(name, 'rb') as source:
+                        destination_name = default_storage.save(name, source)
+                    model.objects.filter(pk=obj.pk).update(
+                        **{field_name: destination_name}
+                    )
+                    migrated += 1
+                    self.stdout.write(
+                        self.style.SUCCESS(
+                            f'  [OK] {model.__name__}#{obj.pk}: '
+                            f'{name} -> {destination_name}'
+                        )
+                    )
+                except Exception as exc:
+                    failed += 1
+                    self.stderr.write(
+                        self.style.ERROR(
+                            f'  [ERROR] {model.__name__}#{obj.pk} ({name}): {exc}'
+                        )
+                    )
 
-        # Migrar imágenes del sitio promocional
-        for imagen in sitio_con_imagen.iterator():
-            old_path = imagen.imagen.name
-            old_storage = FileSystemStorage()
-
-            try:
-                if not old_storage.exists(old_path):
-                    self.stdout.write(self.style.WARNING(
-                        f'  ⚠  Archivo no encontrado en disco: {old_path}'
-                    ))
-                    errors += 1
-                    continue
-
-                with old_storage.open(old_path) as f:
-                    file_data = f.read()
-
-                if options['apply']:
-                    new_name = default_storage.save(old_path, file_data)
-                    SitioImagen.objects.filter(id=imagen.id).update(imagen=new_name)
-                    self.stdout.write(self.style.SUCCESS(
-                        f'  ✓ Imagen de sitio migrada: {old_path} → {new_name}'
-                    ))
-                else:
-                    self.stdout.write(f'  → Imagen de sitio: {old_path}')
-
-                migrated += 1
-
-            except Exception as e:
-                self.stdout.write(self.style.ERROR(
-                    f'  ✗ Error migrando {old_path}: {e}'
-                ))
-                errors += 1
-
-        # Resumen
-        self.stdout.write(self.style.SUCCESS(
-            f'\nResumen: {migrated}/{total} migrados, {errors} errores'
-        ))
-
-        if not options['apply'] and migrated > 0:
-            self.stdout.write(self.style.WARNING(
-                '\nUsa --apply para ejecutar esta migración.'
-            ))
-
-        if errors > 0:
-            self.stdout.write(self.style.WARNING(
-                f'\n[{errors}] errores encontrados. Revisa manualmente.'
-            ))
+        mode = 'APPLY' if apply else 'DRY-RUN'
+        summary = (
+            f'Total: {total} | Migradas/listadas: {migrated} | '
+            f'Omitidas: {skipped} | Fallidas: {failed} | Modo: {mode}'
+        )
+        if failed:
+            raise CommandError(summary)
+        self.stdout.write(self.style.SUCCESS(summary))

@@ -59,6 +59,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get('DEBUG', 'False').lower() == 'true'
 TERMS_VERSION = os.environ.get('TERMS_VERSION', '2026-11')
+MEDIA_STORAGE = os.environ.get('MEDIA_STORAGE', 'filesystem').strip().lower()
+if MEDIA_STORAGE not in {'filesystem', 's3'}:
+    raise ImproperlyConfigured("MEDIA_STORAGE debe ser 'filesystem' o 's3'.")
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.environ.get('SECRET_KEY')
@@ -148,6 +151,8 @@ INSTALLED_APPS = [
     'notificaciones',
     'dbbackup',
 ]
+if MEDIA_STORAGE == 's3':
+    INSTALLED_APPS.append('storages')
 
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',  # Debe ir antes de CommonMiddleware
@@ -260,49 +265,61 @@ try:
 except Exception as e:
     print(f"Warning: Could not create media directories: {e}")
 
-# [FASE 7 §7.4] Storage backend con feature flag
-# Si MEDIA_STORAGE=s3, usa S3 (Cloudflare R2/Supabase Storage/AWS S3)
-# Si no, usa FileSystemStorage (default, para dev)
-# VER NOTA: django-storages y boto3 están en requirements.txt como comentados;
-# instalar con: pip install django-storages[s3] boto3
-if os.environ.get('MEDIA_STORAGE') == 's3':
+# [FASE 15] Supabase Storage via S3-compatible API; filesystem remains the local default.
+STORAGES = {
+    'default': {'BACKEND': 'django.core.files.storage.FileSystemStorage'},
+    'staticfiles': {
+        'BACKEND': 'whitenoise.storage.CompressedManifestStaticFilesStorage',
+    },
+}
+
+if MEDIA_STORAGE == 's3':
+    SUPABASE_S3_ACCESS_KEY = os.environ.get('SUPABASE_S3_ACCESS_KEY')
+    SUPABASE_S3_SECRET_KEY = os.environ.get('SUPABASE_S3_SECRET_KEY')
+    SUPABASE_STORAGE_BUCKET = os.environ.get(
+        'SUPABASE_STORAGE_BUCKET',
+        'gestion-saude-media',
+    )
+    SUPABASE_S3_ENDPOINT = os.environ.get('SUPABASE_S3_ENDPOINT')
+    SUPABASE_S3_REGION = os.environ.get('SUPABASE_S3_REGION', 'us-east-1')
+
+    missing_storage_settings = [
+        name for name, value in (
+            ('SUPABASE_S3_ACCESS_KEY', SUPABASE_S3_ACCESS_KEY),
+            ('SUPABASE_S3_SECRET_KEY', SUPABASE_S3_SECRET_KEY),
+            ('SUPABASE_S3_ENDPOINT', SUPABASE_S3_ENDPOINT),
+        )
+        if not value
+    ]
+    if missing_storage_settings:
+        raise ImproperlyConfigured(
+            'MEDIA_STORAGE=s3 requiere: '
+            + ', '.join(missing_storage_settings)
+        )
+
     try:
-        STORAGES = {
-            'default': {
-                'BACKEND': 'storages.backends.s3.S3Storage',
-                'OPTIONS': {
-                    'access_key': os.environ.get('AWS_ACCESS_KEY_ID'),
-                    'secret_key': os.environ.get('AWS_SECRET_ACCESS_KEY'),
-                    'bucket_name': os.environ.get('AWS_STORAGE_BUCKET_NAME'),
-                    'endpoint_url': os.environ.get('AWS_S3_ENDPOINT_URL'),
-                    'region_name': os.environ.get('AWS_S3_REGION_NAME', 'auto'),
-                    'default_acl': None,
-                    'querystring_auth': True,
-                    'file_overwrite': False,
-                    'object_parameters': {'CacheControl': 'max-age=86400'},
-                },
-            },
-            'staticfiles': {
-                'BACKEND': 'whitenoise.storage.CompressedManifestStaticFilesStorage',
-            },
-        }
-    except ImportError:
-        print('[FASE 7 §7.4] django-storages no instalado; usando FileSystemStorage')
-        STORAGES = {
-            'default': {
-                'BACKEND': 'django.core.files.storage.FileSystemStorage',
-            },
-            'staticfiles': {
-                'BACKEND': 'whitenoise.storage.CompressedManifestStaticFilesStorage',
-            },
-        }
-else:
-    STORAGES = {
-        'default': {
-            'BACKEND': 'django.core.files.storage.FileSystemStorage',
-        },
-        'staticfiles': {
-            'BACKEND': 'whitenoise.storage.CompressedManifestStaticFilesStorage',
+        import boto3  # noqa: F401
+        import storages  # noqa: F401
+    except ImportError as exc:
+        raise ImproperlyConfigured(
+            'MEDIA_STORAGE=s3 requiere instalar django-storages[s3] y boto3.'
+        ) from exc
+
+    STORAGES['default'] = {
+        'BACKEND': 'storages.backends.s3.S3Storage',
+        'OPTIONS': {
+            'access_key': SUPABASE_S3_ACCESS_KEY,
+            'secret_key': SUPABASE_S3_SECRET_KEY,
+            'bucket_name': SUPABASE_STORAGE_BUCKET,
+            'endpoint_url': SUPABASE_S3_ENDPOINT,
+            'region_name': SUPABASE_S3_REGION,
+            'addressing_style': 'path',
+            'signature_version': 's3v4',
+            'default_acl': None,
+            'querystring_auth': True,
+            'querystring_expire': 604800,
+            'file_overwrite': False,
+            'object_parameters': {'CacheControl': 'max-age=86400'},
         },
     }
 
