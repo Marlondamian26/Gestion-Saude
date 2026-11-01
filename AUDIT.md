@@ -2552,11 +2552,52 @@ Todas las IDs existen y son estables. Falta `scroll-margin-top` para el navbar f
 
 ---
 
-## PAUSA — Antes de BLOQUE B (FASE 14)
+## §13.7 — Pausa completada
 
 BLOQUE A está completo y validado. BLOQUE B toca backend (`usuarios.models.Usuario`, migración, serializer, `settings.TERMS_VERSION`) y frontend de plataforma (`Registro.jsx`, `Login.jsx`, `.env.example`).
 
-**¿Proceder con BLOQUE B?** (pende de confirmación del usuario — no hay push, solo commits locales).
+La fase quedó en pausa hasta recibir confirmación. El usuario confirmó proceder con la FASE 14; la implementación y validación se registran a continuación. Sin push.
+
+### §14.4 — Verificación y acciones manuales
+
+**Cambios y alcance comprobados:**
+- Backend modificado únicamente en `usuarios.models.Usuario`, migración `0010_aceptacion_terminos`, `RegistroUsuarioSerializer` y `core.settings.TERMS_VERSION`, además de pruebas. No se modificaron vistas ni lógica clínica.
+- El payload de registro exige `acepta_terminos=true`; ausencia o falso responde 400 y no crea usuario. Aceptación válida guarda booleano, fecha/hora y versión.
+- El formulario bloquea el envío hasta que se acepte; el login y footer global (también visible en dashboard) enlazan al promo. No se duplicaron páginas legales.
+- `VITE_PROMO_URL` ya existe en `frontend/.env.example`. `TERMS_VERSION` default es `2026-11`.
+
+**Validación final:**
+
+| Comando | Resultado |
+|---|---|
+| `REDIS_URL= pytest -q` (backend) | ✅ 142 passed, 3 skipped |
+| `python manage.py makemigrations --check --dry-run` | ✅ Sin cambios pendientes |
+| `npm test` (frontend) | ✅ 60/60 |
+| `npm run i18n:check` (frontend) | ✅ PT/ES/EN |
+| `npm run build` (frontend) | ✅ |
+| `npm test` + `npm run build` (promo-frontend) | ✅ 49/49 + build |
+| E2E de footer del promo | ✅ 4/4 |
+| ESLint focalizado (registro, traducciones, checker y pruebas) | ✅ |
+| `npm run lint` global (frontend) | ⚠️ 51 errores y 13 avisos en el repo; existen problemas previos fuera del alcance, por ejemplo AdminDashboard, Citas y configuración de Vite |
+
+El backend usa cache local (`REDIS_URL=`) durante pytest porque Redis no está activo en este entorno. No se modificó la configuración de cache.
+
+### Acciones que requieren intervención humana
+- Revisar las plantillas legales del promo con asesoría legal y completar todos los placeholders pendientes, incluido el plazo de retención y fecha de publicación.
+- Confirmar en Render que `VITE_PROMO_URL` apunta al promo correcto y configurar `TERMS_VERSION` al publicar una revisión legal.
+- Aplicar la migración en el entorno de despliegue y desplegar backend y frontend después del push autorizado.
+- El cumplimiento jurídico final y el despliegue no se verifican localmente.
+
+**Estado FASE 14:** ✅ Implementada y validada localmente; sin push.
+
+### Commits FASE 14
+- `2ef1f27` docs(14.0): diagnostico de aceptacion legal en registro
+- `b801900` feat(14.1): registrar aceptacion legal con fecha y version
+- `064299e` feat(14.2): exigir aceptacion legal en registro de plataforma
+- `6559e41` feat(14.3): enlazar politicas desde login y footer global
+
+### Commit §14.4
+`test(14.4): documentar verificacion de aceptacion legal`
 
 
 
