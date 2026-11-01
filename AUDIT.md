@@ -2623,3 +2623,14 @@ BLOQUE A está completo y validado. BLOQUE B toca backend (`usuarios.models.Usua
 
 #### Commit §14.2
 `feat(14.2): exigir aceptacion legal en registro de plataforma`
+
+### §14.3 — Enlaces legales desde login y dashboard (completado)
+- Login enlaza a Términos y Privacidad del promo en nuevas pestañas.
+- Se añadieron los mismos enlaces al `Footer` global de `App.jsx`, disponible también en las rutas de dashboard sin modificar el dashboard ni su lógica.
+- Los tres enlaces usan las URLs compartidas `TERMS_URL` / `PRIVACY_URL`, construidas desde `VITE_PROMO_URL`, con `rel="noopener noreferrer"`.
+- Pruebas focalizadas de registro/login/footer: 5/5; el footer global y el login verifican sus dos URLs.
+
+**Estado:** ✅
+
+#### Commit §14.3
+`feat(14.3): enlazar politicas desde login y footer global`

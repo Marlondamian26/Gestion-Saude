@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react'
 // reuse the preconfigured axios instance for consistency
 import axiosInstance from '../services/auth'
 import { useNavigate, Link } from 'react-router-dom'
-import { APP_NAME } from '../config/constants'
+import { APP_NAME, PRIVACY_URL, TERMS_URL } from '../config/constants'
 import { useAuth } from '../context/AuthContext'
 import { useLanguage } from '../context/LanguageContext'
 
@@ -192,6 +192,15 @@ function Login() {
               {t('registerHere')}
             </Link>
           </p>
+          <nav aria-label={t('legalLinksAria')} style={styles.legalLinks}>
+            <a href={TERMS_URL} target="_blank" rel="noopener noreferrer" style={styles.legalLink}>
+              {t('termsLink')}
+            </a>
+            <span aria-hidden="true"> · </span>
+            <a href={PRIVACY_URL} target="_blank" rel="noopener noreferrer" style={styles.legalLink}>
+              {t('privacyLink')}
+            </a>
+          </nav>
         </div>
       </div>
     </div>
@@ -362,6 +371,14 @@ const styles = {
     color: 'var(--color-patient)',
     textDecoration: 'none',
     fontWeight: '600'
+  },
+  legalLinks: {
+    marginTop: '14px',
+    fontSize: '12px'
+  },
+  legalLink: {
+    color: 'var(--text-muted)',
+    textDecoration: 'underline'
   }
 }
 

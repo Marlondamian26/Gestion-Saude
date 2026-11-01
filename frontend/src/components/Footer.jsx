@@ -2,7 +2,7 @@ import React from 'react';
 import { useTheme } from '../context/ThemeContext';
 import { useLanguage } from '../context/LanguageContext';
 import { FaHeart, FaCode } from 'react-icons/fa';
-import { APP_NAME, APP_VERSION } from '../config/constants';
+import { APP_NAME, APP_VERSION, PRIVACY_URL, TERMS_URL } from '../config/constants';
 
 const Footer = () => {
   const { theme } = useTheme();
@@ -63,6 +63,16 @@ const Footer = () => {
       color: 'var(--text-muted)',
       opacity: 0.8,
     },
+    legalLinks: {
+      display: 'flex',
+      gap: '6px',
+      justifyContent: 'center',
+      fontSize: '12px',
+    },
+    legalLink: {
+      color: 'var(--text-muted)',
+      textDecoration: 'underline',
+    },
   };
 
   return (
@@ -75,6 +85,15 @@ const Footer = () => {
           <p style={styles.small}>
             {t('version')} {APP_VERSION} | {t('medicalSystem')}
           </p>
+          <nav aria-label={t('legalLinksAria')} style={styles.legalLinks}>
+            <a href={TERMS_URL} target="_blank" rel="noopener noreferrer" style={styles.legalLink}>
+              {t('termsLink')}
+            </a>
+            <span aria-hidden="true"> · </span>
+            <a href={PRIVACY_URL} target="_blank" rel="noopener noreferrer" style={styles.legalLink}>
+              {t('privacyLink')}
+            </a>
+          </nav>
         </div>
       </div>
     </footer>
