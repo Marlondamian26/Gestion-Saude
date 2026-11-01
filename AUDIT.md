@@ -2424,3 +2424,73 @@ No se encontraron referencias a "IA"/"AI" relacionadas al chatbot en `promo-fron
 | 3 | Fix preexistente: `check-i18n.js` lee `LanguageContext.jsx` en vez de `platform.js` | Baja | Equipo frontend |
 | 4 | Fix preexistente: `AdminDashboard.jsx:310` var `calcularEstadisticas` sin usar; `Dashboard.jsx:25` var `getToken` sin usar | Baja | Equipo frontend |
 
+---
+
+# AUDIT.md — FASE 13 & 14: Footer Completo del Promo y Cumplimiento Legal en la Plataforma
+
+**Fecha de ejecución:** 2026-11-01
+**Ejecutado por:** KiloCode (agente IA)
+**Commit base:** `1bd23e9` (FASE 12 completada, rama `Gestion-Saude`)
+**Rama de trabajo:** `Gestion-Saude` (commits locales, sin push)
+
+## §13.0 — Diagnóstico del footer del promo
+
+### 13.0.1 — Inventario del componente `Footer.jsx`
+
+Archivo: `promo-frontend/src/sitioPromocional/components/Footer.jsx`
+
+Estructura de columnas (4):
+| Columna | Contenido | Notas |
+|---|---|---|
+| Brand | logo + `footerBrandText` + redes sociales | Social: Facebook, Instagram, LinkedIn, YouTube (todos con `CONFIG.social.*` = placeholders a páginas genéricas, cuentas no verificadas) |
+| Servicios (col 2) | `<h4>footerServicesTitle</h4>` + 3 links de `footerLinks.slice(0,3)` | Links: Servicios→`/#servicios`, Sobre→`/#sobre-nosotros`, Contacto→`/#contacto` |
+| Legal (col 3) | `<h4>footerLegalTitle</h4>` + 2 links de `footerLinks.slice(3)` | Privacy→`?lang=&page=privacy`, Terms→`?lang=&page=terms` (sin destino real) |
+| Contacto (col 4) | email (`mailto:`), phone (`tel:`), maps | WhatsApp NO está en el footer |
+
+### 13.0.2 — Bugs identificados (confirmados por inspección de código)
+
+| Bug | Evidencia | Gravedad |
+|---|---|---|
+| `footerAboutTitle` se renderiza como clave literal | `footerAboutTitle` **no existe** en `promo_pt`/`promo_es`/`promo_en` de `promo.js`. Código usa `tPromo('footerAboutTitle') \|\| tPromo('footerServicesTitle')`. Como `tPromo` devuelve la clave propia cuando falta (`|| translations.promo_pt[key] \|\| key`), devuelve `"footerAboutTitle"` (truthy) → se imprime literal. | Alta |
+| "Servicios" duplicado en columna de servicios | `<h4>` muestra `footerServicesTitle` ("Servicios"). Primer link de `footerLinks` también usa `tPromo('footerServicesTitle')` como título. Además `footerAboutTitle` fallback → "Servicios". Resultado: "Servicios" aparece 2-3 veces. | Alta |
+| Enlaces internos sin ancla funcional | href usa `/#servicios?lang=...` etc. Las secciones **sí** tienen `id` (`#inicio`, `#servicios`, `#sobre-nosotros`, `#testimonios`, `#contacto`) en `LandingWrapper.jsx` / `Servicios.jsx` / `SobreNosotros.jsx` / `Testimonios.jsx` / `Contacto.jsx`. Pero el query `?lang=` appended al hash puede interferir con el scroll nativo del navegador. | Media |
+| Enlaces legales sin destino | `footerPrivacy` → `?lang=&page=privacy`, `footerTerms` → `?lang=&page=terms`. No existen rutas `/privacidad` ni `/terminos` en `App.jsx`. | Alta |
+| Redes sociales inexistentes | `CONFIG.social`: facebook, instagram, linkedin, youtube apuntan a `https://www.facebook.com/` etc. (placeholders, no cuentas reales). WhatsApp real (+244947711002) NO está en el footer social. Email real (angobelkis72@gmail.com) está en columna Contacto (no en social). | Alta |
+
+### 13.0.3 — Verificación de i18n (claves `footer*`)
+
+`footerAboutTitle`: **AUSENTE** en las 3 locales (huérfana). Debe añadirse.
+`footerServicesTitle`: presente (pt/es/en) ✅
+`footerLegalTitle`: presente ✅
+`footerContactTitle`: presente ✅
+`footerPrivacy`: presente ✅
+`footerTerms`: presente ✅
+`footerBrandText`: presente ✅
+`footerRights`: presente ✅
+`footerCredit`: presente ✅
+`socialFacebook`, `socialInstagram`, `socialLinkedin`, `socialYoutube`: presentes (se usarán menos tras limpieza) ✅
+Claves nuevas a añadir: `footerAboutTitle`, `footerWhatsappLabel`, `footerEmailLabel`, `footerLegalAria` (opcional).
+
+### 13.0.4 — IDs de sección (contrato de anclas)
+
+| Sección | ID | Archivo:línea |
+|---|---|---|
+| Inicio / Hero | `id="inicio"` | `LandingWrapper.jsx:36` (envuelve Carousel) |
+| Servicios | `id="servicios"` | `Servicios.jsx:26` |
+| Sobre Nosotros | `id="sobre-nosotros"` | `SobreNosotros.jsx:20` |
+| Testimonios | `id="testimonios"` | `Testimonios.jsx:22` |
+| Contacto | `id="contacto"` | `Contacto.jsx:51` |
+
+Todas las IDs existen y son estables. Falta `scroll-margin-top` para el navbar fijo (no hay CSS de scroll-margin en `promocional.css` verificado; añadir en §13.2).
+
+### 13.0.5 — Decisiones de diseño (FASE 13)
+
+- Las páginas legales `/privacidad` y `/terminos` son rutas internas del SPA promo (React Router 7), no páginas externas. La plataforma (frontend/) las enlazará a `https://gestion-saude-promo.onrender.com/privacidad` y `/terminos` en BLOQUE B.
+- Redes sociales del footer: solo WhatsApp (real) + email (ya en columna Contacto). Se eliminan Facebook, Instagram, LinkedIn, YouTube del social row. WhatsApp se añade al social row.
+- `footerAboutTitle` se añade a las 3 locales ("Sobre Nós" / "Sobre Nosotros" / "About Us").
+- Scroll: `section[id] { scroll-margin-top: 88px; }` para no quedar bajo el navbar fijo.
+
+### 13.0.6 — Commit pendiente
+`git commit -m "docs(13.0): diagnostico del footer del promo (i18n, links, redes)"`
+
+
