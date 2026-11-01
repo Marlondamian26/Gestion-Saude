@@ -6,12 +6,12 @@ import { useInView } from '../hooks/useInView';
 import { CONFIG } from '../config/constants';
 
 function Footer() {
-  const { tPromo, language, translations } = useLanguage();
+  const { tPromo, translations } = useLanguage();
   const [ref, isInView] = useInView({ threshold: 0.05 });
 
   const year = new Date().getFullYear();
 
-  const promoTranslations = translations?.[`promo_${language}`] || {};
+  const promoTranslations = translations || {};
   const servicesList = Object.entries(promoTranslations.footerServices || {});
   const whatsappMessage = promoTranslations.footerWhatsappMessage || '';
   const whatsappUrl = `https://wa.me/244947711002?text=${encodeURIComponent(whatsappMessage)}`;
@@ -31,6 +31,9 @@ function Footer() {
           <p>
             {tPromo('footerBrandText')}
           </p>
+          <a className="promo-footer-home-link" href="#inicio">
+            {tPromo('navInicio')}
+          </a>
           <div className="promo-footer-social">
             <a
               href={whatsappUrl}
@@ -44,7 +47,11 @@ function Footer() {
         </div>
 
         <div className={`promo-footer-column ${isInView ? 'animate-fade-up' : ''}`}>
-          <h4>{tPromo('footerServicesTitle')}</h4>
+          <h4>
+            <a className="promo-footer-section-link" href="#servicios">
+              {tPromo('footerServicesTitle')}
+            </a>
+          </h4>
           <ul className="promo-footer-links">
             <li key="sobre-nosotros">
               <a href="#sobre-nosotros">
@@ -67,22 +74,26 @@ function Footer() {
           <h4>{tPromo('footerLegalTitle')}</h4>
           <ul className="promo-footer-links">
             <li key="privacy">
-              <a href="/privacidad" aria-label={tPromo('footerPrivacy')}>
+              <Link to="/privacidad" aria-label={tPromo('footerPrivacy')}>
                 <FaArrowRight />
                 {tPromo('footerPrivacy')}
-              </a>
+              </Link>
             </li>
             <li key="terms">
-              <a href="/terminos" aria-label={tPromo('footerTerms')}>
+              <Link to="/terminos" aria-label={tPromo('footerTerms')}>
                 <FaArrowRight />
                 {tPromo('footerTerms')}
-              </a>
+              </Link>
             </li>
           </ul>
         </div>
 
         <div className={`promo-footer-column ${isInView ? 'animate-fade-right' : ''}`}>
-          <h4>{tPromo('footerContactTitle')}</h4>
+          <h4>
+            <a className="promo-footer-section-link" href="#contacto">
+              {tPromo('footerContactTitle')}
+            </a>
+          </h4>
           <ul className="promo-footer-links">
             <li>
               <a href={`mailto:${CONFIG.contact.email}`} aria-label={tPromo('footerEmailLabel')}>

@@ -336,7 +336,7 @@ export const promoTranslations = {
     footerPrivacy: 'Política de Privacidad',
     footerTerms: 'Términos de Uso',
     footerQuickLinks: { inicio: 'Inicio', servicos: 'Servicios', sobreNos: 'Sobre Nosotros', contacto: 'Contacto' },
-    footerServices: { consulta: 'Consulta Médica', cardiologia: 'Cardiología', emergencias: 'Emergencias', vacinacion: 'Vacunación', analise: 'Análisis Clínicos' },
+    footerServices: { consulta: 'Consulta Médica', cardiologia: 'Cardiología', emergencias: 'Emergencias', vacinacao: 'Vacunación', analise: 'Análisis Clínicos' },
     socialFacebook: 'Facebook',
     socialInstagram: 'Instagram',
     socialLinkedin: 'LinkedIn',

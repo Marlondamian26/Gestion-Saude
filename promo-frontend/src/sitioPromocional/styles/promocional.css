@@ -1449,6 +1449,18 @@
   letter-spacing: var(--promo-tracking-wide);
 }
 
+.promo-footer-section-link {
+  color: inherit;
+  text-decoration: none;
+}
+
+.promo-footer-home-link {
+  display: inline-flex;
+  color: var(--promo-text-muted);
+  font-size: var(--promo-fs-sm);
+  text-decoration: none;
+}
+
 .promo-footer-links {
   list-style: none;
   margin: 0;

@@ -6,6 +6,7 @@ import React from 'react';
 import Footer from '../components/Footer';
 import { ThemeProvider } from '../../context/ThemeContext';
 import { LanguageProvider } from '../../context/LanguageContext';
+import { promoTranslations } from '../../context/translations/promo';
 
 vi.mock('react-router-dom', () => ({
   BrowserRouter: ({ children }) => children,
@@ -32,6 +33,7 @@ vi.mock('../../context/LanguageContext', async () => {
           footerPrivacy: 'Política de Privacidade',
           footerTerms: 'Termos de Uso',
           footerAboutTitle: 'Sobre Nós',
+          navInicio: 'Início',
           footerWhatsappLabel: 'WhatsApp',
           footerEmailLabel: 'Enviar correio',
           footerServices: {
@@ -46,21 +48,19 @@ vi.mock('../../context/LanguageContext', async () => {
       },
       language: 'pt',
       translations: {
-        promo_pt: {
-          footerAboutTitle: 'Sobre Nós',
-          footerServicesTitle: 'Serviços',
-          footerServices: {
-            consulta: 'Consulta Médica',
-            cardiologia: 'Cardiologia',
-            emergencias: 'Emergências',
-            vacinacao: 'Vacinação',
-            analise: 'Análises Clínicas',
-          },
-          footerPrivacy: 'Política de Privacidade',
-          footerTerms: 'Termos de Uso',
-          footerWhatsappLabel: 'WhatsApp',
-          footerEmailLabel: 'Enviar correio',
+        footerAboutTitle: 'Sobre Nós',
+        footerServicesTitle: 'Serviços',
+        footerServices: {
+          consulta: 'Consulta Médica',
+          cardiologia: 'Cardiologia',
+          emergencias: 'Emergências',
+          vacinacao: 'Vacinação',
+          analise: 'Análises Clínicas',
         },
+        footerPrivacy: 'Política de Privacidade',
+        footerTerms: 'Termos de Uso',
+        footerWhatsappLabel: 'WhatsApp',
+        footerEmailLabel: 'Enviar correio',
       },
       setLanguage: vi.fn(),
     }),
@@ -105,6 +105,14 @@ describe('Footer', () => {
     });
   });
 
+  it('inclui anclas funcionais para as secoes da landing', () => {
+    render(<Footer />, { wrapper: AllProviders });
+    expect(screen.getByRole('link', { name: 'Início' })).toHaveAttribute('href', '#inicio');
+    expect(screen.getByRole('link', { name: 'Serviços' })).toHaveAttribute('href', '#servicios');
+    expect(screen.getByRole('link', { name: 'Sobre Nós' })).toHaveAttribute('href', '#sobre-nosotros');
+    expect(screen.getByRole('link', { name: 'Contacto' })).toHaveAttribute('href', '#contacto');
+  });
+
   it('renderiza links legais para /privacidad e /terminos', () => {
     render(<Footer />, { wrapper: AllProviders });
     expect(screen.getByRole('link', { name: /Política de Privacidade/ })).toHaveAttribute('href', '/privacidad');
@@ -126,5 +134,29 @@ describe('Footer', () => {
     expect(container.textContent).not.toContain('footerAboutTitle');
     expect(container.textContent).not.toContain('footerPrivacy');
     expect(container.textContent).not.toContain('footerTerms');
+  });
+
+  it('mantem as chaves do footer e os servicos nos tres idiomas', () => {
+    const footerKeys = [
+      'footerBrandText',
+      'footerServicesTitle',
+      'footerLegalTitle',
+      'footerContactTitle',
+      'footerRights',
+      'footerCredit',
+      'footerPrivacy',
+      'footerTerms',
+      'footerAboutTitle',
+      'footerWhatsappLabel',
+      'footerEmailLabel',
+      'footerWhatsappMessage',
+      'navInicio',
+    ];
+    const serviceKeys = Object.keys(promoTranslations.promo_pt.footerServices);
+
+    Object.values(promoTranslations).forEach((translations) => {
+      footerKeys.forEach((key) => expect(translations[key]).toBeTruthy());
+      serviceKeys.forEach((key) => expect(translations.footerServices[key]).toBeTruthy());
+    });
   });
 });
