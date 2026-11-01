@@ -21,6 +21,7 @@ class TestRegistroThrottled(TestCase):
             'password': 'Test1234!',
             'email': 'test1@test.com',
             'rol': 'patient',
+            'acepta_terminos': True,
         }
         response = self.client.post(url, data, format='json')
         self.assertEqual(response.status_code, 201)
@@ -31,6 +32,7 @@ class TestRegistroThrottled(TestCase):
             'password': 'Test1234!',
             'email': 'test@test.com',
             'rol': 'patient',
+            'acepta_terminos': True,
         }
 
         # 5 successful registrations

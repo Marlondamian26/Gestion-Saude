@@ -2598,3 +2598,15 @@ BLOQUE A está completo y validado. BLOQUE B toca backend (`usuarios.models.Usua
 
 ### §14.0.2 — Commit de diagnóstico
 `docs(14.0): diagnostico de aceptacion legal en registro`
+
+### §14.1 — Backend: aceptación obligatoria (completado)
+- Se añadieron `terminos_aceptados`, `fecha_aceptacion_terminos` y `version_terminos_aceptada` al modelo `Usuario`; la migración es `usuarios/migrations/0010_aceptacion_terminos.py`.
+- `RegistroUsuarioSerializer` requiere `acepta_terminos=true`; ausencia o falso devuelve 400 sin crear la cuenta. La fecha se registra en UTC con `timezone.now()` y la versión proviene de `settings.TERMS_VERSION`.
+- `TERMS_VERSION` se configura por entorno, con default `2026-11`. No se añadió endpoint de consulta: el cliente usa esta aceptación booleana y no necesita leer la versión vigente.
+- Se actualizaron los tests existentes del endpoint y el rate-limit para incluir la aceptación. Los tests dirigidos a los flujos legales y API pasan con `REDIS_URL=` (cache local; Redis no está activo en este entorno): 39/39.
+- `makemigrations --check --dry-run` confirma que modelo y migración están sincronizados.
+
+**Estado:** ✅
+
+#### Commit §14.1
+`feat(14.1): registrar aceptacion legal con fecha y version`

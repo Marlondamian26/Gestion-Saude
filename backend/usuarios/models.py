@@ -40,6 +40,21 @@ class Usuario(AbstractUser):
     )
     # Hacer email opcional pero único (null=True para DB, blank=True para formularios)
     email = models.EmailField(unique=True, null=True, blank=True, verbose_name='Correo electrónico')
+    terminos_aceptados = models.BooleanField(
+        default=False,
+        help_text='El usuario aceptó los términos y la política de privacidad al registrarse.',
+    )
+    fecha_aceptacion_terminos = models.DateTimeField(
+        null=True,
+        blank=True,
+        help_text='Fecha en que el usuario aceptó los términos.',
+    )
+    version_terminos_aceptada = models.CharField(
+        max_length=20,
+        blank=True,
+        default='',
+        help_text='Versión de los términos aceptada (ej. 2026-11).',
+    )
     
     # ✅ Solucionar conflictos de related_name
     groups = models.ManyToManyField(
@@ -399,7 +414,6 @@ class SitioImagen(models.Model):
     
     def __str__(self):
         return f"{self.tipo} - {self.titulo or self.imagen.name}"
-
 
 
 

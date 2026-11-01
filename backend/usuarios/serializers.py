@@ -1,4 +1,6 @@
 from rest_framework import serializers
+from django.conf import settings
+from django.utils import timezone
 from .models import Usuario, Doctor, Enfermera, Paciente, Especialidad, Horario, Cita, SitioImagen
 
 class UsuarioSerializer(serializers.ModelSerializer):
@@ -38,16 +40,25 @@ class UsuarioSerializer(serializers.ModelSerializer):
 
 class RegistroUsuarioSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)
+    acepta_terminos = serializers.BooleanField(write_only=True, required=True)
 
     class Meta:
         model = Usuario
-        fields = ['username', 'password', 'first_name', 'last_name', 'email', 'rol', 'telefono']
+        fields = ['username', 'password', 'first_name', 'last_name', 'email', 'rol', 'telefono', 'acepta_terminos']
         extra_kwargs = {
             'email': {'required': False, 'allow_blank': True},
             'telefono': {'required': False, 'allow_blank': True},
         }
 
+    def validate_acepta_terminos(self, value):
+        if not value:
+            raise serializers.ValidationError(
+                'Debes aceptar los términos y la política de privacidad para registrarte.'
+            )
+        return value
+
     def create(self, validated_data):
+        validated_data.pop('acepta_terminos')
         usuario = Usuario.objects.create_user(
             username=validated_data['username'],
             password=validated_data['password'],
@@ -55,7 +66,10 @@ class RegistroUsuarioSerializer(serializers.ModelSerializer):
             last_name=validated_data.get('last_name', ''),
             email=validated_data.get('email', ''),
             rol=validated_data.get('rol', 'patient'),
-            telefono=validated_data.get('telefono', '')
+            telefono=validated_data.get('telefono', ''),
+            terminos_aceptados=True,
+            fecha_aceptacion_terminos=timezone.now(),
+            version_terminos_aceptada=settings.TERMS_VERSION,
         )
         return usuario
 

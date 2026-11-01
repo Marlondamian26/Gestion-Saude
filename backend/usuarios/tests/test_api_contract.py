@@ -76,6 +76,7 @@ class TestApiContract(TestCase):
             'first_name': 'New',
             'last_name': 'User',
             'rol': 'patient',
+            'acepta_terminos': True,
         }
         response = self.anon_client.post('/api/registro/', data)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
