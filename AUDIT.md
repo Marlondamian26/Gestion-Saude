@@ -2491,7 +2491,72 @@ Todas las IDs existen y son estables. Falta `scroll-margin-top` para el navbar f
 - Scroll: `section[id] { scroll-margin-top: 88px; }` para no quedar bajo el navbar fijo.
 
 ### 13.0.6 — Commit pendiente
-`git commit -m "docs(13.0): diagnostico del footer del promo (i18n, links, redes)"`
+`git commit -m "docs(13.0): diagnostico del footer del promo (i18n, links, redes)"` — [HECHO] `23b6519`
+
+---
+
+## §13.6 — Validación final BLOQUE A (completado)
+
+### Checklist de validación
+
+| Ítem | Resultado | Evidencia |
+|---|---|---|
+| ESLint (archivos JS/JSX tocados) | ✅ Limpio | `npx eslint` sobre Footer, páginas legales, tests, App y E2E |
+| `npm run lint` completo | ⚠️ Fallos preexistentes | Errores en LanguageContext/ThemeContext y otros archivos ajenos a FASE 13 |
+| `npm test` (promo-frontend) | ✅ 49/49 | 9 archivos de test, incluidos Footer, Privacidad y Terminos |
+| `npm run build` (promo-frontend) | ✅ Pasa | Vite produce el bundle de producción |
+| `npm run build` (frontend plataforma) | 🟦 No ejecutado | FASE 14 aún no iniciada |
+| E2E `footer-links.spec.js` | ✅ 4/4 | Inicio, Servicios, Sobre Nosotros, Contacto, rutas legales y redes reales |
+| `npm run i18n:check` | ✅ PT/ES/EN | Verificador corregido; también valida las claves de los servicios del footer |
+
+### Bugs corregidos (evidencia en tests)
+
+- `footerAboutTitle` ya no se renderiza como clave → "Sobre Nós" (PT) ✅ `Footer.test.jsx`
+- "Servicios" ya no duplicado → aparece 1 vez (h4) ✅ `Footer.test.jsx`
+- Ítems de servicios listan los 5 reales y apuntan a `#servicios` ✅
+- Anclas del footer para Inicio, Servicios, Sobre Nosotros y Contacto ✅ `footer-links.spec.js`
+- Enlaces legales → `/privacidad` y `/terminos` (rutas reales del SPA) ✅
+- Navegación legal interna usa `Link` de React Router para evitar recarga completa ✅
+- Redes sociales: solo WhatsApp (`wa.me/244947711002`) + email (`mailto:`); eliminados Facebook/Instagram/LinkedIn/YouTube ✅
+- `section[id] { scroll-margin-top: 88px; }` para navbar fija ✅
+- `i18n:check` ahora compara los diccionarios traducidos correctamente; se alineó la clave interna del servicio de vacunación en PT/ES/EN ✅
+
+### Archivos entregados (BLOQUE A)
+
+| # | Archivo |
+|---|---|
+| 1 | `promo-frontend/src/sitioPromocional/components/Footer.jsx` (corregido) |
+| 2 | `promo-frontend/src/sitioPromocional/pages/Privacidad.jsx` (plantilla) |
+| 3 | `promo-frontend/src/sitioPromocional/pages/Terminos.jsx` (plantilla) |
+| 4 | `promo-frontend/src/sitioPromocional/components/LegalPage.jsx` (layout común) |
+| 5 | `promo-frontend/src/App.jsx` (rutas /privacidad, /terminos) |
+| 6 | `promo-frontend/src/context/translations/promo.js` (claves nuevas PT/ES/EN) |
+| 7 | `promo-frontend/src/sitioPromocional/styles/promocional.css` (scroll-margin + estilos legales) |
+| 8 | `promo-frontend/src/sitioPromocional/__tests__/Footer.test.jsx` |
+| 9 | `promo-frontend/src/sitioPromocional/__tests__/Privacidad.test.jsx` |
+| 10 | `promo-frontend/src/sitioPromocional/__tests__/Terminos.test.jsx` |
+| 11 | `promo-frontend/e2e/footer-links.spec.js` |
+
+### Decisiones documentadas
+- Páginas legales son rutas internas del SPA promo (`/privacidad`, `/terminos`). La plataforma las enlazará externamente en BLOQUE B.
+- Plantillas legales usan placeholders `{{...}}` (ej. `{{NOMBRE_CLINICA}}`); los conocidos se sustituyen con valores reales, los que requieren dato (`PLAZO_RETENCION`, `FECHA`) se dejan como `{{...}}` para el dueño.
+- EN se incluye como traducción de referencia de las plantillas legales.
+- No se tocó la sincronización cross-origen (FASE 9) ni los enlaces WhatsApp/email existentes.
+- No se añadieron dependencias.
+
+### Commits BLOQUE A
+- `23b6519` docs(13.0): diagnostico del footer del promo
+- `47c041a` fix(13.1): corregir footerAboutTitle, duplicado Servicos, anclas y redes sociales
+- `028ace5` feat(13.4): paginas legales privacidad y terminos en promo con plantillas
+- `ad4cf89` fix(13.2): completar anclas y enlaces del footer del promo
+
+---
+
+## PAUSA — Antes de BLOQUE B (FASE 14)
+
+BLOQUE A está completo y validado. BLOQUE B toca backend (`usuarios.models.Usuario`, migración, serializer, `settings.TERMS_VERSION`) y frontend de plataforma (`Registro.jsx`, `Login.jsx`, `.env.example`).
+
+**¿Proceder con BLOQUE B?** (pende de confirmación del usuario — no hay push, solo commits locales).
 
 
 
