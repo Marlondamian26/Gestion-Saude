@@ -2577,3 +2577,24 @@ BLOQUE A está completo y validado. BLOQUE B toca backend (`usuarios.models.Usua
 - Producción: `[REQUIERE ACCIÓN MANUAL]` - Ver instrucciones en §15.2.4
 
 **Estado:** ✅
+
+## FASE 14 — Cumplimiento legal en la plataforma
+
+### §14.0 — Diagnóstico
+
+**Registro actual verificado:**
+- `frontend/src/components/Registro.jsx` envía `formData` a `POST /api/registro/`, no muestra una casilla de aceptación y habilita el envío únicamente según `loading`.
+- El formulario tiene un bloque informativo de términos al pie, pero apunta a rutas relativas (`/terminos` y `/privacidade`) dentro del dominio de la plataforma, no al promo.
+- `backend/usuarios/models.py` (`Usuario`) no contiene campos de aceptación legal.
+- `backend/usuarios/serializers.py` (`RegistroUsuarioSerializer`) no requiere ni valida aceptación y crea la cuenta directamente.
+- `frontend/src/components/Login.jsx` no muestra enlaces legales. `frontend/src/App.jsx` monta `Footer` globalmente, también alrededor de las rutas del dashboard.
+- `frontend/.env.example` ya define `VITE_PROMO_URL`; la implementación reutilizará este ajuste y tendrá un fallback a `https://gestion-saude-promo.onrender.com`.
+
+**Decisión:** guardar en `Usuario` el booleano de aceptación, fecha/hora y versión; el registro exige aceptación verdadera. Se usará el valor configurable `TERMS_VERSION` (default `2026-11`). Las páginas legales permanecen únicamente en el promo.
+
+**Backend fuera de alcance:** no se modificarán otras vistas, modelos ni lógica clínica; los únicos archivos backend previstos son modelo, migración, serializer y settings, además de las pruebas de registro.
+
+**Estado:** ✅ Diagnóstico completado antes de editar el código.
+
+### §14.0.2 — Commit de diagnóstico
+`docs(14.0): diagnostico de aceptacion legal en registro`
