@@ -52,12 +52,16 @@ class TestPacienteQueryset(TestCase):
                 'telefono': '',
                 'fecha_nacimiento': None,
                 'rol': 'patient',
+                'tipo': 'usuarios',
             },
             format='json',
         )
 
         self.assertEqual(create_response.status_code, 201, create_response.data)
         usuario_id = create_response.data['id']
+        new_user = Usuario.objects.get(pk=usuario_id)
+        self.assertTrue(new_user.check_password('TestPass123!'))
+        self.assertTrue(Paciente.objects.filter(usuario=new_user).exists())
 
         profiles_response = self.client.get(
             '/api/pacientes/',

@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from django.conf import settings
+from django.db import transaction
 from django.utils import timezone
 from rest_framework.fields import empty
 from rest_framework.validators import UniqueValidator
@@ -41,10 +42,15 @@ class UsuarioSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         password = validated_data.pop('password', None)
-        usuario = super().create(validated_data)
-        if password:
-            usuario.set_password(password)
+        with transaction.atomic():
+            usuario = Usuario(**validated_data)
+            if password:
+                usuario.set_password(password)
+            else:
+                usuario.set_unusable_password()
             usuario.save()
+            if usuario.rol == 'patient' and usuario.username != 'admin':
+                Paciente.objects.get_or_create(usuario=usuario)
         return usuario
 
     def update(self, instance, validated_data):
