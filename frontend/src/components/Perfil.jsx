@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import axiosInstance from '../services/auth'
 import { useNavigate } from 'react-router-dom'
 import { useLanguage } from '../context/LanguageContext'
@@ -43,6 +43,39 @@ function Perfil() {
 
   // Estado para foto de perfil
   const [fotoPerfil, setFotoPerfil] = useState(null)
+  const [fotoPerfilPreview, setFotoPerfilPreview] = useState(null)
+  const fotoPerfilPreviewRef = useRef(null)
+
+  useEffect(() => {
+    return () => {
+      if (fotoPerfilPreviewRef.current) {
+        URL.revokeObjectURL(fotoPerfilPreviewRef.current)
+      }
+    }
+  }, [])
+
+  const handleFotoPerfilChange = (e) => {
+    const file = e.target.files?.[0] || null
+
+    if (fotoPerfilPreviewRef.current) {
+      URL.revokeObjectURL(fotoPerfilPreviewRef.current)
+    }
+
+    const previewUrl = file ? URL.createObjectURL(file) : null
+    fotoPerfilPreviewRef.current = previewUrl
+    setFotoPerfil(file)
+    setFotoPerfilPreview(previewUrl)
+  }
+
+  const limpiarFotoPerfilSeleccionada = () => {
+    if (fotoPerfilPreviewRef.current) {
+      URL.revokeObjectURL(fotoPerfilPreviewRef.current)
+      fotoPerfilPreviewRef.current = null
+    }
+
+    setFotoPerfil(null)
+    setFotoPerfilPreview(null)
+  }
 
   // Estado para cambio de contraseña
   const [passwordForm, setPasswordForm] = useState({
@@ -310,6 +343,7 @@ function Perfil() {
       }
 
       mostrarMensaje(t('profileUpdated'), 'success')
+      limpiarFotoPerfilSeleccionada()
       setEditMode(false)
       await fetchUserData() // Recargar datos
     } catch (error) {
@@ -575,9 +609,19 @@ function Perfil() {
                      <input
                        type="file"
                        accept="image/*"
-                       onChange={(e) => setFotoPerfil(e.target.files[0])}
+                       onChange={handleFotoPerfilChange}
                        style={styles.fileInput}
                      />
+                     {fotoPerfilPreview && (
+                       <div style={styles.photoPreview}>
+                         <img
+                           src={fotoPerfilPreview}
+                           alt={t('newImageSelected')}
+                           style={styles.previewImage}
+                         />
+                         <p style={styles.currentPhotoLabel}>{t('newImageSelected')}</p>
+                       </div>
+                     )}
                      <small style={styles.hint}>
                        {t('photoRequirements')}: JPEG, PNG, GIF, WebP. Máx 25MB.
                      </small>
@@ -667,7 +711,7 @@ function Perfil() {
                    <button
                      onClick={() => {
                        setEditMode(false)
-                       setFotoPerfil(null)
+                       limpiarFotoPerfilSeleccionada()
                      }}
                      style={styles.cancelButton}
                      disabled={saving}
