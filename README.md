@@ -182,6 +182,35 @@ Mis_proyectos/
 | `TWILIO_ACCOUNT_SID` | ❌ No | — | Para WhatsApp/SMS |
 | `TWILIO_AUTH_TOKEN` | ❌ No | — | Para WhatsApp/SMS |
 | `TWILIO_WHATSAPP_NUMBER` | ❌ No | — | Número de WhatsApp empresarial |
+| `MEDIA_STORAGE` | ✅ Sí (prod) | `filesystem` local | `s3` usa Supabase Storage; en Render requiere las variables siguientes |
+| `SUPABASE_STORAGE_BUCKET` | ✅ Con `s3` | `gestion-saude-media` | Bucket privado de Supabase Storage |
+| `SUPABASE_S3_ENDPOINT` | ✅ Con `s3` | — | Endpoint S3 del proyecto Supabase |
+| `SUPABASE_S3_REGION` | ❌ No | `us-east-1` | Región compatible con la API S3 de Supabase |
+| `SUPABASE_S3_ACCESS_KEY` | ✅ Con `s3` | — | Access key S3 de Supabase (secreto; solo backend) |
+| `SUPABASE_S3_SECRET_KEY` | ✅ Con `s3` | — | Secret key S3 de Supabase (secreto; solo backend) |
+
+### Almacenamiento de imágenes
+
+El desarrollo local conserva `MEDIA_STORAGE=filesystem`. En Render se configura
+`MEDIA_STORAGE=s3` para almacenar medios en el bucket privado de Supabase. Antes
+de desplegar esa configuración, crea el bucket y carga en Render el endpoint y
+las credenciales S3 desde el panel de Supabase; el backend falla al arrancar si
+faltan. No uses una service-role key ni publiques estas credenciales en el
+frontend. Las URLs de medios se firman en el backend y expiran en siete días.
+
+Para migrar los archivos existentes, haz primero un respaldo de `MEDIA_ROOT`,
+configura y prueba el storage y revisa el inventario:
+
+```bash
+python manage.py migrate_media_to_s3 --dry-run
+python manage.py migrate_media_to_s3 --apply
+```
+
+El comando solo lista en modo predeterminado (`--dry-run`); `--apply` copia los
+archivos y actualiza sus referencias. No borra los originales. Confirma que las
+imágenes funcionan antes de retirar el respaldo. La migración de archivos en
+producción debe ejecutarse manualmente después de verificar el bucket y las
+credenciales.
 
 ### Frontend
 

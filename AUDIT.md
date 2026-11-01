@@ -2607,17 +2607,40 @@ El backend usa cache local (`REDIS_URL=`) durante pytest porque Redis no está a
 
 ### §15.0 — Inventario (FASE 7 §7.4)
 **Verificado:**
-- `backend/core/settings.py:263-320` - Feature flag `MEDIA_STORAGE=s3` preparado. Usa `storages.backends.s3.S3Storage`, vars `AWS_*`, `querystring_auth=True`. Fallback a `FileSystemStorage` si falta `django-storages`.
-- `backend/requirements.txt:32-33` - `django-storages[s3]==1.18.0` y `boto3==1.39.0` comentados (listos para instalar).
-- `backend/usuarios/management/commands/migrate_media_to_s3.py` - Existe comando de migración (dry-run por defecto, requiere `--apply`). Soporta usuarios.foto_perfil y SitioImagen.imagen.
-- `render.yaml` - Sin variables `MEDIA_STORAGE` configuradas actualmente.
-- `backend/.env.example` - No tiene vars de media storage.
+- `backend/media/` local contiene **0 archivos** y ocupa **8.0K** en el momento del inventario.
+- La configuración anterior tenía fallback silencioso a filesystem aunque se solicitara `MEDIA_STORAGE=s3`; las dependencias S3 y la configuración de Render no estaban activas.
+- La producción no se inspeccionó; el inventario de sus archivos requiere acceso y acción manual.
 
 **Imágenes actuales:**
-- Local: Se verificará con find/du.
-- Producción: `[REQUIERE ACCIÓN MANUAL]` - Ver instrucciones en §15.2.4
+- Local: 0 archivos.
+- Producción: `[REQUIERE ACCIÓN MANUAL]` - no se consultó ni modificó.
 
-**Estado:** ✅
+**Estado:** ✅ Inventario local completado; inventario de producción pendiente.
+
+### §15.1 — Configuración y migrador
+- El backend mantiene filesystem por defecto en local y configura Supabase Storage mediante la API S3 con `MEDIA_STORAGE=s3`.
+- En modo S3, la configuración valida las credenciales y dependencias al iniciar; no hay fallback silencioso. El bucket es privado y se generan URLs firmadas con expiración de siete días.
+- Se fijaron `django-storages[s3]==1.14.6` y `boto3==1.43.123`; Render declara las variables no secretas y solicita endpoint/credenciales como valores no sincronizados, que deben configurarse en el panel.
+- `backend/.env.example` documenta las variables sin secretos. Se añadió `migrate_media_to_s3`: dry-run por defecto, `--apply` explícito, selección de modelo, comprobación del destino e informe de errores.
+- El comando `optimizar_imagenes` ahora abre, guarda y elimina archivos a través del storage, sin depender de rutas locales; esto mantiene su compatibilidad cuando el backend usa Supabase.
+- Validación: **137 tests backend aprobados, 3 omitidos**; pruebas nuevas verifican configuración filesystem/S3, URLs firmadas, rechazo de configuración incompleta, dry-run, migración idempotente y optimización sin `.path`. `makemigrations --check --dry-run`, `pip check` y `git diff --check` pasan.
+- Dry-run ejecutado con una base local temporal migrada: `Total: 0 | Migradas/listadas: 0 | Omitidas: 0 | Fallidas: 0 | Modo: DRY-RUN`. El archivo temporal se eliminó al terminar.
+
+**Estado:** ✅ Implementación y validación local completadas; no ejecutado contra Supabase.
+
+#### Commit §15.1
+`feat(15.1): migrar media a Supabase Storage`
+
+### §15.2 — Documentación y preparación de producción
+- README actualizado con variables, configuración local/Render, privacidad del bucket, expiración de URLs, respaldo y uso del migrador.
+- No se ejecutó `migrate_media_to_s3 --apply`, no se contactó Supabase y no se copiaron ni borraron archivos.
+- **Intervención humana requerida antes de desplegar:** verificar inventario de producción y respaldar `MEDIA_ROOT`; crear/verificar el bucket privado `gestion-saude-media`; obtener las S3 Access Key/Secret Key y endpoint correctos desde Supabase; cargarlos como secretos en Render; realizar un dry-run en producción y revisar su salida. No sincronizar el manifiesto/desplegar antes de configurar esas variables, pues el servicio fallará al iniciar.
+- Tras aprobar el dry-run, ejecutar manualmente `python manage.py migrate_media_to_s3 --apply` en el entorno de producción y validar imágenes antes de retirar respaldos.
+
+**Estado:** Documentación y código preparados; pendiente configuración y migración manual en producción. No se hizo push.
+
+#### Commit §15.2
+`docs(15.2): documentar configuracion y migracion de media`
 
 ## FASE 14 — Cumplimiento legal en la plataforma
 
