@@ -1,24 +1,20 @@
 import React from 'react';
-import { FaFacebookF, FaInstagram, FaLinkedinIn, FaYoutube, FaArrowRight, FaEnvelope, FaPhone, FaMapMarkerAlt } from 'react-icons/fa';
+import { Link } from 'react-router-dom';
+import { FaArrowRight, FaEnvelope, FaPhone, FaMapMarkerAlt, FaWhatsapp } from 'react-icons/fa';
 import { useLanguage } from '../../context/LanguageContext';
 import { useInView } from '../hooks/useInView';
 import { CONFIG } from '../config/constants';
 
 function Footer() {
-  const { tPromo, language } = useLanguage();
+  const { tPromo, language, translations } = useLanguage();
   const [ref, isInView] = useInView({ threshold: 0.05 });
 
   const year = new Date().getFullYear();
 
-  const currentLang = language === 'pt' ? 'pt' : 'en';
-
-  const footerLinks = [
-    { title: tPromo('footerServicesTitle'), href: `/#servicios?lang=${currentLang}` },
-    { title: tPromo('footerAboutTitle') || tPromo('footerServicesTitle'), href: `/#sobre-nosotros?lang=${currentLang}` },
-    { title: tPromo('footerContactTitle'), href: `/#contacto?lang=${currentLang}` },
-    { title: tPromo('footerPrivacy'), href: `?lang=${currentLang}&page=privacy` },
-    { title: tPromo('footerTerms'), href: `?lang=${currentLang}&page=terms` },
-  ];
+  const promoTranslations = translations?.[`promo_${language}`] || {};
+  const servicesList = Object.entries(promoTranslations.footerServices || {});
+  const whatsappMessage = promoTranslations.footerWhatsappMessage || '';
+  const whatsappUrl = `https://wa.me/244947711002?text=${encodeURIComponent(whatsappMessage)}`;
 
   return (
     <footer
@@ -36,57 +32,31 @@ function Footer() {
             {tPromo('footerBrandText')}
           </p>
           <div className="promo-footer-social">
-            {CONFIG.social?.facebook && (
-              <a
-                href={CONFIG.social.facebook}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label={tPromo('socialFacebook')}
-              >
-                <FaFacebookF />
-              </a>
-            )}
-            {CONFIG.social?.instagram && (
-              <a
-                href={CONFIG.social.instagram}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label={tPromo('socialInstagram')}
-              >
-                <FaInstagram />
-              </a>
-            )}
-            {CONFIG.social?.linkedin && (
-              <a
-                href={CONFIG.social.linkedin}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label={tPromo('socialLinkedin')}
-              >
-                <FaLinkedinIn />
-              </a>
-            )}
-            {CONFIG.social?.youtube && (
-              <a
-                href={CONFIG.social.youtube}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label={tPromo('socialYoutube')}
-              >
-                <FaYoutube />
-              </a>
-            )}
+            <a
+              href={whatsappUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label={tPromo('footerWhatsappLabel')}
+            >
+              <FaWhatsapp />
+            </a>
           </div>
         </div>
 
         <div className={`promo-footer-column ${isInView ? 'animate-fade-up' : ''}`}>
           <h4>{tPromo('footerServicesTitle')}</h4>
           <ul className="promo-footer-links">
-            {footerLinks.slice(0, 3).map((link) => (
-              <li key={link.href}>
-                <a href={link.href}>
+            <li key="sobre-nosotros">
+              <a href="#sobre-nosotros">
+                <FaArrowRight />
+                {tPromo('footerAboutTitle')}
+              </a>
+            </li>
+            {servicesList.map(([key, title]) => (
+              <li key={`servico-${key}`}>
+                <a href="#servicios">
                   <FaArrowRight />
-                  {link.title}
+                  {title}
                 </a>
               </li>
             ))}
@@ -96,14 +66,18 @@ function Footer() {
         <div className={`promo-footer-column ${isInView ? 'animate-fade-up' : ''}`}>
           <h4>{tPromo('footerLegalTitle')}</h4>
           <ul className="promo-footer-links">
-            {footerLinks.slice(3).map((link) => (
-              <li key={link.href}>
-                <a href={link.href}>
-                  <FaArrowRight />
-                  {link.title}
-                </a>
-              </li>
-            ))}
+            <li key="privacy">
+              <a href="/privacidad" aria-label={tPromo('footerPrivacy')}>
+                <FaArrowRight />
+                {tPromo('footerPrivacy')}
+              </a>
+            </li>
+            <li key="terms">
+              <a href="/terminos" aria-label={tPromo('footerTerms')}>
+                <FaArrowRight />
+                {tPromo('footerTerms')}
+              </a>
+            </li>
           </ul>
         </div>
 
@@ -111,7 +85,7 @@ function Footer() {
           <h4>{tPromo('footerContactTitle')}</h4>
           <ul className="promo-footer-links">
             <li>
-              <a href={`mailto:${CONFIG.contact.email}`}>
+              <a href={`mailto:${CONFIG.contact.email}`} aria-label={tPromo('footerEmailLabel')}>
                 <FaEnvelope />
                 {CONFIG.contact.email}
               </a>

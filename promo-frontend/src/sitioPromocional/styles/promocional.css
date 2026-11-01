@@ -1520,6 +1520,11 @@
   margin-top: var(--promo-space-1);
 }
 
+/* Scroll compensation para navbar fija: las anclas no quedan ocultas */
+section[id] {
+  scroll-margin-top: 88px;
+}
+
 /* ============================================
    ANIMACIONES
    ============================================ */
