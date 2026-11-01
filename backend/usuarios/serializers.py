@@ -1,11 +1,26 @@
 from rest_framework import serializers
 from django.conf import settings
 from django.utils import timezone
+from rest_framework.fields import empty
+from rest_framework.validators import UniqueValidator
 from .models import Usuario, Doctor, Enfermera, Paciente, Especialidad, Horario, Cita, SitioImagen
+
+
+class OptionalEmailField(serializers.EmailField):
+    def run_validation(self, data=empty):
+        if isinstance(data, str) and not data.strip():
+            data = None
+        return super().run_validation(data)
+
 
 class UsuarioSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, required=False)
     foto_perfil_url = serializers.SerializerMethodField()
+    email = OptionalEmailField(
+        required=False,
+        allow_null=True,
+        validators=[UniqueValidator(queryset=Usuario.objects.all())],
+    )
 
     class Meta:
         model = Usuario
@@ -41,12 +56,16 @@ class UsuarioSerializer(serializers.ModelSerializer):
 class RegistroUsuarioSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)
     acepta_terminos = serializers.BooleanField(write_only=True, required=True)
+    email = OptionalEmailField(
+        required=False,
+        allow_null=True,
+        validators=[UniqueValidator(queryset=Usuario.objects.all())],
+    )
 
     class Meta:
         model = Usuario
         fields = ['username', 'password', 'first_name', 'last_name', 'email', 'rol', 'telefono', 'acepta_terminos']
         extra_kwargs = {
-            'email': {'required': False, 'allow_blank': True},
             'telefono': {'required': False, 'allow_blank': True},
         }
 
@@ -59,18 +78,19 @@ class RegistroUsuarioSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         validated_data.pop('acepta_terminos')
-        usuario = Usuario.objects.create_user(
-            username=validated_data['username'],
-            password=validated_data['password'],
+        usuario = Usuario(
+            username=Usuario.normalize_username(validated_data['username']),
             first_name=validated_data.get('first_name', ''),
             last_name=validated_data.get('last_name', ''),
-            email=validated_data.get('email', ''),
+            email=validated_data.get('email'),
             rol=validated_data.get('rol', 'patient'),
             telefono=validated_data.get('telefono', ''),
             terminos_aceptados=True,
             fecha_aceptacion_terminos=timezone.now(),
             version_terminos_aceptada=settings.TERMS_VERSION,
         )
+        usuario.set_password(validated_data['password'])
+        usuario.save()
         return usuario
 
 
