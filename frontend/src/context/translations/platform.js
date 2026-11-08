@@ -539,8 +539,14 @@ export const platformTranslations = {
     appointment: 'Consulta',
     
 
-  },
+    // Legal modal / acceptance labels
+    modalAcceptTerms: 'Aceitar e continuar',
+    modalCancel: 'Cancelar',
+    modalTermsTitle: 'Termos de Uso',
+    modalPrivacyTitle: 'Política de Privacidade',
+    acceptCheckboxLabel: 'Ao se cadastrar, declaro que li e aceito os Termos de Uso e a Política de Privacidade.',
 
+  },
 
   // Spanish
   es: {
@@ -1137,10 +1143,16 @@ export const platformTranslations = {
     phoneFormat: 'Formato: +244 923 456 789',
     emailPlaceholder: 'correo@ejemplo.com',
     passwordPlaceholder: '********',
+    // Legal modal / acceptance labels
+    modalAcceptTerms: 'Aceptar y continuar',
+    modalCancel: 'Cancelar',
+    modalTermsTitle: 'Términos de Uso',
+    modalPrivacyTitle: 'Política de Privacidad',
+    acceptCheckboxLabel: 'Al registrarme, declaro que he leído y acepto los Términos de Uso y la Política de Privacidad.',
+
   },
 
   // English
-
   // English
   en: {
     loading: 'Loading...',
@@ -1724,8 +1736,15 @@ export const platformTranslations = {
      seeAvailableTimes: 'View available times',
      haveQuestion: 'I have a question',
      untitled: 'Untitled',
-     appointment: 'Appointment',
-   },
+      appointment: 'Appointment',
+    // Legal modal / acceptance labels
+    modalAcceptTerms: 'Accept and continue',
+    modalCancel: 'Cancel',
+    modalTermsTitle: 'Terms of Use',
+    modalPrivacyTitle: 'Privacy Policy',
+    acceptCheckboxLabel: 'By registering, I declare that I have read and accept the Terms of Use and Privacy Policy.',
+
+    },
 
   // Sitio Promocional Translations
   // Portuguese (sitio promocional)

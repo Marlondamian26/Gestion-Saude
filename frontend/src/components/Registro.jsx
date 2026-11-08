@@ -6,9 +6,10 @@ import {
   FaUser, FaEnvelope, FaPhone, FaLock, FaEye, FaEyeSlash,
   FaCheckCircle, FaExclamationTriangle, FaSpinner, FaUserPlus
 } from 'react-icons/fa'
-import { APP_NAME, PRIVACY_URL, TERMS_URL } from '../config/constants'
+import { APP_NAME } from '../config/constants'
 import { useLanguage } from '../context/LanguageContext'
 import { useAuth } from '../context/AuthContext'
+import LegalModal from './legal/LegalModal'
 
 function Registro() {
   const { t } = useLanguage()
@@ -28,6 +29,7 @@ function Registro() {
   const [success, setSuccess] = useState('')
   const [loading, setLoading] = useState(false)
   const [aceptaTerminos, setAceptaTerminos] = useState(false)
+  const [showLegalModal, setShowLegalModal] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
   const [passwordStrength, setPasswordStrength] = useState({ score: 0, message: '', color: '#e74c3c' })
   // Evitar que el componente se desmonte durante el registro
@@ -284,6 +286,17 @@ function Registro() {
     if (error) setError('')
   }
 
+  const handleOpenLegal = () => {
+    setShowLegalModal(true)
+    if (error) setError('')
+  }
+
+  const handleAcceptLegal = () => {
+    setAceptaTerminos(true)
+    setErrors((previous) => ({ ...previous, acepta_terminos: '' }))
+    setShowLegalModal(false)
+  }
+
   return (
     <div style={styles.container} className="fade-in-scale slide-in-top">
       <div style={styles.card}>
@@ -490,7 +503,11 @@ function Registro() {
           <input type="hidden" name="rol" value="patient" />
 
           <div style={styles.termsAcceptance}>
-            <label style={styles.termsAcceptanceLabel} htmlFor="accept-legal">
+            <label
+              style={styles.termsAcceptanceLabel}
+              htmlFor="accept-legal"
+              onClick={handleOpenLegal}
+            >
               <input
                 id="accept-legal"
                 name="acepta_terminos"
@@ -502,15 +519,21 @@ function Registro() {
                 aria-invalid={Boolean(errors.acepta_terminos)}
                 aria-describedby={errors.acepta_terminos ? 'accept-legal-error' : undefined}
               />
-              <span>
+              <span style={{ cursor: 'pointer' }} onClick={handleOpenLegal}>
                 {t('aceptaTerminosPrefix')}{' '}
-                <a href={TERMS_URL} target="_blank" rel="noopener noreferrer" style={styles.termsLink}>
+                <span
+                  style={styles.termsLink}
+                  onClick={(e) => { e.stopPropagation(); handleOpenLegal() }}
+                >
                   {t('termsLink')}
-                </a>{' '}
+                </span>{' '}
                 {t('and')}{' '}
-                <a href={PRIVACY_URL} target="_blank" rel="noopener noreferrer" style={styles.termsLink}>
+                <span
+                  style={styles.termsLink}
+                  onClick={(e) => { e.stopPropagation(); handleOpenLegal() }}
+                >
                   {t('privacyLink')}
-                </a>.
+                </span>.
               </span>
             </label>
             {errors.acepta_terminos && (
@@ -519,6 +542,12 @@ function Registro() {
               </span>
             )}
           </div>
+
+          <LegalModal
+            isOpen={showLegalModal}
+            onClose={() => setShowLegalModal(false)}
+            onAccept={handleAcceptLegal}
+          />
 
           {/* Botón de registro */}
           <button 

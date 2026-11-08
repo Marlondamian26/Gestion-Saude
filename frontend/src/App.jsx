@@ -27,6 +27,8 @@ const Perfil = lazy(() => import('./components/Perfil'));
 const AdminDashboard = lazy(() => import('./components/AdminDashboard'));
 const EnfermeriaDashboard = lazy(() => import('./components/EnfermeriaDashboard'));
 const ChatIA = lazy(() => import('./components/chat/ChatIA'));
+const Terminos = lazy(() => import('./components/legal/LegalPage'));
+const Privacidad = lazy(() => import('./components/legal/LegalPage'));
 
 // Theme/Language toggles — usados en header, import estáticos
 import ThemeToggle from './components/ThemeToggle';
@@ -101,6 +103,8 @@ function AppContent() {
             <Route path="/admin" element={<AdminDashboard />} />
             <Route path="/enfermeria" element={<EnfermeriaDashboard />} />
             <Route path="/chat" element={<ChatIA />} />
+            <Route path="/terminos" element={<Terminos type="terminos" />} />
+            <Route path="/privacidad" element={<Privacidad type="privacidad" />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </Suspense>

@@ -74,13 +74,13 @@ describe('Registro — aceptación legal', () => {
     expect(submit).toBeEnabled();
   });
 
-  it('enlaza las políticas del promo desde la casilla de aceptación', () => {
+  it('abre el modal de políticas al hacer clic en los enlaces legales', () => {
     renderRegistro();
 
-    expect(screen.getByRole('link', { name: 'Términos de Uso' }))
-      .toHaveAttribute('href', expect.stringMatching(/\/terminos$/));
-    expect(screen.getByRole('link', { name: 'Política de Privacidad' }))
-      .toHaveAttribute('href', expect.stringMatching(/\/privacidad$/));
+    // Hacer clic en el texto de Términos de Uso abre el modal
+    fireEvent.click(screen.getByText('Términos de Uso'));
+    expect(screen.getByRole('button', { name: /Aceptar y continuar/ })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Cancelar/ })).toBeInTheDocument();
   });
 
   it('envía acepta_terminos=true en el payload de registro', async () => {
