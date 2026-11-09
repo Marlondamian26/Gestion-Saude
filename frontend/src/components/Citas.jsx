@@ -49,12 +49,6 @@ function Citas() {
     fetchDoctores()
   }, [])
 
-  useEffect(() => {
-    if (location.state?.scrollToHistory && historyRef.current) {
-      historyRef.current.scrollIntoView({ behavior: 'smooth' })
-    }
-  }, [location.state])
-
    useEffect(() => {
      if (nuevaCita.doctor && nuevaCita.fecha) {
        fetchHorariosDisponibles()

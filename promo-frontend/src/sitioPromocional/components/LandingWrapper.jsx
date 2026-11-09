@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { useTheme } from '../../context/ThemeContext';
 import { useLanguage } from '../../context/LanguageContext';
 
@@ -16,10 +16,6 @@ import LanguageToggle from './LanguageToggle';
 
 function LandingWrapper() {
   const { theme } = useTheme();
-
-  useEffect(() => {
-    window.scrollTo(0, 0);
-  }, []);
 
   return (
     <div className="sitio-promocional" data-theme={theme}>

@@ -18,6 +18,7 @@ import { setErrorHandler } from './services/errorHandler';
 import ErrorBoundary from './components/ErrorBoundary';
 import Login from './components/Login';
 import Registro from './components/Registro';
+import ScrollManager from './components/ScrollManager';
 
 // [FASE 7 §7.2.2] Lazy-loaded route components (solo se descargan al navegar)
 const Dashboard = lazy(() => import('./components/Dashboard'));
@@ -107,6 +108,7 @@ function AppContent() {
             <Route path="/privacidad" element={<Privacidad type="privacidad" />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
+          <ScrollManager />
         </Suspense>
       </div>
 
