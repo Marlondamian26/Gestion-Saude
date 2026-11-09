@@ -132,6 +132,15 @@
   --promo-gutter: clamp(1.25rem, 4vw, 2.5rem);
   --promo-section-py: clamp(4rem, 8vw, 7rem);
 
+  /* --- Escala de z-index del sitio promocional ---
+     Coherente y sin valores mágicos sueltos:
+     navbar (contexto de apilamiento del menú móvil) < toggles flotantes
+     < skip link (accesibilidad, siempre encima). */
+  --promo-z-navbar: 2100;
+  --promo-z-mobile-menu: 1100;
+  --promo-z-floating-toggles: 2000;
+  --promo-z-skip-link: 9999;
+
   /* --- Backward compatibility aliases (old --promo-* vars) --- */
   --promo-primary: var(--promo-primary-500);
   --promo-primary-dark: var(--promo-primary-600);

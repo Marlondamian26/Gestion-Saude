@@ -168,7 +168,7 @@ img, svg { display: block; max-width: 100%; height: auto; }
   border-radius: var(--promo-radius-sm);
   text-decoration: none;
   font-size: var(--promo-fs-sm);
-  z-index: 9999;
+  z-index: var(--promo-z-skip-link, 9999);
   transition: top var(--promo-dur-fast) var(--promo-ease);
 }
 

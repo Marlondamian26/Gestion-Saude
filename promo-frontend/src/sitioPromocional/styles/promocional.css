@@ -169,7 +169,7 @@
   top: 0;
   left: 0;
   right: 0;
-  z-index: 1000;
+  z-index: var(--promo-z-navbar, 2100);
   height: 72px;
   display: flex;
   align-items: center;
@@ -364,7 +364,7 @@
 .promo-navbar-mobile {
   position: fixed;
   inset: 72px 0 0 0;
-  z-index: 999;
+  z-index: var(--promo-z-mobile-menu, 1100);
   background: var(--promo-surface);
   padding: var(--promo-space-8) var(--promo-gutter);
   transform: translateY(-100%);
@@ -845,7 +845,7 @@
   text-decoration: none;
   font-size: 0.875rem;
   transition: top 0.2s;
-  z-index: 9999;
+  z-index: var(--promo-z-skip-link, 9999);
 }
 
 .promo-skip-link:focus {
