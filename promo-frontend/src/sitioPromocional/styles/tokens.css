@@ -93,6 +93,11 @@
   --promo-space-24: 6rem;
   --promo-space-32: 8rem;
 
+  /* --- Altura del navbar fijo (usada por el menú móvil) ---
+     Se redefine en los media queries de promocional.css para
+     coincidir con la altura real del navbar en cada breakpoint. */
+  --navbar-height: 72px;
+
   /* --- Typography --- */
   --promo-font-sans: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
   --promo-font-display: 'Fraunces', 'Playfair Display', Georgia, serif;
