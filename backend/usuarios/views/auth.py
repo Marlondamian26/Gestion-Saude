@@ -199,3 +199,249 @@ def gestionar_foto_perfil(request, usuario_id=None):
             'message': 'Foto de perfil eliminada correctamente',
             'usuario': serializer.data
         }, status=status.HTTP_200_OK)
+
+
+# =============================================================================
+# Vistas de recuperación de contraseña (Password Reset)
+# =============================================================================
+
+from django.utils import timezone
+from django.conf import settings
+from ..models import PasswordResetToken
+from ..serializers import PasswordResetRequestSerializer, PasswordResetConfirmSerializer
+
+
+class PasswordResetRequestThrottle(AnonRateThrottle):
+    """Throttle dedicado para solicitud de recuperación de contraseña."""
+    scope = 'password_reset_request'
+
+
+class PasswordResetConfirmThrottle(AnonRateThrottle):
+    """Throttle dedicado para confirmación de recuperación de contraseña."""
+    scope = 'password_reset_confirm'
+
+
+def _enmascarar_email(email):
+    """Devuelve el email enmascarado para logs (us***@dominio.com)."""
+    if not email or '@' not in email:
+        return 'desconocido'
+    parte_local, dominio = email.split('@', 1)
+    if len(parte_local) <= 2:
+        mascarada = parte_local[0] + '***'
+    else:
+        mascarada = parte_local[:2] + '***'
+    return f'{mascarada}@{dominio}'
+
+
+def _construir_enlace_reset(token_plano):
+    """Construye la URL completa del enlace de restablecimiento."""
+    frontend_url = getattr(settings, 'FRONTEND_URL', '').rstrip('/')
+    if not frontend_url:
+        # Fallback para desarrollo local
+        frontend_url = 'http://localhost:5173'
+    return f'{frontend_url}/reset-password/{token_plano}'
+
+
+def _enviar_email_recuperacion(usuario, token_plano):
+    """Envía el email de recuperación de contraseña al usuario."""
+    if not usuario.email:
+        logger.warning(
+            'Usuario %s sin email configurado, no se puede enviar enlace de recuperación.',
+            usuario.id,
+        )
+        return False, 'Usuario sin email configurado.'
+
+    enlace = _construir_enlace_reset(token_plano)
+    timeout_min = int(getattr(settings, 'PASSWORD_RESET_TIMEOUT', 3600) / 60)
+
+    asunto = 'Recupera tu contraseña — Gestion-Saude'
+
+    mensaje_html = f"""
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    </head>
+    <body style="font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; margin: 0; padding: 0; background-color: #f4f2ee; color: #1a1816;">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width: 600px; margin: 0 auto; padding: 32px 16px;">
+            <tr>
+                <td align="center" style="padding-bottom: 24px;">
+                    <h1 style="margin: 0; font-size: 24px; color: #00a896; font-weight: 700;">Gestion-Saude</h1>
+                </td>
+            </tr>
+            <tr>
+                <td style="background-color: #ffffff; border-radius: 12px; padding: 32px; border: 1px solid #e6e2db;">
+                    <h2 style="margin: 0 0 16px 0; font-size: 20px; color: #1a1816;">Hola {usuario.first_name or usuario.username},</h2>
+                    <p style="margin: 0 0 16px 0; font-size: 15px; color: #3d3935; line-height: 1.5;">
+                        Recibimos una solicitud para restablecer la contraseña de tu cuenta de Gestion-Saude.
+                    </p>
+                    <p style="margin: 0 0 24px 0; font-size: 15px; color: #3d3935; line-height: 1.5;">
+                        Haz clic en el botón de abajo para crear una nueva contraseña. El enlace expira en
+                        <strong>{timeout_min} minutos</strong>.
+                    </p>
+                    <table role="presentation" cellpadding="0" cellspacing="0">
+                        <tr>
+                            <td align="center">
+                                <a href="{enlace}" style="display: inline-block; background-color: #00a896; color: #ffffff; text-decoration: none; padding: 14px 28px; border-radius: 8px; font-size: 15px; font-weight: 600;">
+                                    Restablecer contraseña
+                                </a>
+                            </td>
+                        </tr>
+                    </table>
+                    <p style="margin: 24px 0 0 0; font-size: 13px; color: #78716c; line-height: 1.5;">
+                        Si no solicitaste este cambio, puedes ignorar este correo de forma segura. Tu contraseña actual
+                        permanecerá vigente hasta que uses este enlace.
+                    </p>
+                </td>
+            </tr>
+            <tr>
+                <td align="center" style="padding-top: 24px; font-size: 12px; color: #a8a29e;">
+                    Gestion-Saude — Plataforma de Gestión Médica
+                </td>
+            </tr>
+        </table>
+    </body>
+    </html>
+    """
+
+    mensaje_texto = f"""
+Hola {usuario.first_name or usuario.username},
+
+Recibimos una solicitud para restablecer la contraseña de tu cuenta de Gestion-Saude.
+
+Haz clic en el siguiente enlace para crear una nueva contraseña. El enlace expira en {timeout_min} minutos:
+
+{enlace}
+
+Si no solicitaste este cambio, puedes ignorar este correo de forma segura. Tu contraseña actual permanecerá vigente hasta que uses este enlace.
+
+Gestion-Saude — Plataforma de Gestión Médica
+"""
+
+    try:
+        success, message = ServicioNotificaciones.enviar_email(
+            destinatario=usuario.email,
+            asunto=asunto,
+            mensaje=mensaje_html,
+        )
+        if not success:
+            logger.error(
+                'Error enviando email de recuperación a %s: %s',
+                _enmascarar_email(usuario.email), message,
+            )
+        return success, message
+    except Exception as e:
+        logger.exception(
+            'Excepción enviando email de recuperación a %s: %s',
+            _enmascarar_email(usuario.email), str(e)[:200],
+        )
+        return False, str(e)[:200]
+
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+@throttle_classes([PasswordResetRequestThrottle])
+def password_reset_request(request):
+    """
+    Endpoint público para solicitar un enlace de recuperación de contraseña.
+
+    Siempre responde 200 con un mensaje genérico, exista o no el email
+    registrado, para evitar enumeración de usuarios.
+    """
+    serializer = PasswordResetRequestSerializer(data=request.data)
+    if not serializer.is_valid():
+        return Response({'error': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+
+    email = serializer.validated_data['email']
+
+    try:
+        usuario = Usuario.objects.get(email__iexact=email)
+    except Usuario.DoesNotExist:
+        # No revelar si el email existe o no
+        logger.info(
+            'Solicitud de reset con email no registrado: %s',
+            _enmascarar_email(email),
+        )
+        return Response({
+            'detail': 'Si el correo está registrado, recibirás un enlace de recuperación.'
+        }, status=status.HTTP_200_OK)
+
+    # No permitir reset en cuentas inactivas
+    if not usuario.is_active:
+        logger.info(
+            'Solicitud de reset para usuario inactivo: %s',
+            _enmascarar_email(email),
+        )
+        return Response({
+            'detail': 'Si el correo está registrado, recibirás un enlace de recuperación.'
+        }, status=status.HTTP_200_OK)
+
+    try:
+        token, token_plano = PasswordResetToken.create_for_user(usuario)
+    except Exception as e:
+        logger.exception(
+            'Error generando token de reset para %s: %s',
+            _enmascarar_email(email), str(e)[:200],
+        )
+        return Response({
+            'detail': 'Si el correo está registrado, recibirás un enlace de recuperación.'
+        }, status=status.HTTP_200_OK)
+
+    success, message = _enviar_email_recuperacion(usuario, token_plano)
+    if not success:
+        logger.error(
+            'Fallo al enviar email de recuperación a %s: %s',
+            _enmascarar_email(email), message,
+        )
+        # Aun así respondemos 200 genérico para no filtrar información
+
+    return Response({
+        'detail': 'Si el correo está registrado, recibirás un enlace de recuperación.'
+    }, status=status.HTTP_200_OK)
+
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+@throttle_classes([PasswordResetConfirmThrottle])
+def password_reset_confirm(request):
+    """
+    Endpoint público para confirmar la nueva contraseña usando el token.
+
+    Valida el token (existencia, expiración, un solo uso, usuario activo),
+    valida la política de contraseñas de Django, actualiza la contraseña
+    e invalida el token.
+    """
+    serializer = PasswordResetConfirmSerializer(data=request.data)
+    if not serializer.is_valid():
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    token_plano = serializer.validated_data['token']
+    new_password = serializer.validated_data['new_password']
+
+    try:
+        usuario = PasswordResetToken.validar_y_consumir(token_plano)
+    except ValueError as exc:
+        logger.warning(
+            'Token de reset inválido: %s',
+            str(exc)[:200],
+        )
+        return Response({
+            'error': 'Token inválido o expirado.'
+        }, status=status.HTTP_400_BAD_REQUEST)
+
+    try:
+        usuario.set_password(new_password)
+        usuario.save(update_fields=['password'])
+    except Exception as e:
+        logger.exception(
+            'Error guardando nueva contraseña para usuario %s: %s',
+            usuario.id, str(e)[:200],
+        )
+        return Response({
+            'error': 'No se pudo actualizar la contraseña. Inténtalo de nuevo.'
+        }, status=status.HTTP_400_BAD_REQUEST)
+
+    return Response({
+        'detail': 'Contraseña actualizada correctamente. Ya puedes iniciar sesión.'
+    }, status=status.HTTP_200_OK)

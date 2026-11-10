@@ -401,3 +401,40 @@ class SitioImagenSerializer(serializers.ModelSerializer):
             target = (1920, 1080) if validated_data.get('tipo') == 'hero' else (1200, 800)
             validated_data['imagen'] = optimizar_imagen(imagen, target_size=target)
         return super().create(validated_data)
+
+
+# =============================================================================
+# Serializers de recuperación de contraseña (Password Reset)
+# =============================================================================
+
+from django.contrib.auth.password_validation import validate_password
+from django.core.exceptions import ValidationError as DjangoValidationError
+from .models import PasswordResetToken
+
+
+class PasswordResetRequestSerializer(serializers.Serializer):
+    """Solicitud de enlace de recuperación de contraseña."""
+
+    email = serializers.EmailField(required=True, allow_blank=False)
+
+    def validate_email(self, value):
+        email = value.strip().lower()
+        if not email:
+            raise serializers.ValidationError('El correo electrónico es obligatorio.')
+        return email
+
+
+class PasswordResetConfirmSerializer(serializers.Serializer):
+    """Confirmación de nueva contraseña mediante token."""
+
+    token = serializers.CharField(required=True, allow_blank=False, trim_whitespace=True)
+    new_password = serializers.CharField(required=True, write_only=True, trim_whitespace=False)
+
+    def validate_new_password(self, value):
+        if not value:
+            raise serializers.ValidationError('La nueva contraseña es obligatoria.')
+        try:
+            validate_password(value)
+        except DjangoValidationError as exc:
+            raise serializers.ValidationError(list(exc.messages))
+        return value

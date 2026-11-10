@@ -394,6 +394,8 @@ REST_FRAMEWORK = {
         'user': '60/minute',  # Rate limit for authenticated users
         'anon': '30/minute',  # Rate limit for anonymous users
         'registro': '5/minute',  # Dedicated rate limit for public registration
+        'password_reset_request': '5/hour',  # Rate limit for public password reset request
+        'password_reset_confirm': '10/hour',  # Rate limit for public password reset confirm
     }
 }
 
@@ -405,6 +407,12 @@ EMAIL_PORT = int(os.getenv('EMAIL_PORT', 587))
 EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS', 'True') == 'True'
 EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', '')
 EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', '')
+
+# URL del frontend para construir enlaces de recuperación (usado en emails)
+FRONTEND_URL = os.getenv('FRONTEND_URL', 'http://localhost:5173')
+
+# Tiempo de expiración del token de recuperación de contraseña (segundos)
+PASSWORD_RESET_TIMEOUT = int(os.getenv('PASSWORD_RESET_TIMEOUT', '3600'))  # 1 hora por defecto
 
 # [FASE 5 §5.3] Email backend: Resend/anymail si está configurado, console en dev
 RESEND_API_KEY = os.getenv('RESEND_API_KEY', '')

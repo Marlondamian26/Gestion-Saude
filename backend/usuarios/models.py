@@ -1,6 +1,12 @@
+import secrets
+from datetime import timedelta
+
+from django.contrib.auth.hashers import make_password, check_password
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.core.validators import MinValueValidator, MaxValueValidator
+from django.utils import timezone
+from django.conf import settings
 
 class Usuario(AbstractUser):
     """
@@ -414,6 +420,90 @@ class SitioImagen(models.Model):
     
     def __str__(self):
         return f"{self.tipo} - {self.titulo or self.imagen.name}"
+
+
+class PasswordResetToken(models.Model):
+    """
+    Token de un solo uso para recuperación de contraseña.
+
+    El token se almacena hasheado (nunca en texto plano) y expira tras
+    PASSWORD_RESET_TIMEOUT segundos (configurable por variable de entorno,
+    default 1 hora). Está vinculado a un usuario y se invalida tras su primer
+    uso exitoso.
+    """
+
+    usuario = models.ForeignKey(
+        Usuario,
+        on_delete=models.CASCADE,
+        related_name='password_reset_tokens',
+        verbose_name='Usuario',
+    )
+    token_hash = models.CharField(max_length=255, verbose_name='Token hasheado')
+    creado_en = models.DateTimeField(auto_now_add=True, verbose_name='Creado en')
+    expira_en = models.DateTimeField(verbose_name='Expira en')
+    usado = models.BooleanField(default=False, verbose_name='Usado')
+
+    class Meta:
+        verbose_name = 'Token de recuperación de contraseña'
+        verbose_name_plural = 'Tokens de recuperación de contraseña'
+        indexes = [
+            models.Index(fields=['usuario', 'usado'], name='pwd_reset_user_used_idx'),
+            models.Index(fields=['expira_en'], name='pwd_reset_expires_idx'),
+        ]
+
+    def __str__(self):
+        return f"ResetToken({self.usuario_id}, expira={self.expira_en})"
+
+    @classmethod
+    def generate_token(cls):
+        """Genera un token seguro y aleatorio (texto plano, solo se devuelve una vez)."""
+        return secrets.token_urlsafe(32)
+
+    @classmethod
+    def create_for_user(cls, usuario):
+        """Crea (o reutiliza si aún es válido) un token para el usuario dado."""
+        timeout = getattr(settings, 'PASSWORD_RESET_TIMEOUT', 3600)
+        ahora = timezone.now()
+        expira = ahora + timedelta(seconds=timeout)
+
+        # Invalidar tokens previos no usados de este usuario para forzar uno nuevo
+        cls.objects.filter(usuario=usuario, usado=False).update(usado=True)
+
+        token_plano = cls.generate_token()
+        token = cls.objects.create(
+            usuario=usuario,
+            token_hash=make_password(token_plano),
+            expira_en=expira,
+            usado=False,
+        )
+        return token, token_plano
+
+    @classmethod
+    def validar_y_consumir(cls, token_plano):
+        """
+        Valida que el token exista, no haya expirado, no esté usado y pertenezca
+        a un usuario activo. Si es válido, lo marca como usado y devuelve el
+        usuario. Lanza ValueError en caso contrario.
+        """
+        ahora = timezone.now()
+        tokens = cls.objects.filter(usado=False, expira_en__gt=ahora).select_related('usuario')
+
+        for token_obj in tokens:
+            if check_password(token_plano, token_obj.token_hash):
+                if not token_obj.usuario.is_active:
+                    raise ValueError('Esta cuenta no está activa.')
+                token_obj.usado = True
+                token_obj.save(update_fields=['usado'])
+                return token_obj.usuario
+
+        raise ValueError('Token inválido o expirado.')
+
+    def es_valido(self):
+        return (
+            not self.usado
+            and self.expira_en > timezone.now()
+            and self.usuario.is_active
+        )
 
 
 

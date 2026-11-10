@@ -42,4 +42,8 @@ urlpatterns = [
     # Gestión de foto de perfil
     path('foto-perfil/', views.gestionar_foto_perfil, name='gestionar_foto_perfil'),
     path('foto-perfil/<int:usuario_id>/', views.gestionar_foto_perfil, name='gestionar_foto_perfil_usuario'),
+
+    # Recuperación de contraseña (pública)
+    path('password-reset/request/', views.password_reset_request, name='password-reset-request'),
+    path('password-reset/confirm/', views.password_reset_confirm, name='password-reset-confirm'),
 ]

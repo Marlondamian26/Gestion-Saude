@@ -14,6 +14,10 @@ from .auth import (
     usuario_actual,
     cambiar_contrasena,
     gestionar_foto_perfil,
+    password_reset_request,
+    password_reset_confirm,
+    PasswordResetRequestThrottle,
+    PasswordResetConfirmThrottle,
 )
 from .usuarios import UsuarioViewSet
 from .doctores import DoctorViewSet, doctores_publicos, mi_perfil_doctor
@@ -32,6 +36,10 @@ __all__ = [
     'usuario_actual',
     'cambiar_contrasena',
     'gestionar_foto_perfil',
+    'password_reset_request',
+    'password_reset_confirm',
+    'PasswordResetRequestThrottle',
+    'PasswordResetConfirmThrottle',
     'UsuarioViewSet',
     'DoctorViewSet',
     'doctores_publicos',
