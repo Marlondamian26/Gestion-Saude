@@ -171,6 +171,9 @@ function Login() {
               />
               {t('rememberMe')}
             </label>
+            <Link to="/forgot-password" style={styles.forgotPasswordLink}>
+              {t('forgotPassword') || '¿Olvidaste tu contraseña?'}
+            </Link>
           </div>
 
           <button 
@@ -371,6 +374,14 @@ const styles = {
     color: 'var(--color-patient)',
     textDecoration: 'none',
     fontWeight: '600'
+  },
+  forgotPasswordLink: {
+    color: 'var(--color-patient)',
+    textDecoration: 'none',
+    fontSize: '13px',
+    fontWeight: '600',
+    marginLeft: 'auto',
+    cursor: 'pointer',
   },
   legalLinks: {
     marginTop: '14px',

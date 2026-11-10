@@ -70,7 +70,7 @@ axiosInstance.interceptors.response.use(
     const originalRequest = error.config
     
     // No redirigir para requests de login/registro
-    const noRedirigirUrls = ['/token/', '/token/refresh/', '/registro/', '/doctores-publicos/', '/especialidades-publicas/', '/especialistas-publicos/']
+    const noRedirigirUrls = ['/token/', '/token/refresh/', '/registro/', '/doctores-publicos/', '/especialidades-publicas/', '/especialistas-publicos/', '/password-reset/request/', '/password-reset/confirm/']
     const isAuthRequest = noRedirigirUrls.some(url => originalRequest.url?.includes(url))
     
     if (error.response?.status === 401 && !originalRequest._retry && !isAuthRequest) {
@@ -157,6 +157,43 @@ axiosInstance.interceptors.response.use(
     return Promise.reject(error);
   }
 )
+
+// =============================================================================
+// Servicios de recuperación de contraseña (endpoints públicos, sin JWT)
+// =============================================================================
+
+export async function requestPasswordReset(email) {
+  try {
+    const response = await axiosInstance.post('/password-reset/request/', {
+      email,
+    })
+    return response.data
+  } catch (error) {
+    if (error.response?.status === 429) {
+      throw new Error('Demasiadas solicitudes. Inténtalo de nuevo más tarde.')
+    }
+    throw error
+  }
+}
+
+export async function confirmPasswordReset(token, newPassword) {
+  try {
+    const response = await axiosInstance.post('/password-reset/confirm/', {
+      token,
+      new_password: newPassword,
+    })
+    return response.data
+  } catch (error) {
+    if (error.response?.status === 429) {
+      throw new Error('Demasiados intentos. Inténtalo de nuevo más tarde.')
+    }
+    if (error.response?.status === 400) {
+      const msg = error.response.data?.error || error.response.data?.detail || 'Token inválido o expirado.'
+      throw new Error(msg)
+    }
+    throw error
+  }
+}
 
 export default axiosInstance
 export { wakeUpBackend }

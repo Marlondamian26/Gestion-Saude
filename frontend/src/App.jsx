@@ -18,6 +18,8 @@ import { setErrorHandler } from './services/errorHandler';
 import ErrorBoundary from './components/ErrorBoundary';
 import Login from './components/Login';
 import Registro from './components/Registro';
+import ForgotPasswordPage from './components/ForgotPasswordPage';
+import ResetPasswordPage from './components/ResetPasswordPage';
 import ScrollManager from './components/ScrollManager';
 
 // [FASE 7 §7.2.2] Lazy-loaded route components (solo se descargan al navegar)
@@ -97,6 +99,8 @@ function AppContent() {
             <Route path="/" element={<Bootstrap />} />
             <Route path="/login" element={<Login />} />
             <Route path="/registro" element={<Registro />} />
+            <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+            <Route path="/reset-password/:token" element={<ResetPasswordPage />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/citas" element={<Citas />} />
             <Route path="/doctores" element={<Doctores />} />
