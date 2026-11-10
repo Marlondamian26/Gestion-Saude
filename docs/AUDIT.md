@@ -930,7 +930,7 @@ No persiste eventos en BD (baja). Logs estructurados a stdout.
 - `backend/usuarios/chat_metrics.py`: funciones de logging estructurado.
 - `backend/usuarios/ai_service.py`: instrumentación (logging solo, sin cambio de lógica).
 - `backend/core/settings.py`: `LOGGING` config con `python-json-logger`.
-- `backend/usuarios/CHAT_METRICS.md`: catálogo + KPIs.
+- `../backend/usuarios/CHAT_METRICS.md`: catálogo + KPIs.
 
 ### KPIs a vigilar
 1. Conversión: `cita_creada / session_started ≥ 2%`

@@ -196,6 +196,6 @@
 
 ### Enlaces
 - Documentación del proyecto: [README.md](../README.md)
-- Auditoría completa: [AUDIT.md](../AUDIT.md)
+- Auditoría completa: [AUDIT.md](AUDIT.md)
 - Evaluaciones técnicas: [docs/architecture/]()
 - Deuda técnica tracking: esta sección

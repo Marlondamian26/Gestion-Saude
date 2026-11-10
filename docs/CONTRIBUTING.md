@@ -150,4 +150,4 @@ Los workflows en `.github/workflows/`:
 - `frontend-ci.yml`: Node 20, lint, test, build.
 - `e2e.yml`: Playwright en PRs a `main`/`belkis-saude`.
 
-Ver detalles en [CHANGELOG.md](CHANGELOG.md) y el diagrama de arquitectura en [README.md](README.md).
+Ver detalles en [CHANGELOG.md](./CHANGELOG.md) y el diagrama de arquitectura en [README.md](../README.md).

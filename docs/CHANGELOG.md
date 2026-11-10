@@ -12,7 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `CHANGELOG.md`: this file.
 - `CONTRIBUTING.md`: PR workflow, coding standards, commit conventions.
 - `docs/er-diagram.md`: entity relationship diagram for all models.
-- `backend/LOGGING.md`: structured logging guide, log formats, debugging procedures.
+- `../backend/LOGGING.md`: structured logging guide, log formats, debugging procedures.
 
 ### Added — §6.1.5 E2E Infrastructure
 - `.github/workflows/e2e.yml`: Playwright E2E tests on PRs to `main`/`belkis-saude`.

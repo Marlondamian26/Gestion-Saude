@@ -15,7 +15,7 @@
  * - components/chat/ChatInput.jsx
  *
  * TODO(FASE 6): Eliminar este archivo y actualizar imports a usar ./chat/ChatIA directamente.
- * Ver AUDIT.md §4.1.2 para detalles.
+ * Ver docs/AUDIT.md §4.1.2 para detalles.
  *
  * §4.1.2 — Refactor de ChatIA.jsx (1326 líneas → 11 archivos, max ~100 líneas por componente)
  */
