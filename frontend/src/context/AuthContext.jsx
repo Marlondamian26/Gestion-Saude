@@ -5,7 +5,6 @@ import { wakeUpBackend } from '../utils/apiUtils';
 // Función para despertar el backend antes de login
 const localWakeUpBackend = async () => {
   try {
-    console.log('[Auth] Waking up backend...');
     await wakeUpBackend();
   } catch (err) {
     console.warn('[Auth] Health check failed, but continuing:', err.message);

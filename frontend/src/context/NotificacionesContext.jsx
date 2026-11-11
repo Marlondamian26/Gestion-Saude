@@ -237,7 +237,6 @@ export const NotificacionesProvider = ({ children }) => {
 
       sseRef.current = eventSource;
       setSSEActive(true);
-      console.log('[SSE] Connected to notificaciones stream');
     } catch (e) {
       console.error('[SSE] Failed to connect:', e);
       setSSEActive(false);

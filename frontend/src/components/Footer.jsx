@@ -65,6 +65,8 @@ const Footer = () => {
     },
     legalLinks: {
       display: 'flex',
+      flexWrap: 'wrap',
+      alignItems: 'center',
       gap: '6px',
       justifyContent: 'center',
       fontSize: '12px',
@@ -72,6 +74,9 @@ const Footer = () => {
     legalLink: {
       color: 'var(--text-muted)',
       textDecoration: 'underline',
+      display: 'inline-flex',
+      alignItems: 'center',
+      minHeight: '44px',
     },
   };
 

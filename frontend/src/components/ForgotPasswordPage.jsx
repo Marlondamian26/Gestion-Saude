@@ -132,7 +132,7 @@ const styles = {
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
-    minHeight: '100vh',
+    minHeight: 'var(--app-viewport-min-height, 100vh)',
     backgroundColor: 'var(--bg-primary)',
     padding: '20px',
     fontFamily: 'system-ui, -apple-system, sans-serif',
@@ -230,7 +230,6 @@ const styles = {
     backgroundColor: 'var(--bg-primary)',
     color: 'var(--text-primary)',
     boxSizing: 'border-box',
-    outline: 'none',
     transition: 'border-color 0.3s',
   },
   button: {
@@ -264,6 +263,9 @@ const styles = {
     color: 'var(--color-patient)',
     textDecoration: 'none',
     fontWeight: '600',
+    display: 'inline-flex',
+    alignItems: 'center',
+    minHeight: '44px',
   },
 }
 

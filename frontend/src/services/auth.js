@@ -37,9 +37,7 @@ const processQueue = (error, token = null) => {
 // Función para despertar el backend (útil para Render free tier)
 const wakeUpBackend = async () => {
   try {
-    console.log('[Auth] Waking up backend...');
     await axios.get(`${API_URL.replace('/api', '')}/health/`, { timeout: 5000 });
-    console.log('[Auth] Backend is awake');
   } catch (err) {
     console.warn('[Auth] Health check failed, but continuing:', err.message);
   }

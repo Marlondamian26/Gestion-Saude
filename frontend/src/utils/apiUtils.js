@@ -16,13 +16,11 @@ const getApiUrl = () => {
 // Función para despertar el backend (útil para Render free tier)
 export const wakeUpBackend = async () => {
   try {
-    console.log('[API] Waking up backend...');
     const API_URL = getApiUrl();
     const response = await fetch(`${API_URL.replace('/api', '')}/health/`, {
       method: 'GET',
       timeout: 5000
     });
-    console.log('[API] Backend is awake');
     return response.ok;
   } catch (err) {
     console.warn('[API] Health check failed, but continuing:', err.message);

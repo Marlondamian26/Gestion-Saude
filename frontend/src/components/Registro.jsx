@@ -179,7 +179,6 @@ function Registro() {
 
       clearTimeout(timeoutId)
 
-      console.log('Respuesta del servidor:', response.data)
       
       setSuccess(t('registrationSuccess'))
       
@@ -327,12 +326,13 @@ function Registro() {
           {/* Nombre y Apellido en fila */}
           <div style={styles.row}>
             <div style={styles.inputGroup}>
-              <label style={styles.label}>
+              <label htmlFor="register-first-name" style={styles.label}>
                 <FaUser style={styles.inputIcon} />
                 {t('firstName')} *
               </label>
               <input
                 type="text"
+                id="register-first-name"
                 name="first_name"
                 value={formData.first_name}
                 onChange={handleChange}
@@ -350,12 +350,13 @@ function Registro() {
             </div>
 
             <div style={styles.inputGroup}>
-              <label style={styles.label}>
+              <label htmlFor="register-last-name" style={styles.label}>
                 <FaUser style={styles.inputIcon} />
                 {t('lastName')} *
               </label>
               <input
                 type="text"
+                id="register-last-name"
                 name="last_name"
                 value={formData.last_name}
                 onChange={handleChange}
@@ -375,12 +376,13 @@ function Registro() {
 
           {/* Usuario */}
           <div style={styles.inputGroup}>
-            <label style={styles.label}>
+            <label htmlFor="register-username" style={styles.label}>
               <FaUser style={styles.inputIcon} />
               {t('username')} *
             </label>
             <input
               type="text"
+              id="register-username"
               name="username"
               value={formData.username}
               onChange={handleChange}
@@ -391,7 +393,7 @@ function Registro() {
               placeholder={t('usernamePlaceholder')}
               disabled={loading}
               maxLength="30"
-              autoComplete="off"
+              autoComplete="username"
             />
             {errors.username && (
               <span style={styles.fieldError}>{errors.username}</span>
@@ -401,12 +403,13 @@ function Registro() {
 
           {/* Email */}
           <div style={styles.inputGroup}>
-            <label style={styles.label}>
+            <label htmlFor="register-email" style={styles.label}>
               <FaEnvelope style={styles.inputIcon} />
               Email {t('requiredFieldIndicator')}
             </label>
               <input
                 type="email"
+                id="register-email"
                 name="email"
                 value={formData.email}
                 onChange={handleChange}
@@ -425,12 +428,13 @@ function Registro() {
 
           {/* Teléfono */}
           <div style={styles.inputGroup}>
-            <label style={styles.label}>
+            <label htmlFor="register-phone" style={styles.label}>
               <FaPhone style={styles.inputIcon} />
               {t('phone')}
             </label>
               <input
                 type="tel"
+                id="register-phone"
                 name="telefono"
                 value={formData.telefono}
                 onChange={handleChange}
@@ -450,13 +454,14 @@ function Registro() {
 
           {/* Contraseña */}
           <div style={styles.inputGroup}>
-            <label style={styles.label}>
+            <label htmlFor="register-password" style={styles.label}>
               <FaLock style={styles.inputIcon} />
               {t('passwordLabel')}
             </label>
             <div style={styles.passwordWrapper}>
                 <input
                 type={showPassword ? 'text' : 'password'}
+                id="register-password"
                 name="password"
                 value={formData.password}
                 onChange={handleChange}
@@ -473,7 +478,7 @@ function Registro() {
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
                 style={styles.passwordToggle}
-                tabIndex="-1"
+                aria-label={showPassword ? t('hidePassword') : t('showPassword')}
               >
                 {showPassword ? <FaEyeSlash /> : <FaEye />}
               </button>
@@ -606,7 +611,7 @@ const styles = {
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
-    minHeight: '100vh',
+    minHeight: 'var(--app-viewport-min-height, 100vh)',
     backgroundColor: 'var(--bg-primary)',
     padding: '20px',
     fontFamily: 'system-ui, -apple-system, sans-serif'
@@ -711,7 +716,6 @@ const styles = {
     transition: 'border-color 0.3s',
     backgroundColor: 'var(--bg-primary)',
     color: 'var(--text-primary)',
-    outline: 'none',
     ':focus': {
       borderColor: 'var(--color-patient)'
     },
@@ -738,7 +742,6 @@ const styles = {
     transition: 'border-color 0.3s',
     backgroundColor: 'var(--bg-primary)',
     color: 'var(--text-primary)',
-    outline: 'none',
     ':focus': {
       borderColor: 'var(--color-patient)'
     }
@@ -752,6 +755,12 @@ const styles = {
     cursor: 'pointer',
     color: 'var(--text-muted)',
     padding: '0',
+    width: '48px',
+    minWidth: '48px',
+    minHeight: '48px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
     ':hover': {
       color: 'var(--text-primary)'
     }
@@ -820,6 +829,7 @@ const styles = {
     border: 'none',
     borderRadius: '8px',
     cursor: 'pointer',
+    minHeight: '48px',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
@@ -847,6 +857,9 @@ const styles = {
     color: 'var(--color-patient)',
     textDecoration: 'none',
     fontWeight: '600',
+    display: 'inline-flex',
+    alignItems: 'center',
+    minHeight: '48px',
     ':hover': {
       textDecoration: 'underline'
     }
@@ -861,9 +874,10 @@ const styles = {
   },
   termsAcceptanceLabel: {
     display: 'flex',
-    alignItems: 'flex-start',
+    alignItems: 'center',
     gap: '9px',
-    cursor: 'pointer'
+    cursor: 'pointer',
+    minHeight: '48px'
   },
   termsLink: {
     color: 'var(--text-secondary)',

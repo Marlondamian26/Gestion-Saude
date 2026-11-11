@@ -153,6 +153,7 @@ function ResetPasswordPage() {
                   type="button"
                   onClick={() => setShowNewPassword(!showNewPassword)}
                   style={styles.passwordToggle}
+                  aria-label={showNewPassword ? t('hidePassword') : t('showPassword')}
                 >
                   {showNewPassword ? '👁️' : '👁️‍🗨️'}
                 </button>
@@ -180,6 +181,7 @@ function ResetPasswordPage() {
                   type="button"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                   style={styles.passwordToggle}
+                  aria-label={showConfirmPassword ? t('hidePassword') : t('showPassword')}
                 >
                   {showConfirmPassword ? '👁️' : '👁️‍🗨️'}
                 </button>
@@ -219,7 +221,7 @@ const styles = {
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
-    minHeight: '100vh',
+    minHeight: 'var(--app-viewport-min-height, 100vh)',
     backgroundColor: 'var(--bg-primary)',
     padding: '20px',
     fontFamily: 'system-ui, -apple-system, sans-serif',
@@ -317,7 +319,6 @@ const styles = {
     backgroundColor: 'var(--bg-primary)',
     color: 'var(--text-primary)',
     boxSizing: 'border-box',
-    outline: 'none',
     transition: 'border-color 0.3s',
   },
   passwordToggle: {
@@ -328,6 +329,12 @@ const styles = {
     fontSize: '16px',
     cursor: 'pointer',
     color: 'var(--text-muted)',
+    width: '48px',
+    minWidth: '48px',
+    minHeight: '48px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   button: {
     backgroundColor: 'var(--color-patient)',
@@ -360,6 +367,9 @@ const styles = {
     color: 'var(--color-patient)',
     textDecoration: 'none',
     fontWeight: '600',
+    display: 'inline-flex',
+    alignItems: 'center',
+    minHeight: '44px',
   },
 }
 

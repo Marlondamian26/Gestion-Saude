@@ -124,11 +124,12 @@ function Login() {
 
         <form onSubmit={handleSubmit} style={styles.form}>
           <div style={styles.inputGroup}>
-            <label style={styles.label}>{t('username')}</label>
+            <label htmlFor="login-username" style={styles.label}>{t('username')}</label>
             <div style={styles.inputWrapper}>
               <span style={styles.inputIcon}>👤</span>
                 <input
                 type="text"
+                id="login-username"
                 name="username"
                 value={formData.username}
                 onChange={handleChange}
@@ -141,11 +142,12 @@ function Login() {
           </div>
 
           <div style={styles.inputGroup}>
-            <label style={styles.label}>{t('password')}</label>
+            <label htmlFor="login-password" style={styles.label}>{t('password')}</label>
             <div style={styles.inputWrapper}>
               <span style={styles.inputIcon}>🔒</span>
               <input
                 type={showPassword ? 'text' : 'password'}
+                id="login-password"
                 name="password"
                 value={formData.password}
                 onChange={handleChange}
@@ -158,6 +160,7 @@ function Login() {
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
                 style={styles.passwordToggle}
+                aria-label={showPassword ? t('hidePassword') : t('showPassword')}
               >
                 {showPassword ? '👁️' : '👁️‍🗨️'}
               </button>
@@ -218,7 +221,7 @@ const styles = {
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
-    minHeight: '100vh',
+    minHeight: 'var(--app-viewport-min-height, 100vh)',
     backgroundColor: 'var(--bg-primary)',
     padding: '20px',
     fontFamily: 'system-ui, -apple-system, sans-serif'
@@ -299,7 +302,6 @@ const styles = {
     backgroundColor: 'var(--bg-primary)',
     color: 'var(--text-primary)',
     boxSizing: 'border-box',
-    outline: 'none',
     transition: 'border-color 0.3s'
   },
   passwordToggle: {
@@ -328,7 +330,8 @@ const styles = {
     alignItems: 'center',
     gap: '5px',
     color: 'var(--text-secondary)',
-    cursor: 'pointer'
+    cursor: 'pointer',
+    minHeight: '44px'
   },
   button: {
     backgroundColor: 'var(--color-patient)',
@@ -381,7 +384,10 @@ const styles = {
   registerLink: {
     color: 'var(--color-patient)',
     textDecoration: 'none',
-    fontWeight: '600'
+    fontWeight: '600',
+    display: 'inline-flex',
+    alignItems: 'center',
+    minHeight: '44px'
   },
   forgotPasswordLink: {
     color: 'var(--color-patient)',
@@ -390,14 +396,25 @@ const styles = {
     fontWeight: '600',
     marginLeft: 'auto',
     cursor: 'pointer',
+    display: 'inline-flex',
+    alignItems: 'center',
+    minHeight: '44px'
   },
   legalLinks: {
     marginTop: '14px',
-    fontSize: '12px'
+    fontSize: '12px',
+    display: 'flex',
+    flexWrap: 'wrap',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: '8px'
   },
   legalLink: {
     color: 'var(--text-muted)',
-    textDecoration: 'underline'
+    textDecoration: 'underline',
+    display: 'inline-flex',
+    alignItems: 'center',
+    minHeight: '44px'
   }
 }
 

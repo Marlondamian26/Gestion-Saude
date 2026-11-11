@@ -71,6 +71,12 @@ describe('Login — regresión accesibilidad y inputs (P0/P1)', () => {
     expect(input).toHaveAttribute('autocomplete', 'current-password');
   });
 
+  it('mantiene ambos inputs de autenticacion en 16px para evitar auto-zoom movil', () => {
+    renderLogin();
+    expect(screen.getByPlaceholderText(/Usuario o correo/).style.fontSize).toBe('16px');
+    expect(screen.getByPlaceholderText(/Contraseña/).style.fontSize).toBe('16px');
+  });
+
   it('muestra etiquetas visibles para los inputs', () => {
     const { container } = renderLogin();
     const labels = Array.from(container.querySelectorAll('label')).map(
@@ -78,6 +84,8 @@ describe('Login — regresión accesibilidad y inputs (P0/P1)', () => {
     );
     expect(labels).toContain('Usuario');
     expect(labels).toContain('Contraseña');
+    expect(screen.getByLabelText('Usuario')).toHaveAttribute('id', 'login-username');
+    expect(screen.getByLabelText('Contraseña')).toHaveAttribute('id', 'login-password');
   });
 
   it('limpia el mensaje de error al cambiar un input', async () => {

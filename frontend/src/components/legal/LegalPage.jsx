@@ -11,7 +11,7 @@ export default function LegalPage({ type }) {
 
   const styles = {
     root: {
-      minHeight: '100vh',
+      minHeight: 'var(--app-viewport-min-height, 100vh)',
       display: 'flex',
       flexDirection: 'column',
       backgroundColor: 'var(--bg-primary)',
