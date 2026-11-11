@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react'
+import React, { useEffect, useState, useCallback, useRef } from 'react'
 import axiosInstance from '../services/auth'
 import { useNavigate } from 'react-router-dom'
 import { useLanguage } from '../context/LanguageContext'
@@ -42,6 +42,18 @@ function EnfermeriaDashboard() {
   })
   const [saving, setSaving] = useState(false)
   const navigate = useNavigate()
+  const modalTitleRef = useRef(null)
+
+  // Cerrar modal de signos vitales con tecla Escape
+  useEffect(() => {
+    const handleKeydown = (e) => {
+      if (e.key === 'Escape' && selectedPaciente) {
+        setSelectedPaciente(null)
+      }
+    }
+    document.addEventListener('keydown', handleKeydown)
+    return () => document.removeEventListener('keydown', handleKeydown)
+  }, [selectedPaciente])
 
   // Estados para búsqueda de pacientes
   const [busquedaPaciente, setBusquedaPaciente] = useState('')
@@ -388,9 +400,12 @@ function EnfermeriaDashboard() {
 
                     {/* Modal de signos vitales */}
                     {selectedPaciente?.id === cita.id && (
-                      <div style={styles.modalOverlay} onClick={() => setSelectedPaciente(null)}>
+                      <div style={styles.modalOverlay} onClick={() => setSelectedPaciente(null)}
+                           role="dialog" aria-modal="true" aria-labelledby="enfermeria-modal-title">
                         <div style={styles.modal} onClick={e => e.stopPropagation()}>
-                          <h3>{t('registerVitalsTitle')}</h3>
+                          <h3 id="enfermeria-modal-title" ref={modalTitleRef}>
+                            {t('registerVitalsTitle')}
+                          </h3>
                           <p style={styles.modalPaciente}>
                             {t('patient')}: {selectedPaciente?.paciente_nombre}
                           </p>
@@ -992,7 +1007,7 @@ const styles = {
     padding: '8px',
     border: '1px solid var(--border-color)',
     borderRadius: '6px',
-    fontSize: '14px',
+    fontSize: '16px',
     backgroundColor: 'var(--bg-primary)',
     color: 'var(--text-primary)'
   },
@@ -1001,7 +1016,7 @@ const styles = {
     padding: '8px',
     border: '1px solid var(--border-color)',
     borderRadius: '6px',
-    fontSize: '14px',
+    fontSize: '16px',
     textAlign: 'center',
     backgroundColor: 'var(--bg-primary)',
     color: 'var(--text-primary)'
@@ -1015,7 +1030,7 @@ const styles = {
     padding: '8px',
     border: '1px solid var(--border-color)',
     borderRadius: '6px',
-    fontSize: '14px',
+    fontSize: '16px',
     resize: 'vertical',
     backgroundColor: 'var(--bg-primary)',
     color: 'var(--text-primary)'
@@ -1024,7 +1039,7 @@ const styles = {
     padding: '8px',
     border: '1px solid var(--border-color)',
     borderRadius: '6px',
-    fontSize: '14px',
+    fontSize: '16px',
     backgroundColor: 'var(--bg-primary)',
     color: 'var(--text-primary)'
   },

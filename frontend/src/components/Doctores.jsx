@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useRef } from 'react'
 import axiosInstance from '../services/auth'
 import { useNavigate } from 'react-router-dom'
 import { useLanguage } from '../context/LanguageContext'
@@ -13,6 +13,18 @@ function Doctores() {
   const [especialistaSeleccionado, setEspecialistaSeleccionado] = useState(null)
   const [horarios, setHorarios] = useState([])
   const navigate = useNavigate()
+  const modalTitleRef = useRef(null)
+
+  // Cerrar modal con tecla Escape
+  useEffect(() => {
+    const handleKeydown = (e) => {
+      if (e.key === 'Escape' && especialistaSeleccionado) {
+        cerrarModal()
+      }
+    }
+    document.addEventListener('keydown', handleKeydown)
+    return () => document.removeEventListener('keydown', handleKeydown)
+  }, [especialistaSeleccionado])
 
   useEffect(() => {
     fetchEspecialistas()
@@ -169,7 +181,8 @@ function Doctores() {
 
       {/* Modal de detalles del especialista */}
       {especialistaSeleccionado && (
-        <div style={styles.modalOverlay} onClick={cerrarModal}>
+        <div style={styles.modalOverlay} onClick={cerrarModal}
+             role="dialog" aria-modal="true" aria-labelledby="doctores-modal-title">
           <div style={styles.modal} onClick={e => e.stopPropagation()}>
             <button style={styles.modalClose} onClick={cerrarModal}>×</button>
             
@@ -180,7 +193,9 @@ function Doctores() {
                 style={styles.modalAvatar}
               />
               <div>
-                <h2>{especialistaSeleccionado.tipo === 'nurse' ? t('nurseShort') : t('dr')} {especialistaSeleccionado.usuario?.first_name} {especialistaSeleccionado.usuario?.last_name}</h2>
+                <h2 id="doctores-modal-title" ref={modalTitleRef}>
+                  {especialistaSeleccionado.tipo === 'nurse' ? t('nurseShort') : t('dr')} {especialistaSeleccionado.usuario?.first_name} {especialistaSeleccionado.usuario?.last_name}
+                </h2>
                 <p style={styles.modalEspecialidad}>{getEspecialidadNombre(especialistaSeleccionado)}</p>
               </div>
             </div>
@@ -281,10 +296,10 @@ const styles = {
     color: 'var(--text-primary)'
   },
   filtroSelect: {
-    padding: '8px',
-    borderRadius: '5px',
+    padding: '10px',
+    borderRadius: '6px',
     border: '1px solid var(--border-color)',
-    fontSize: '14px',
+    fontSize: '16px',
     minWidth: '200px',
     backgroundColor: 'var(--bg-primary)',
     color: 'var(--text-primary)'

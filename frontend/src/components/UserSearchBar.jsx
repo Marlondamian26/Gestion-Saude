@@ -38,7 +38,7 @@ const input = {
   borderStyle: 'solid',
   borderColor: 'var(--border-color)',
   borderRadius: '6px',
-  fontSize: '14px',
+  fontSize: '16px',
   backgroundColor: 'var(--bg-primary)',
   color: 'var(--text-primary)',
   boxSizing: 'border-box',

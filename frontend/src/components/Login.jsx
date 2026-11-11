@@ -127,7 +127,7 @@ function Login() {
             <label style={styles.label}>{t('username')}</label>
             <div style={styles.inputWrapper}>
               <span style={styles.inputIcon}>👤</span>
-              <input
+                <input
                 type="text"
                 name="username"
                 value={formData.username}
@@ -135,6 +135,7 @@ function Login() {
                 style={styles.input}
                 placeholder={t('usernameOrEmail')}
                 disabled={loading}
+                autoComplete="username"
               />
             </div>
           </div>
@@ -151,6 +152,7 @@ function Login() {
                 style={styles.input}
                 placeholder={t('enterPassword')}
                 disabled={loading}
+                autoComplete="current-password"
               />
               <button
                 type="button"
@@ -291,7 +293,7 @@ const styles = {
   input: {
     width: '100%',
     padding: '12px 40px',
-    fontSize: '15px',
+    fontSize: '16px',
     border: `2px solid var(--border-color)`,
     borderRadius: '10px',
     backgroundColor: 'var(--bg-primary)',
@@ -305,9 +307,15 @@ const styles = {
     right: '12px',
     background: 'none',
     border: 'none',
-    fontSize: '16px',
+    fontSize: '18px',
     cursor: 'pointer',
-    color: 'var(--text-muted)'
+    color: 'var(--text-muted)',
+    minWidth: '44px',
+    minHeight: '44px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 0
   },
   optionsRow: {
     display: 'flex',

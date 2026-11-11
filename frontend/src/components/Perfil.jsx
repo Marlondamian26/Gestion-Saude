@@ -1243,7 +1243,7 @@ const styles = {
     padding: '10px',
     border: '1px solid var(--border-color)',
     borderRadius: '8px',
-    fontSize: '14px',
+    fontSize: '16px',
     backgroundColor: 'var(--bg-primary)',
     color: 'var(--text-primary)',
     outline: 'none'
@@ -1252,7 +1252,7 @@ const styles = {
     padding: '10px',
     border: '1px solid var(--border-color)',
     borderRadius: '8px',
-    fontSize: '14px',
+    fontSize: '16px',
     resize: 'vertical',
     minHeight: '80px',
     backgroundColor: 'var(--bg-primary)',
@@ -1263,7 +1263,7 @@ const styles = {
     padding: '10px',
     border: '1px solid var(--border-color)',
     borderRadius: '8px',
-    fontSize: '14px',
+    fontSize: '16px',
     backgroundColor: 'var(--bg-primary)',
     color: 'var(--text-primary)',
     outline: 'none'

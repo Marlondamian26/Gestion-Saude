@@ -34,6 +34,18 @@ function Citas() {
   const [errorSlotsModal, setErrorSlotsModal] = useState(null)
   const navigate = useNavigate()
   const location = useLocation()
+  const modalTitleRef = useRef(null)
+
+  // Cerrar modal con tecla Escape
+  useEffect(() => {
+    const handleKeydown = (e) => {
+      if (e.key === 'Escape' && showModal) {
+        handleCloseModal()
+      }
+    }
+    document.addEventListener('keydown', handleKeydown)
+    return () => document.removeEventListener('keydown', handleKeydown)
+  }, [showModal])
   
   const [nuevaCita, setNuevaCita] = useState({
     doctor: location.state?.doctorSeleccionado?.id || '',
@@ -529,9 +541,11 @@ function Citas() {
 
       {/* Modal para crear cita */}
       {showModal && (
-        <div style={styles.modalOverlay} onClick={handleCloseModal}>
+        <div style={styles.modalOverlay} onClick={handleCloseModal}
+             role="dialog" aria-modal="true" aria-labelledby="citas-modal-title">
           <div style={styles.modal} onClick={e => e.stopPropagation()}>
-            <h2 style={styles.modalTitle}>{t('createNew')} {t('appointment')}</h2>
+            <h2 id="citas-modal-title" style={styles.modalTitle}
+                ref={modalTitleRef}>{t('createNew')} {t('appointment')}</h2>
             
             <form onSubmit={handleSubmitForm}>
               {/* Selección de paciente para doctor/admin/enfermera */}
@@ -850,7 +864,7 @@ const styles = {
     borderStyle: 'solid',
     borderColor: 'var(--border-color)',
     borderRadius: '6px',
-    fontSize: '14px',
+    fontSize: '16px',
     backgroundColor: 'var(--bg-primary)',
     color: 'var(--text-primary)'
   },
@@ -860,7 +874,7 @@ const styles = {
     borderStyle: 'solid',
     borderColor: 'var(--border-color)',
     borderRadius: '6px',
-    fontSize: '14px',
+    fontSize: '16px',
     backgroundColor: 'var(--bg-primary)',
     color: 'var(--text-primary)'
   },
@@ -870,7 +884,7 @@ const styles = {
     borderStyle: 'solid',
     borderColor: 'var(--border-color)',
     borderRadius: '6px',
-    fontSize: '14px',
+    fontSize: '16px',
     resize: 'vertical',
     backgroundColor: 'var(--bg-primary)',
     color: 'var(--text-primary)',

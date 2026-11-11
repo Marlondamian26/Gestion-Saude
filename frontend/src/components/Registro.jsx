@@ -405,19 +405,19 @@ function Registro() {
               <FaEnvelope style={styles.inputIcon} />
               Email {t('requiredFieldIndicator')}
             </label>
-            <input
-              type="email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              style={{
-                ...styles.input,
-                ...(errors.email ? styles.inputError : {})
-              }}
-              placeholder="correo@ejemplo.com"
-              disabled={loading}
-              autoComplete="off"
-            />
+              <input
+                type="email"
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
+                style={{
+                  ...styles.input,
+                  ...(errors.email ? styles.inputError : {})
+                }}
+                placeholder="correo@ejemplo.com"
+                disabled={loading}
+                autoComplete="email"
+              />
             {errors.email && (
               <span style={styles.fieldError}>{errors.email}</span>
             )}
@@ -429,18 +429,19 @@ function Registro() {
               <FaPhone style={styles.inputIcon} />
               {t('phone')}
             </label>
-            <input
-              type="tel"
-              name="telefono"
-              value={formData.telefono}
-              onChange={handleChange}
-              style={{
-                ...styles.input,
-                ...(errors.telefono ? styles.inputError : {})
-              }}
-              placeholder="+244 XXX XXX XXX"
-              disabled={loading}
-            />
+              <input
+                type="tel"
+                name="telefono"
+                value={formData.telefono}
+                onChange={handleChange}
+                style={{
+                  ...styles.input,
+                  ...(errors.telefono ? styles.inputError : {})
+                }}
+                placeholder="+244 XXX XXX XXX"
+                disabled={loading}
+                autoComplete="tel"
+              />
             {errors.telefono && (
               <span style={styles.fieldError}>{errors.telefono}</span>
             )}
@@ -454,7 +455,7 @@ function Registro() {
               {t('passwordLabel')}
             </label>
             <div style={styles.passwordWrapper}>
-              <input
+                <input
                 type={showPassword ? 'text' : 'password'}
                 name="password"
                 value={formData.password}
@@ -466,6 +467,7 @@ function Registro() {
                 placeholder="••••••••"
                 disabled={loading}
                 maxLength="50"
+                autoComplete="new-password"
               />
               <button
                 type="button"
@@ -705,7 +707,7 @@ const styles = {
     padding: '12px',
     border: '2px solid var(--border-color)',
     borderRadius: '8px',
-    fontSize: '14px',
+    fontSize: '16px',
     transition: 'border-color 0.3s',
     backgroundColor: 'var(--bg-primary)',
     color: 'var(--text-primary)',
@@ -732,7 +734,7 @@ const styles = {
     paddingRight: '40px',
     border: '2px solid var(--border-color)',
     borderRadius: '8px',
-    fontSize: '14px',
+    fontSize: '16px',
     transition: 'border-color 0.3s',
     backgroundColor: 'var(--bg-primary)',
     color: 'var(--text-primary)',

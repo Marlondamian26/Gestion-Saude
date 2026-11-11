@@ -311,7 +311,7 @@ const styles = {
   input: {
     width: '100%',
     padding: '12px 40px',
-    fontSize: '15px',
+    fontSize: '16px',
     border: `2px solid var(--border-color)`,
     borderRadius: '10px',
     backgroundColor: 'var(--bg-primary)',
