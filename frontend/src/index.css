@@ -40,20 +40,6 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Tablet (481px - 768px) */
-@media (max-width: 768px) {
-  html {
-    font-size: 93.75%; /* Equivalente a 15px */
-  }
-}
-
-/* Móvil (menos de 480px) */
-@media (max-width: 480px) {
-  html {
-    font-size: 87.5%; /* Equivalente a 14px */
-  }
-}
-
 /* Enlaces - adaptados a nuestro tema */
 a {
   font-weight: 500;
@@ -64,6 +50,14 @@ a {
 
 a:hover {
   color: var(--color-patient-soft);
+}
+
+/* Foco visible global (accesibilidad) - anillo de ≥3:1 contra el fondo.
+   Se aplica a la navegación por teclado. Los componentes que definan
+   outline en línea deben conservar un anillo visible equivalente. */
+:focus-visible {
+  outline: 2px solid var(--focus-ring, var(--color-primary));
+  outline-offset: 2px;
 }
 
 /* Body - ahora usa nuestras variables y no fuerza centrado */
