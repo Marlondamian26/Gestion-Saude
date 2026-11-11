@@ -1,4 +1,4 @@
-﻿import React, { useEffect, useState, useMemo } from 'react'
+﻿import React, { useEffect, useState, useMemo, useRef } from 'react'
 import axiosInstance from '../services/auth'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useLanguage } from '../context/LanguageContext'
@@ -50,6 +50,7 @@ function AdminDashboard() {
   })
   const [mensaje, setMensaje] = useState({texto: '', tipo: ''})
   const [showModal, setShowModal] = useState(false)
+  const modalTitleRef = useRef(null)
   const [modalMode, setModalMode] = useState('')
   const [selectedItem, setSelectedItem] = useState(null)
   const [formData, setFormData] = useState({})
@@ -1299,20 +1300,36 @@ function AdminDashboard() {
     setErrorBackend('')
   }
 
+  // Ref estable para el handler de cierre del modal: evita re-suscribir el
+  // listener del teclado en cada render y satisface exhaustive-deps.
+  const escapeCloseRef = useRef(handleCloseModal)
+  escapeCloseRef.current = handleCloseModal
+
+  // Cerrar modal con tecla Escape (accesibilidad)
+  useEffect(() => {
+    const handleKeydown = (e) => {
+      if (e.key === 'Escape' && showModal) {
+        escapeCloseRef.current()
+      }
+    }
+    document.addEventListener('keydown', handleKeydown)
+    return () => document.removeEventListener('keydown', handleKeydown)
+  }, [showModal])
+
   // ===== FUNCIONES AUXILIARES =====
 
   const getEstadoBadge = (estado) => {
     const colores = {
-      pendiente: '#f39c12',
-      confirmada: '#27ae60',
-      completada: '#3498db',
-      cancelada: '#e74c3c',
-      no_asistio: '#95a5a6'
+      pendiente: 'var(--color-pending)',
+      confirmada: 'var(--color-confirmed)',
+      completada: 'var(--color-completed)',
+      cancelada: 'var(--color-cancelled)',
+      no_asistio: 'var(--color-no-show)'
     }
     return (
       <span style={{
         ...styles.badge,
-        backgroundColor: colores[estado] || '#95a5a6',
+        backgroundColor: colores[estado] || 'var(--color-no-show)',
         color: 'white'
       }}>
         {estado}
@@ -1509,7 +1526,7 @@ function AdminDashboard() {
         <button
           style={{...styles.chatbotButton}}
           onClick={() => setChatbotOpen(!chatbotOpen)}
-          title="Abrir asistente de citas"
+          title="Abrir asistente de citas" aria-label="Abrir asistente de citas"
         >
           <span style={{ fontSize: '22px' }}>🤖</span>
           <span style={{ fontSize: '10px', fontWeight: 'bold' }}>Chat</span>
@@ -1533,7 +1550,7 @@ function AdminDashboard() {
             <button
               onClick={() => setChatbotOpen(true)}
               style={styles.chatbotButton}
-              title="Abrir asistente de citas"
+              title="Abrir asistente de citas" aria-label="Abrir asistente de citas"
             >
               <span style={{ fontSize: '22px' }}>🤖</span>
               <span style={{ fontSize: '10px', fontWeight: 'bold' }}>Chat</span>
@@ -1587,7 +1604,7 @@ function AdminDashboard() {
                 <p>{t('searchNoResults', { query: usuariosQuery })}</p>
               </div>
             ) : (
-              <div style={styles.tableContainer}>
+              <div className="table-scroll" style={styles.tableContainer}>
                  <table style={styles.table}>
                    <thead>
                      <tr>
@@ -1643,7 +1660,7 @@ function AdminDashboard() {
                 <p>{t('noDoctorsFound')}</p>
               </div>
             ) : (
-              <div style={styles.tableContainer}>
+              <div className="table-scroll" style={styles.tableContainer}>
                  <table style={styles.table}>
                    <thead>
                      <tr>
@@ -1700,7 +1717,7 @@ function AdminDashboard() {
                 <p>{t('noNursesFound')}</p>
               </div>
             ) : (
-              <div style={styles.tableContainer}>
+              <div className="table-scroll" style={styles.tableContainer}>
                  <table style={styles.table}>
                    <thead>
                      <tr>
@@ -1772,7 +1789,7 @@ function AdminDashboard() {
                 <p>{t('searchNoResults', { query: pacientesQuery })}</p>
               </div>
             ) : (
-              <div style={styles.tableContainer}>
+              <div className="table-scroll" style={styles.tableContainer}>
                  <table style={styles.table}>
                    <thead>
                      <tr>
@@ -1830,7 +1847,7 @@ function AdminDashboard() {
                 <p>No hay citas registradas</p>
               </div>
             ) : (
-              <div style={styles.tableContainer}>
+              <div className="table-scroll" style={styles.tableContainer}>
                 <table style={styles.table}>
                   <thead>
                     <tr>
@@ -1888,7 +1905,7 @@ function AdminDashboard() {
                 <p>No hay especialidades registradas</p>
               </div>
             ) : (
-              <div style={styles.tableContainer}>
+              <div className="table-scroll" style={styles.tableContainer}>
                 <table style={styles.table}>
                   <thead>
                     <tr>
@@ -1914,7 +1931,7 @@ function AdminDashboard() {
                         <td>
                           <span style={{
                             ...styles.badge,
-                            backgroundColor: esp.activo ? '#27ae60' : '#e74c3c',
+                            backgroundColor: esp.activo ? 'var(--color-success)' : 'var(--color-error)',
                             color: 'white'
                           }}>
                             {esp.activo ? t('active') : t('inactive')}
@@ -1954,7 +1971,7 @@ function AdminDashboard() {
                 <p>No hay horarios registrados</p>
               </div>
             ) : (
-              <div style={styles.tableContainer}>
+              <div className="table-scroll" style={styles.tableContainer}>
                 <table style={styles.table}>
                   <thead>
                     <tr>
@@ -1988,7 +2005,7 @@ function AdminDashboard() {
                           <td>
                             <span style={{
                               ...styles.badge,
-                              backgroundColor: horario.activo ? '#27ae60' : '#e74c3c',
+                              backgroundColor: horario.activo ? 'var(--color-success)' : 'var(--color-error)',
                               color: 'white'
                             }}>
                               {horario.activo ? t('active') : t('inactive')}
@@ -2056,7 +2073,7 @@ function AdminDashboard() {
                       </span>
                       <span style={{ 
                         ...styles.imageStatus,
-                        color: imagen.activo ? '#22c55e' : '#ef4444'
+                        color: imagen.activo ? 'var(--color-success)' : 'var(--color-error)'
                       }}>
                         {imagen.activo ? t('active') : t('inactive')}
                       </span>
@@ -2071,14 +2088,14 @@ function AdminDashboard() {
                       </button>
                       <button 
                         onClick={() => handleToggleActive(imagen, 'imagenes-sitio')}
-                        style={{...styles.actionButton, color: imagen.activo ? '#ef4444' : '#22c55e'}}
+                        style={{...styles.actionButton, color: imagen.activo ? 'var(--color-error)' : 'var(--color-success)'}}
                         title={imagen.activo ? t('deactivate') : t('activate')}
                       >
                         {imagen.activo ? <FaTimes /> : <FaCheck />}
                       </button>
                       <button 
                         onClick={() => handleDelete('sitio-imagenes', imagen.id)}
-                        style={{...styles.actionButton, color: '#ef4444'}}
+                        style={{...styles.actionButton, color: 'var(--color-error)'}}
                         title={t('delete')}
                       >
                         <FaTrash />
@@ -2094,9 +2111,11 @@ function AdminDashboard() {
 
       {/* Modal para crear/editar/ver */}
       {showModal && (
-        <div style={styles.modalOverlay} onClick={handleCloseModal}>
+        <div style={styles.modalOverlay} onClick={handleCloseModal}
+             role="dialog" aria-modal="true" aria-labelledby="admin-modal-title">
           <div style={styles.modal} onClick={e => e.stopPropagation()}>
-            <h2 style={styles.modalTitle}>
+            <h2 id="admin-modal-title" style={styles.modalTitle}
+                ref={modalTitleRef}>
               {modalMode === 'create' && `${t('createNew')} ${getModalTitle(formData.tipo)}`}
               {modalMode === 'edit' && `${t('editItem')} ${getModalTitle(formData.tipo)}`}
               {modalMode === 'view' && `${t('viewItem')} ${getModalTitle(formData.tipo)}`}
@@ -3323,7 +3342,7 @@ const styles = {
   },
   errorIcon: {
     fontSize: '48px',
-    color: '#e74c3c',
+    color: 'var(--color-error)',
     marginBottom: '20px'
   },
   errorTitle: {
@@ -3538,7 +3557,11 @@ const styles = {
     fontWeight: '500'
   },
   tableContainer: {
-    overflowX: 'auto'
+    overflowX: 'auto',
+    WebkitOverflowScrolling: 'touch',
+    overscrollBehaviorX: 'contain',
+    position: 'relative',
+    marginBottom: '10px'
   },
   table: {
     width: '100%',
@@ -3668,7 +3691,7 @@ const styles = {
     borderStyle: 'solid',
     borderColor: 'var(--border-color)',
     borderRadius: '6px',
-    fontSize: '14px',
+    fontSize: '16px',
     backgroundColor: 'var(--bg-primary)',
     color: 'var(--text-primary)'
   },
@@ -3678,7 +3701,7 @@ const styles = {
     borderStyle: 'solid',
     borderColor: 'var(--border-color)',
     borderRadius: '6px',
-    fontSize: '14px',
+    fontSize: '16px',
     backgroundColor: 'var(--bg-primary)',
     color: 'var(--text-primary)',
     width: '100%',
@@ -3690,7 +3713,7 @@ const styles = {
     borderStyle: 'solid',
     borderColor: 'var(--border-color)',
     borderRadius: '6px',
-    fontSize: '14px',
+    fontSize: '16px',
     resize: 'vertical',
     backgroundColor: 'var(--bg-primary)',
     color: 'var(--text-primary)',
@@ -3702,7 +3725,7 @@ const styles = {
     borderStyle: 'solid',
     borderColor: 'var(--border-color)',
     borderRadius: '6px',
-    fontSize: '14px',
+    fontSize: '16px',
     backgroundColor: 'var(--bg-primary)',
     color: 'var(--text-primary)'
   },
@@ -3905,8 +3928,8 @@ const styles = {
   },
   chatbotButton: {
     position: 'fixed',
-    bottom: '20px',
-    right: '20px',
+    bottom: 'calc(20px + env(safe-area-inset-bottom, 0px))',
+    right: 'calc(20px + env(safe-area-inset-right, 0px))',
     width: '70px',
     height: '60px',
     borderRadius: '30px',
@@ -3918,7 +3941,7 @@ const styles = {
     alignItems: 'center',
     justifyContent: 'center',
     fontSize: '22px',
-    zIndex: 999,
+    zIndex: 'var(--z-fixed)',
     flexDirection: 'column',
     gap: '2px'
   },

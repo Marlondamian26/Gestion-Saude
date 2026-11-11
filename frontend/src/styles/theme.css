@@ -465,3 +465,29 @@
               box-shadow 0.3s ease !important;
 }
 
+/* ============================================
+   UTILIDADES DE TABLA MOVIL
+   ============================================ */
+
+/* Contenedor con scroll horizontal controlado (tablas de gestion). */
+.table-scroll {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
+  position: relative;
+  margin-bottom: var(--space-4);
+}
+
+/* Sombra lateral suave que indica scroll disponible (solo visual, sin JS). */
+.table-scroll::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 70px;
+  background: linear-gradient(to right, transparent, var(--bg-primary));
+  pointer-events: none;
+  opacity: 0.55;
+}
+
