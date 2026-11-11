@@ -137,6 +137,14 @@ function Dashboard() {
     navigate(path)
   }
 
+  // Teclado accesible para items de menu renderizados como role="button"
+  const handleMenuKey = (e, handler) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault()
+      handler()
+    }
+  }
+
   // Mostrar pantalla de carga
   if (loading) {
     return (
@@ -278,7 +286,8 @@ function Dashboard() {
               onClick={() => handleNavigation('/citas')}
               role="button"
               tabIndex={0}
-              onKeyPress={(e) => e.key === 'Enter' && handleNavigation('/citas')}
+              aria-label={t('myAppointments')}
+              onKeyPress={(e) => handleMenuKey(e, () => handleNavigation('/citas'))}
             >
               <span style={styles.menuIcon}>📅</span>
               <span style={styles.menuLabel}>{t('myAppointments')}</span>
@@ -291,7 +300,8 @@ function Dashboard() {
               onClick={() => handleNavigation('/doctores')}
               role="button"
               tabIndex={0}
-              onKeyPress={(e) => e.key === 'Enter' && handleNavigation('/doctores')}
+              aria-label={t('doctors')}
+              onKeyPress={(e) => handleMenuKey(e, () => handleNavigation('/doctores'))}
             >
               <span style={styles.menuIcon}>👨‍⚕️</span>
               <span style={styles.menuLabel}>{t('doctors')}</span>
@@ -304,7 +314,8 @@ function Dashboard() {
               onClick={() => handleNavigation('/perfil')}
               role="button"
               tabIndex={0}
-              onKeyPress={(e) => e.key === 'Enter' && handleNavigation('/perfil')}
+              aria-label={t('myProfile')}
+              onKeyPress={(e) => handleMenuKey(e, () => handleNavigation('/perfil'))}
             >
               <span style={styles.menuIcon}>👤</span>
               <span style={styles.menuLabel}>{t('myProfile')}</span>
@@ -318,7 +329,8 @@ function Dashboard() {
                 onClick={() => handleNavigation('/admin')}
                 role="button"
                 tabIndex={0}
-                onKeyPress={(e) => e.key === 'Enter' && handleNavigation('/admin')}
+                aria-label={t('adminPanel')}
+                onKeyPress={(e) => handleMenuKey(e, () => handleNavigation('/admin'))}
               >
                 <span style={styles.menuIcon}>⚙️</span>
                 <span style={styles.menuLabel}>{t('adminPanel')}</span>
@@ -438,8 +450,8 @@ function Dashboard() {
             onClick={() => setMostrarChatIA(true)}
             style={{
               position: 'fixed',
-              bottom: '20px',
-              right: '20px',
+              bottom: 'calc(20px + env(safe-area-inset-bottom, 0px))',
+              right: 'calc(20px + env(safe-area-inset-right, 0px))',
               width: '70px',
               height: '60px',
               borderRadius: '30px',
@@ -451,11 +463,12 @@ function Dashboard() {
               alignItems: 'center',
               justifyContent: 'center',
               fontSize: '22px',
-              zIndex: 999,
+              zIndex: 'var(--z-fixed)',
               flexDirection: 'column',
               gap: '2px'
             }}
             title={t('chatAssistant')}
+            aria-label={t('chatAssistant')}
           >
             <span style={{ fontSize: '24px' }}>🤖</span>
             <span style={{ fontSize: '10px', fontWeight: 'bold' }}>Chat</span>

@@ -41,7 +41,7 @@ const Footer = () => {
       justifyContent: 'center',
     },
     heart: {
-      color: '#e74c3c',
+      color: 'var(--color-error)',
       animation: 'pulse 1.5s ease infinite',
       margin: '0 3px',
     },

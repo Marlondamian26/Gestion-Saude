@@ -321,8 +321,8 @@ const styles = {
     },
   },
   deleteButton: {
-    color: '#e74c3c',
-    borderColor: '#e74c3c',
+    color: 'var(--color-error)',
+    borderColor: 'var(--color-error)',
     ':hover': {
       backgroundColor: 'var(--color-cancelled)',
       color: 'white',
