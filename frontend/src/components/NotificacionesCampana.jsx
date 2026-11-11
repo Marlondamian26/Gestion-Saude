@@ -195,7 +195,7 @@ const styles = {
     position: 'absolute',
     top: '55px',
     right: '0',
-    width: '350px',
+    width: 'clamp(280px, 92vw, 350px)',
     maxHeight: '500px',
     background: 'var(--bg-secondary)',
     border: '1px solid var(--border-color)',
