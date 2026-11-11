@@ -1,8 +1,10 @@
-﻿import React, { useEffect, useState } from 'react'
+﻿import React, { useEffect, useState, useMemo } from 'react'
 import axiosInstance from '../services/auth'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useLanguage } from '../context/LanguageContext'
 import ChatIA from './ChatIA'
+import { filterUsers } from '../utils/searchUsers'
+import UserSearchBar from './UserSearchBar'
 import { 
   FaUsers, FaUserMd, FaUserNurse, FaCalendarAlt, 
   FaChartBar, FaStethoscope, FaClock, FaPlus, 
@@ -35,6 +37,8 @@ function AdminDashboard() {
   const [doctorSuggestions, setDoctorSuggestions] = useState([])
   const [showDoctorSuggestions, setShowDoctorSuggestions] = useState(false)
   const [chatbotOpen, setChatbotOpen] = useState(false)
+  const [usuariosQuery, setUsuariosQuery] = useState('')
+  const [pacientesQuery, setPacientesQuery] = useState('')
   const [stats, setStats] = useState({
     totalUsuarios: 0,
     totalDoctores: 0,
@@ -77,6 +81,13 @@ function AdminDashboard() {
       setActiveTab(tabFromUrl)
     }
   }, [location.search, navigate])
+
+  // Resetear la búsqueda al cambiar de sección para no arrastrar el filtro
+  // entre Gestionar Usuarios y Gestionar Pacientes
+  useEffect(() => {
+    setUsuariosQuery('')
+    setPacientesQuery('')
+  }, [activeTab])
 
   // Cargar datos al iniciar
   useEffect(() => {
@@ -1327,6 +1338,28 @@ function AdminDashboard() {
   }
 
   // Renderizado condicional
+  // Listas filtradas por búsqueda incremental (cálculo en cliente)
+  const visibleUsuarios = useMemo(
+    () => filterUsers(todosLosUsuarios, usuariosQuery),
+    [todosLosUsuarios, usuariosQuery]
+  )
+
+  const visiblePacientes = useMemo(() => {
+    // El endpoint de pacientes ya devuelve solo perfiles con rol patient
+    // (garantía de origen), así que no se vuelve a filtrar por rol. Se
+    // reutiliza filterUsers mapeando los campos anidados bajo usuario.
+    return filterUsers(
+      pacientes.map((p) => ({
+        username: p.usuario?.username ?? '',
+        first_name: p.usuario?.first_name ?? '',
+        last_name: p.usuario?.last_name ?? '',
+        email: p.usuario?.email ?? '',
+        _paciente: p,
+      })),
+      pacientesQuery
+    ).map((m) => m._paciente)
+  }, [pacientes, pacientesQuery])
+
   if (loading) {
     return (
       <div style={styles.loadingContainer}>
@@ -1532,6 +1565,15 @@ function AdminDashboard() {
           <div>
             <div style={styles.tableHeader}>
               <h2 style={styles.sectionTitle}>{t('userManagement')}</h2>
+              <UserSearchBar
+                value={usuariosQuery}
+                onChange={(e) => setUsuariosQuery(e.target.value)}
+                onClear={() => setUsuariosQuery('')}
+                placeholder={t('searchUsersPlaceholder')}
+                resultCount={visibleUsuarios.length}
+                totalCount={todosLosUsuarios.length}
+                query={usuariosQuery}
+              />
               <button onClick={() => handleCreate('usuarios')} style={styles.createButton}>
                 <FaPlus /> {t('newUser')}
               </button>
@@ -1539,6 +1581,10 @@ function AdminDashboard() {
             {todosLosUsuarios.length === 0 ? (
               <div style={styles.emptyState}>
                 <p>Nao ha usuarios cadastrados</p>
+              </div>
+            ) : visibleUsuarios.length === 0 ? (
+              <div style={styles.emptyState}>
+                <p>{t('searchNoResults', { query: usuariosQuery })}</p>
               </div>
             ) : (
               <div style={styles.tableContainer}>
@@ -1555,7 +1601,7 @@ function AdminDashboard() {
                      </tr>
                    </thead>
                   <tbody>
-                    {todosLosUsuarios.map(user => (
+                    {visibleUsuarios.map(user => (
                       <tr key={user.id}>
                         <td>{user.id}</td>
                         <td>{user.username}</td>
@@ -1704,6 +1750,15 @@ function AdminDashboard() {
           <div>
             <div style={styles.tableHeader}>
               <h2 style={styles.sectionTitle}>{t('patientManagement')}</h2>
+              <UserSearchBar
+                value={pacientesQuery}
+                onChange={(e) => setPacientesQuery(e.target.value)}
+                onClear={() => setPacientesQuery('')}
+                placeholder={t('searchUsersPlaceholder')}
+                resultCount={visiblePacientes.length}
+                totalCount={pacientes.length}
+                query={pacientesQuery}
+              />
               <button onClick={() => handleCreate('pacientes')} style={styles.createButton}>
                 <FaPlus /> {t('newPatient')}
               </button>
@@ -1711,6 +1766,10 @@ function AdminDashboard() {
             {pacientes.length === 0 ? (
               <div style={styles.emptyState}>
                 <p>No hay pacientes registrados</p>
+              </div>
+            ) : visiblePacientes.length === 0 ? (
+              <div style={styles.emptyState}>
+                <p>{t('searchNoResults', { query: pacientesQuery })}</p>
               </div>
             ) : (
               <div style={styles.tableContainer}>
@@ -1728,7 +1787,7 @@ function AdminDashboard() {
                      </tr>
                    </thead>
                   <tbody>
-                    {pacientes.map(paciente => (
+                    {visiblePacientes.map(paciente => (
                       <tr key={paciente.id}>
                         <td>{paciente.id}</td>
                         <td>{paciente.usuario?.first_name} {paciente.usuario?.last_name}</td>
