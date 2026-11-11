@@ -43,6 +43,42 @@ const pacientes = [
   }
 ]
 
+const doctores = [
+  {
+    id: 201,
+    usuario: { id: 2, username: 'maria.gomez', first_name: 'María', last_name: 'Gómez', email: 'maria@example.com', rol: 'doctor' },
+    especialidad_nombre: 'Cardiología'
+  },
+  {
+    id: 202,
+    usuario: { id: 6, username: 'pedro.diaz', first_name: 'Pedro', last_name: 'Díaz', email: 'pedro@example.com', rol: 'doctor' },
+    especialidad_nombre: 'Pediatría'
+  },
+  {
+    id: 203,
+    usuario: { id: 7, username: 'ana.ruiz', first_name: 'Ana', last_name: 'Ruiz', email: 'ana@example.com', rol: 'nurse' },
+    especialidad_nombre: 'General'
+  }
+]
+
+const enfermeras = [
+  {
+    id: 301,
+    usuario: { id: 3, username: 'jose.lopez', first_name: 'José', last_name: 'López', email: 'jose@example.com', rol: 'nurse' },
+    especialidad_nombre: 'General'
+  },
+  {
+    id: 302,
+    usuario: { id: 7, username: 'lucia.silva', first_name: 'Lucía', last_name: 'Silva', email: 'lucia@example.com', rol: 'nurse' },
+    especialidad_nombre: 'Pediatría'
+  },
+  {
+    id: 303,
+    usuario: { id: 8, username: 'ana.doctor', first_name: 'Ana', last_name: 'Doctor', email: 'doctor@example.com', rol: 'doctor' },
+    especialidad_nombre: 'General'
+  }
+]
+
 const response = (results = []) => ({ data: { count: results.length, results } })
 
 const renderDashboard = async () => {
@@ -61,6 +97,8 @@ describe('gestión de usuarios y pacientes (sin regresión + búsqueda)', () => 
     axiosInstance.get.mockImplementation(async (url) => {
       if (url === 'usuario-actual/') return usuarioActual
       if (url.startsWith('usuarios/')) return response(usuarios)
+      if (url.startsWith('doctores/')) return response(doctores)
+      if (url.startsWith('enfermeras/')) return response(enfermeras)
       if (url.startsWith('pacientes/')) return response(pacientes)
       return response()
     })
@@ -222,6 +260,60 @@ describe('gestión de usuarios y pacientes (sin regresión + búsqueda)', () => 
     })
   })
 
+  describe('Gestionar Doctores', () => {
+    it('filtra doctores por los datos de su usuario asociado', async () => {
+      const user = userEvent.setup()
+      await renderDashboard()
+      await screen.findByRole('button', { name: /manageDoctors/ })
+      await user.click(screen.getByRole('button', { name: /manageDoctors/ }))
+
+      expect(await screen.findByText('Dr. María Gómez')).toBeInTheDocument()
+      expect(screen.getByText('Dr. Pedro Díaz')).toBeInTheDocument()
+      expect(screen.queryByText('Dr. Ana Ruiz')).not.toBeInTheDocument()
+
+      const input = screen.getByPlaceholderText('searchUsersPlaceholder')
+      await user.type(input, 'pedro')
+      await waitFor(() => {
+        expect(screen.getByText('Dr. Pedro Díaz')).toBeInTheDocument()
+        expect(screen.queryByText('Dr. María Gómez')).not.toBeInTheDocument()
+      })
+    })
+
+    it('muestra el estado sin resultados y permite limpiar la búsqueda', async () => {
+      const user = userEvent.setup()
+      await renderDashboard()
+      await screen.findByRole('button', { name: /manageDoctors/ })
+      await user.click(screen.getByRole('button', { name: /manageDoctors/ }))
+
+      const input = screen.getByPlaceholderText('searchUsersPlaceholder')
+      await user.type(input, 'no-existe')
+      expect(await screen.findByText('searchNoResults')).toBeInTheDocument()
+
+      await user.click(screen.getByRole('button', { name: 'clearSearch' }))
+      expect(await screen.findByText('Dr. María Gómez')).toBeInTheDocument()
+    })
+  })
+
+  describe('Gestionar Enfermeras', () => {
+    it('filtra enfermeras por los datos de su usuario asociado', async () => {
+      const user = userEvent.setup()
+      await renderDashboard()
+      await screen.findByRole('button', { name: /manageNurses/ })
+      await user.click(screen.getByRole('button', { name: /manageNurses/ }))
+
+      expect(await screen.findByText('Enf. José López')).toBeInTheDocument()
+      expect(screen.getByText('Enf. Lucía Silva')).toBeInTheDocument()
+      expect(screen.queryByText('Enf. Ana Doctor')).not.toBeInTheDocument()
+
+      const input = screen.getByPlaceholderText('searchUsersPlaceholder')
+      await user.type(input, 'lucia@example.com')
+      await waitFor(() => {
+        expect(screen.getByText('Enf. Lucía Silva')).toBeInTheDocument()
+        expect(screen.queryByText('Enf. José López')).not.toBeInTheDocument()
+      })
+    })
+  })
+
   describe('reset de búsqueda al cambiar de sección', () => {
     it('no arrastra la query al pasar de Usuarios a Pacientes', async () => {
       const user = userEvent.setup()
@@ -237,6 +329,21 @@ describe('gestión de usuarios y pacientes (sin regresión + búsqueda)', () => 
         expect(screen.getByPlaceholderText('searchUsersPlaceholder')).toHaveValue('')
         expect(screen.getByText('Juan Pérez')).toBeInTheDocument()
         expect(screen.getByText('Luisa Martín')).toBeInTheDocument()
+      })
+    })
+
+    it('reinicia la búsqueda al cambiar de Doctores a Enfermeras', async () => {
+      const user = userEvent.setup()
+      await renderDashboard()
+      await screen.findByRole('button', { name: /manageDoctors/ })
+      await user.click(screen.getByRole('button', { name: /manageDoctors/ }))
+      await user.type(screen.getByPlaceholderText('searchUsersPlaceholder'), 'pedro')
+
+      await user.click(screen.getByRole('button', { name: /manageNurses/ }))
+      await waitFor(() => {
+        expect(screen.getByPlaceholderText('searchUsersPlaceholder')).toHaveValue('')
+        expect(screen.getByText('Enf. José López')).toBeInTheDocument()
+        expect(screen.getByText('Enf. Lucía Silva')).toBeInTheDocument()
       })
     })
   })

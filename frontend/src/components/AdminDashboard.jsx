@@ -38,6 +38,8 @@ function AdminDashboard() {
   const [showDoctorSuggestions, setShowDoctorSuggestions] = useState(false)
   const [chatbotOpen, setChatbotOpen] = useState(false)
   const [usuariosQuery, setUsuariosQuery] = useState('')
+  const [doctoresQuery, setDoctoresQuery] = useState('')
+  const [enfermerasQuery, setEnfermerasQuery] = useState('')
   const [pacientesQuery, setPacientesQuery] = useState('')
   const [stats, setStats] = useState({
     totalUsuarios: 0,
@@ -83,9 +85,11 @@ function AdminDashboard() {
   }, [location.search, navigate])
 
   // Resetear la búsqueda al cambiar de sección para no arrastrar el filtro
-  // entre Gestionar Usuarios y Gestionar Pacientes
+  // entre las secciones de gestión
   useEffect(() => {
     setUsuariosQuery('')
+    setDoctoresQuery('')
+    setEnfermerasQuery('')
     setPacientesQuery('')
   }, [activeTab])
 
@@ -1312,6 +1316,44 @@ function AdminDashboard() {
     [todosLosUsuarios, usuariosQuery]
   )
 
+  const doctoresDeRol = useMemo(
+    () => doctores.filter((doctor) => doctor.usuario?.rol === 'doctor'),
+    [doctores]
+  )
+
+  const visibleDoctores = useMemo(
+    () => filterUsers(
+      doctoresDeRol.map((doctor) => ({
+        username: doctor.usuario?.username ?? '',
+        first_name: doctor.usuario?.first_name ?? '',
+        last_name: doctor.usuario?.last_name ?? '',
+        email: doctor.usuario?.email ?? '',
+        _doctor: doctor,
+      })),
+      doctoresQuery
+    ).map((match) => match._doctor),
+    [doctoresDeRol, doctoresQuery]
+  )
+
+  const enfermerasDeRol = useMemo(
+    () => enfermeras.filter((enfermera) => enfermera.usuario?.rol === 'nurse'),
+    [enfermeras]
+  )
+
+  const visibleEnfermeras = useMemo(
+    () => filterUsers(
+      enfermerasDeRol.map((enfermera) => ({
+        username: enfermera.usuario?.username ?? '',
+        first_name: enfermera.usuario?.first_name ?? '',
+        last_name: enfermera.usuario?.last_name ?? '',
+        email: enfermera.usuario?.email ?? '',
+        _enfermera: enfermera,
+      })),
+      enfermerasQuery
+    ).map((match) => match._enfermera),
+    [enfermerasDeRol, enfermerasQuery]
+  )
+
   const visiblePacientes = useMemo(() => {
     // El endpoint de pacientes ya devuelve solo perfiles con rol patient
     // (garantía de origen), así que no se vuelve a filtrar por rol. Se
@@ -1602,13 +1644,26 @@ function AdminDashboard() {
           <div>
             <div style={styles.tableHeader}>
               <h2 style={styles.sectionTitle}>{t('manageDoctors')}</h2>
+              <UserSearchBar
+                value={doctoresQuery}
+                onChange={(value) => setDoctoresQuery(value)}
+                onClear={() => setDoctoresQuery('')}
+                placeholder={t('searchUsersPlaceholder')}
+                resultCount={visibleDoctores.length}
+                totalCount={doctoresDeRol.length}
+                query={doctoresQuery}
+              />
               <button onClick={() => handleCreate('doctores')} style={styles.createButton}>
                 <FaPlus /> {t('registerNew')}
               </button>
             </div>
-            {doctores.length === 0 ? (
+            {doctoresDeRol.length === 0 ? (
               <div style={styles.emptyState}>
                 <p>{t('noDoctorsFound')}</p>
+              </div>
+            ) : visibleDoctores.length === 0 ? (
+              <div style={styles.emptyState}>
+                <p>{t('searchNoResults', { query: doctoresQuery })}</p>
               </div>
             ) : (
               <div className="table-scroll" style={styles.tableContainer}>
@@ -1624,7 +1679,7 @@ function AdminDashboard() {
                      </tr>
                    </thead>
                   <tbody>
-                    {doctores.map(doctor => (
+                    {visibleDoctores.map(doctor => (
                       <tr key={doctor.id}>
                         <td>{doctor.id}</td>
                         <td>Dr. {doctor.usuario?.first_name} {doctor.usuario?.last_name}</td>
@@ -1659,13 +1714,26 @@ function AdminDashboard() {
           <div>
             <div style={styles.tableHeader}>
               <h2 style={styles.sectionTitle}>{t('manageNurses')}</h2>
+              <UserSearchBar
+                value={enfermerasQuery}
+                onChange={(value) => setEnfermerasQuery(value)}
+                onClear={() => setEnfermerasQuery('')}
+                placeholder={t('searchUsersPlaceholder')}
+                resultCount={visibleEnfermeras.length}
+                totalCount={enfermerasDeRol.length}
+                query={enfermerasQuery}
+              />
               <button onClick={() => handleCreate('enfermeras')} style={styles.createButton}>
                 <FaPlus /> {t('registerNew')}
               </button>
             </div>
-            {enfermeras.length === 0 ? (
+            {enfermerasDeRol.length === 0 ? (
               <div style={styles.emptyState}>
                 <p>{t('noNursesFound')}</p>
+              </div>
+            ) : visibleEnfermeras.length === 0 ? (
+              <div style={styles.emptyState}>
+                <p>{t('searchNoResults', { query: enfermerasQuery })}</p>
               </div>
             ) : (
               <div className="table-scroll" style={styles.tableContainer}>
@@ -1682,7 +1750,7 @@ function AdminDashboard() {
                      </tr>
                    </thead>
                   <tbody>
-                    {enfermeras.map(enfermera => (
+                    {visibleEnfermeras.map(enfermera => (
                       <tr key={enfermera.id}>
                         <td>{enfermera.id}</td>
                         <td>Enf. {enfermera.usuario?.first_name} {enfermera.usuario?.last_name}</td>

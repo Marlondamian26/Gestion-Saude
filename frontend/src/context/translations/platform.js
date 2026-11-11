@@ -49,6 +49,7 @@ export const platformTranslations = {
     serverConnectionError: 'Erro ao conectar com o servidor',
     // Perfil
     myProfile: 'Meu Perfil',
+    profileAdminPanel: 'Painel de administração',
     personalInfo: 'Informação Pessoal',
     professionalInfo: 'Informação Profissional',
     medicalInfo: 'Informação Médica',
@@ -691,6 +692,7 @@ export const platformTranslations = {
 
     // Perfil
     myProfile: 'Mi Perfil',
+    profileAdminPanel: 'Panel de administración',
     personalInfo: 'Información Personal',
     professionalInfo: 'Información Profesional',
     medicalInfo: 'Información Médica',
@@ -1230,6 +1232,7 @@ export const platformTranslations = {
     appSlogan: 'Caring for your health with excellence',
     // Perfil
     myProfile: 'My Profile',
+    profileAdminPanel: 'Administration panel',
     personalInfo: 'Personal Information',
     professionalInfo: 'Professional Information',
     medicalInfo: 'Medical Information',
