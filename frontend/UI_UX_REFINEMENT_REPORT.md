@@ -90,7 +90,7 @@ En 375px se verificó además el foco de teclado sobre un campo: `outline` visib
 2. Validar funcionalidad de extremo a extremo (roles, acciones de tablas, agendamiento, notificaciones, perfil, scroll restoration e imágenes persistidas) contra un backend real.
 3. Medir contraste AA de todas las combinaciones y estados interactivos; no se certificó de manera integral en esta pasada.
 4. Corregir los 52 errores y 13 warnings de lint preexistentes.
-5. Verificar CI/CD, Render y hard reload después de sincronizar la rama. El resultado depende del permiso de push y de la configuración del servicio remoto.
+5. Completar/verificar el deploy de Render y el hard reload: el push se realizó, pero la URL pública todavía referencia bundles anteriores.
 
 ## Verificación complementaria: selector de idioma y overflow móvil
 
@@ -149,4 +149,5 @@ Las capturas se guardan en `ui-audit-screenshots/`. El baseline disponible es an
 - Tests (115), build e `i18n:check` pasan. Lint sigue fallando con 52 errores y 13 warnings ya existentes.
 - Las verificaciones de navegador se hicieron con emulación Chromium a zoom 100%, con movimiento reducido y respuestas API simuladas. No sustituyen pruebas en dispositivo físico, zoom 200%, lectores de pantalla ni backend real.
 - Commits de implementación en `Gestion-Saude`: `b37cee0` (topbar), `a359d65` (overflow responsive) y `06b00ec` (controles de autenticación/accesibilidad). Quedaban además 8 commits locales anteriores sin push; se conservaron sin reescritura.
-- No se ha hecho push ni se verificaron CI/Render. `render.yaml` no fija una rama de despliegue; confirmar el posible auto-deploy antes de sincronizar el branch.
+- Se hizo push de los 12 commits de trabajo a `Gestion-Saude`; la referencia remota se verificó en `e0f455f` antes de esta actualización del informe. No se generó ningún run de GitHub Actions para esa rama.
+- Se comprobó la URL pública con una consulta cache-busted: responde HTTP 200, pero sigue sirviendo `index-Dymh3Qv_.js` y `Dashboard-9a5U-yDN.js`, mientras el build local verificado referencia `index-zqfsB0Cb.js` y `Dashboard-DhCdnrJf.js`. El deploy de Render y el hard reload no están confirmados; `render.yaml` no declara la rama/autodeploy del servicio.
