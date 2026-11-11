@@ -242,11 +242,12 @@ body::before {
 .form-group textarea {
   width: 100%;
   padding: clamp(0.75rem, 2vw, 1rem) clamp(1rem, 3vw, 1rem);
+  min-height: 44px;
   border: 2px solid var(--border-color);
   border-radius: var(--border-radius-md);
   background: var(--input-bg);
   color: var(--text-primary);
-  font-size: clamp(0.875rem, 2vw, 1rem);
+  font-size: 16px;
   transition: all 0.3s ease;
   box-sizing: border-box;
 }
@@ -254,10 +255,16 @@ body::before {
 .form-group input:focus,
 .form-group select:focus,
 .form-group textarea:focus {
-  outline: none;
   border-color: var(--color-primary);
   box-shadow: 0 0 0 3px var(--focus-shadow);
   transform: translateY(-1px);
+}
+
+.form-group input:focus-visible,
+.form-group select:focus-visible,
+.form-group textarea:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
 }
 
 /* Animación de carga */
@@ -387,7 +394,7 @@ body::before {
   transition: background-color 0.25s ease,
               color 0.25s ease,
               border-color 0.25s ease,
-              box-shadow 0.25s ease !important;
+              box-shadow 0.25s ease;
 }
 
 /* Animaciones */
@@ -481,7 +488,7 @@ body::before {
 }
 /* Tarjetas con gradientes más visibles */
 .gradient-card {
-  background: var(--card-gradient) !important;
+  background: var(--card-gradient);
   border: 1px solid var(--border-color);
   border-radius: var(--border-radius-lg);
   box-shadow: var(--box-shadow);
@@ -534,7 +541,6 @@ input, textarea, select {
 }
 
 input:focus, textarea:focus, select:focus {
-  outline: none;
   border-color: var(--color-patient);
   box-shadow: 0 0 0 3px var(--focus-shadow);
   background: rgba(255, 255, 255, 0.95);
@@ -583,7 +589,7 @@ button:disabled {
 .theme-transition *,
 .theme-transition *::before,
 .theme-transition *::after {
-  transition: all 0.3s ease !important;
+  transition: all 0.3s ease;
 }
 
 /* Asegurar que los gradientes se apliquen */
@@ -676,7 +682,7 @@ button:disabled {
   }
   
   .grid {
-    grid-template-columns: 1fr !important;
+    grid-template-columns: 1fr;
   }
   
   .flex {

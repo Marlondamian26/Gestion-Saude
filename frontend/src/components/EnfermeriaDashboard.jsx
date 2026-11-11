@@ -189,11 +189,10 @@ function EnfermeriaDashboard() {
     }))
   }
 
-  const registrarSignosVitales = async (pacienteId) => {
+  const registrarSignosVitales = async () => {
     setSaving(true)
     try {
       // Aquí iría la llamada a la API
-      console.log('Registrando signos vitales:', { pacienteId, ...signosVitales })
       
       mostrarMensaje(t('vitalsRegistered'), 'success')
       setSignosVitales({
@@ -220,7 +219,6 @@ function EnfermeriaDashboard() {
   const realizarProcedimiento = async () => {
     setSaving(true)
     try {
-      console.log('Realizando procedimiento:', procedimiento)
       mostrarMensaje(t('itemCreated', { type: t('procedures').toLowerCase() }), 'success')
       setProcedimiento({
         tipo: 'curacion',
@@ -540,7 +538,7 @@ function EnfermeriaDashboard() {
 
                             <div style={styles.modalButtons}>
                               <button 
-                                onClick={() => registrarSignosVitales(selectedPaciente.paciente)}
+                                onClick={registrarSignosVitales}
                                 style={styles.saveButton}
                                 disabled={saving}
                               >
@@ -734,7 +732,7 @@ const styles = {
     maxWidth: '1200px',
     margin: '0 auto',
     backgroundColor: 'var(--bg-primary)',
-    minHeight: '100vh',
+    minHeight: 'var(--app-viewport-min-height, 100vh)',
     fontFamily: 'system-ui, -apple-system, sans-serif'
   },
   loadingContainer: {
@@ -742,7 +740,7 @@ const styles = {
     flexDirection: 'column',
     justifyContent: 'center',
     alignItems: 'center',
-    minHeight: '100vh',
+    minHeight: 'var(--app-viewport-min-height, 100vh)',
     backgroundColor: 'var(--bg-primary)'
   },
   loadingSpinner: {
@@ -764,6 +762,8 @@ const styles = {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
+    flexWrap: 'wrap',
+    gap: '12px',
     marginBottom: '30px',
     backgroundColor: 'var(--bg-secondary)',
     padding: '25px',
@@ -774,7 +774,9 @@ const styles = {
   headerLeft: {
     display: 'flex',
     flexDirection: 'column',
-    gap: '5px'
+    gap: '5px',
+    flex: '1 1 220px',
+    minWidth: 0
   },
   title: {
     fontSize: '28px',
@@ -815,7 +817,8 @@ const styles = {
     border: 'none',
     borderRadius: '8px',
     cursor: 'pointer',
-    fontSize: '14px'
+    fontSize: '14px',
+    flexShrink: 0
   },
   successMessage: {
     backgroundColor: 'var(--color-success-bg)',
@@ -1077,7 +1080,7 @@ const styles = {
   },
   procedimientosList: {
     display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
+    gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 300px), 1fr))',
     gap: '15px'
   },
   procedimientoCard: {

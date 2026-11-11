@@ -139,7 +139,6 @@ function Citas() {
      try {
        const response = await axiosInstance.get(`horarios/disponibles/?doctor=${nuevaCita.doctor}&fecha=${nuevaCita.fecha}`)
        const horariosData = Array.isArray(response.data) ? response.data : []
-       console.log('Horarios recibidos:', horariosData)
 
        const citasResponse = await axiosInstance.get('citas/', {
          params: {
@@ -459,8 +458,8 @@ function Citas() {
     <div style={styles.container}>
       <style>{styles.dateTimeInput}</style>
       <div style={styles.header}>
-        <h1>📅 {t('appointmentsManagement')}</h1>
-        <div>
+        <h1 style={styles.headerTitle}>📅 {t('appointmentsManagement')}</h1>
+        <div style={styles.headerActions}>
           <button onClick={() => navigate('/dashboard')} style={styles.backButton}>
             ← {t('back')}
           </button>
@@ -759,18 +758,33 @@ const styles = {
     maxWidth: '1200px',
     margin: '0 auto',
     backgroundColor: 'var(--bg-primary)',
-    minHeight: '100vh'
+    minHeight: 'var(--app-viewport-min-height, 100vh)'
   },
   header: {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
+    flexWrap: 'wrap',
+    gap: '12px',
     marginBottom: '30px',
     backgroundColor: 'var(--bg-secondary)',
     padding: '20px',
     borderRadius: '10px',
     boxShadow: 'var(--box-shadow)',
     border: '1px solid var(--border-color)'
+  },
+  headerTitle: {
+    flex: '1 1 200px',
+    minWidth: 0,
+    overflowWrap: 'anywhere'
+  },
+  headerActions: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+    flexWrap: 'wrap',
+    gap: '8px',
+    maxWidth: '100%'
   },
   backButton: {
     backgroundColor: 'var(--text-muted)',
@@ -928,7 +942,7 @@ const styles = {
   },
   citasContainer: {
     display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 400px), 1fr))',
     gap: '20px'
   },
   section: {

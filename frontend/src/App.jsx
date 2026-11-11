@@ -44,16 +44,14 @@ const styles = {
   appContainer: {
     display: 'flex',
     flexDirection: 'column',
-    minHeight: '100vh',
+    minHeight: 'var(--app-viewport-min-height, 100vh)',
     width: '100%',
-    maxWidth: '100vw',
-    overflowX: 'hidden',
+    maxWidth: '100%',
   },
   contentContainer: {
     flex: 1,
     width: '100%',
-    maxWidth: '100vw',
-    overflowX: 'hidden',
+    maxWidth: '100%',
   },
   headerBar: {
     position: 'fixed',

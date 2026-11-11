@@ -117,7 +117,7 @@ function Doctores() {
     <div style={styles.container}>
       {/* Header */}
       <div style={styles.header}>
-        <h1>👨‍⚕️ {t('ourSpecialists')}</h1>
+        <h1 style={styles.headerTitle}>👨‍⚕️ {t('ourSpecialists')}</h1>
         <button onClick={() => navigate('/dashboard')} style={styles.backButton}>
           ← {t('back')}
         </button>
@@ -260,18 +260,25 @@ const styles = {
     maxWidth: '1200px',
     margin: '0 auto',
     backgroundColor: 'var(--bg-primary)',
-    minHeight: '100vh'
+    minHeight: 'var(--app-viewport-min-height, 100vh)'
   },
   header: {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
+    flexWrap: 'wrap',
+    gap: '12px',
     marginBottom: '30px',
     backgroundColor: 'var(--bg-secondary)',
     padding: '20px',
     borderRadius: '10px',
     boxShadow: 'var(--box-shadow)',
     border: '1px solid var(--border-color)'
+  },
+  headerTitle: {
+    flex: '1 1 180px',
+    minWidth: 0,
+    overflowWrap: 'anywhere'
   },
   backButton: {
     backgroundColor: 'var(--text-muted)',
@@ -292,6 +299,7 @@ const styles = {
   },
   filtroLabel: {
     marginRight: '10px',
+    flexShrink: 0,
     fontWeight: 'bold',
     color: 'var(--text-primary)'
   },
@@ -306,7 +314,7 @@ const styles = {
   },
   grid: {
     display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
+    gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 300px), 1fr))',
     gap: '20px'
   },
   card: {

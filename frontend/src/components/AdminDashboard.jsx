@@ -78,7 +78,6 @@ function AdminDashboard() {
     const searchParams = new URLSearchParams(location.search)
     const tabFromUrl = searchParams.get('tab')
     if (tabFromUrl && ['dashboard', 'usuarios', 'doctores', 'enfermeras', 'pacientes', 'citas', 'especialidades', 'horarios', 'sitio'].includes(tabFromUrl)) {
-      console.log('🔄 Cambiando tab desde URL:', tabFromUrl)
       setActiveTab(tabFromUrl)
     }
   }, [location.search, navigate])
@@ -159,70 +158,52 @@ function AdminDashboard() {
     let horariosData = []
     let imagenesSitioData = []
 
-    // Total de usuarios por tipo (desde la paginación)
-    let totalUsuariosAPI = 0
-    let totalDoctoresAPI = 0
-    let totalEnfermerasAPI = 0
-    let totalPacientesAPI = 0
-
     // ✅ Usuarios (con paginación)
     if (usuariosRes.status === 'fulfilled') {
       const responseData = usuariosRes.value.data
       usuariosData = responseData.results || responseData || []
-      totalUsuariosAPI = responseData.count || usuariosData.length
-      console.log('👥 Usuarios cargados:', usuariosData.length, 'Total API:', totalUsuariosAPI)
     }
 
     // ✅ Doctores (con paginación)
     if (doctoresRes.status === 'fulfilled') {
       const responseData = doctoresRes.value.data
       doctoresData = responseData.results || responseData || []
-      totalDoctoresAPI = responseData.count || doctoresData.length
-      console.log('👨‍⚕️ Doctores cargados:', doctoresData.length, 'Total API:', totalDoctoresAPI)
     }
 
     // ✅ Enfermeras (con paginación)
     if (enfermerasRes.status === 'fulfilled') {
       const responseData = enfermerasRes.value.data
       enfermerasData = responseData.results || responseData || []
-      totalEnfermerasAPI = responseData.count || enfermerasData.length
-      console.log('👩‍⚕️ Enfermeras cargadas:', enfermerasData.length, 'Total API:', totalEnfermerasAPI)
     }
 
     // ✅ Pacientes (con paginación)
     if (pacientesRes.status === 'fulfilled') {
       const responseData = pacientesRes.value.data
       pacientesData = responseData.results || responseData || []
-      totalPacientesAPI = responseData.count || pacientesData.length
-      console.log('🏥 Pacientes cargados:', pacientesData.length, 'Total API:', totalPacientesAPI)
     }
 
     // ✅ Citas (con paginación)
     if (citasRes.status === 'fulfilled') {
       const responseData = citasRes.value.data
       citasData = responseData.results || responseData || []
-      console.log('📅 Citas cargadas:', citasData.length)
     }
 
     // ✅ Especialidades (con paginación)
     if (especialidadesRes.status === 'fulfilled') {
       const responseData = especialidadesRes.value.data
       especialidadesData = responseData.results || responseData || []
-      console.log('🔬 Especialidades cargadas:', especialidadesData.length)
     }
 
     // ✅ Horarios (con paginación)
     if (horariosRes.status === 'fulfilled') {
       const responseData = horariosRes.value.data
       horariosData = responseData.results || responseData || []
-      console.log('⏰ Horarios cargados:', horariosData.length)
     }
 
     // ✅ Imágenes del Sitio
     if (imagenesSitioRes.status === 'fulfilled') {
       const responseData = imagenesSitioRes.value.data
       imagenesSitioData = responseData.results || responseData || []
-      console.log('🖼️ Imágenes del sitio cargadas:', imagenesSitioData.length)
     }
 
     // Asignar datos al estado
@@ -349,7 +330,6 @@ function AdminDashboard() {
 
   // Abrir modal para crear
   const handleCreate = (tipo) => {
-    console.log('Creando nuevo:', tipo)
     setModalMode('create')
     setSelectedItem(null)
     setErrorBackend('')
@@ -477,7 +457,6 @@ function AdminDashboard() {
 
   // Abrir modal para editar
   const handleEdit = (item, tipo) => {
-    console.log('Editando:', item, tipo)
     setModalMode('edit')
     setSelectedItem(item)
     setErrorBackend('')
@@ -539,7 +518,6 @@ function AdminDashboard() {
 
   // Abrir modal para ver
   const handleView = (item, tipo) => {
-    console.log('Viendo:', item, tipo)
     setModalMode('view')
     setSelectedItem(item)
     
@@ -741,7 +719,6 @@ function AdminDashboard() {
   setSaving(true)
   setErrorBackend('')
   
-  console.log('📤 Enviando formulario:', formData)
   
   // Validar campos requeridos para pacientes
   if (formData.tipo === 'pacientes') {
@@ -795,11 +772,9 @@ function AdminDashboard() {
           telefono: formData.telefono || '',
           rol: 'doctor'
         }
-        console.log('👉 Creando usuario:', usuarioData)
         
         const usuarioRes = await axiosInstance.post('usuarios/', usuarioData)
         const nuevoUsuario = usuarioRes.data
-        console.log('✅ Usuario creado:', nuevoUsuario)
         
         // Crear perfil de doctor
         const doctorData = {
@@ -808,10 +783,8 @@ function AdminDashboard() {
           otra_especialidad: formData.otra_especialidad || '',
           biografia: formData.biografia || ''
         }
-        console.log('👉 Creando doctor:', doctorData)
         
         const doctorRes = await axiosInstance.post('doctores/', doctorData)
-        console.log('Doctor creado:', doctorRes.data)
 
         // Subir foto de perfil si se proporcionó
         if (formData.foto_perfil) {
@@ -831,7 +804,6 @@ function AdminDashboard() {
               tipo_especialidad: 'medica',
               activo: true
             })
-            console.log('Nueva especialidad médica creada:', nuevaEsp.data)
             // Actualizar el doctor con la nueva especialidad
             await axiosInstance.patch(`doctores/${doctorRes.data.id}/`, {
               especialidad: nuevaEsp.data.id,
@@ -855,11 +827,9 @@ function AdminDashboard() {
           telefono: formData.telefono || '',
           rol: 'nurse'
         }
-        console.log('👉 Creando usuario:', usuarioData)
         
         const usuarioRes = await axiosInstance.post('usuarios/', usuarioData)
         const nuevoUsuario = usuarioRes.data
-        console.log('✅ Usuario creado:', nuevoUsuario)
         
         // Crear perfil de enfermera
         const enfermeraData = {
@@ -868,10 +838,8 @@ function AdminDashboard() {
           otra_especialidad: formData.otra_especialidad || '',
           numero_licencia: formData.numero_licencia || ''
         }
-        console.log('👉 Creando enfermera:', enfermeraData)
         
         const enfermeraRes = await axiosInstance.post('enfermeras/', enfermeraData)
-        console.log('Enfermera creada:', enfermeraRes.data)
 
         // Subir foto de perfil si se proporcionó
         if (formData.foto_perfil) {
@@ -891,7 +859,6 @@ function AdminDashboard() {
               tipo_especialidad: 'enfermeria',
               activo: true
             })
-            console.log('Nueva especialidad de enfermería creada:', nuevaEsp.data)
             // Actualizar la enfermera con la nueva especialidad
             await axiosInstance.patch(`enfermeras/${enfermeraRes.data.id}/`, {
               especialidad: nuevaEsp.data.id,
@@ -916,10 +883,8 @@ function AdminDashboard() {
           fecha_nacimiento: formData.fecha_nacimiento || null,
           rol: 'patient'
         }
-        console.log('👉 Creando usuario paciente:', usuarioData)
         const usuarioRes = await axiosInstance.post('usuarios/', usuarioData)
         const nuevoUsuario = usuarioRes.data
-        console.log('✅ Usuario paciente creado:', nuevoUsuario)
 
         // Subir foto de perfil si se proporcionó
         if (formData.foto_perfil) {
@@ -948,9 +913,7 @@ function AdminDashboard() {
                 contacto_emergencia: formData.contacto_emergencia || '',
                 telefono_emergencia: formData.telefono_emergencia || ''
               }
-              console.log('👉 Actualizando perfil de paciente:', pacienteData)
               await axiosInstance.patch(`pacientes/${pacienteExistente.id}/`, pacienteData)
-              console.log('✅ Perfil de paciente actualizado')
             } else {
               console.warn('⚠️ No se encontró el perfil de paciente creado automáticamente')
               datosMedicosActualizados = false
@@ -985,10 +948,9 @@ function AdminDashboard() {
         if (formData.imagenFile) {
           formDataObj.append('imagen', formData.imagenFile)
         }
-        const response = await axiosInstance.post('sitio-imagenes/', formDataObj, {
+        await axiosInstance.post('sitio-imagenes/', formDataObj, {
           headers: { 'Content-Type': 'multipart/form-data' }
         })
-        console.log('✅ Imagen creada:', response.data)
         mostrarMensaje('✅ ' + t('imageUploaded'), 'success')
       }
       else if (tipo === 'horarios' && Array.isArray(formData.dia_semana) && formData.dia_semana.length > 0) {
@@ -1023,14 +985,12 @@ function AdminDashboard() {
           })
         }
 
-        console.log('✅ Usuario creado:', response.data)
         mostrarMensaje('✅ ' + t('itemCreated', { type: t('user') }), 'success')
       }
       else {
         // ✅ ESTA ES LA PARTE QUE SE EJECUTA PARA especialidades, citas, horarios
         // ✅ Usa formData.tipo que DEBE ser 'especialidades', 'citas', 'horarios'
-        const response = await axiosInstance.post(`${tipo}/`, formData)
-        console.log('✅ Creado:', response.data)
+        await axiosInstance.post(`${tipo}/`, formData)
         mostrarMensaje('✅ ' + t('itemCreated', { type: tipo }), 'success')
       }
     }
@@ -1071,8 +1031,7 @@ function AdminDashboard() {
         if (!selectedItem?.id) {
           throw new Error('No se pudo obtener el ID del doctor')
         }
-        const response = await axiosInstance.patch(`${tipo}/${selectedItem.id}/`, doctorData)
-        console.log('Doctor actualizado:', response.data)
+        await axiosInstance.patch(`${tipo}/${selectedItem.id}/`, doctorData)
         
         // Si se usó "otra_especialidad" y no se seleccionó una de la lista, crear la nueva especialidad
         if (formData.otra_especialidad && !formData.especialidad) {
@@ -1083,7 +1042,6 @@ function AdminDashboard() {
               tipo_especialidad: 'medica',
               activo: true
             })
-            console.log('Nueva especialidad médica creada:', nuevaEsp.data)
             // Actualizar el doctor con la nueva especialidad
             await axiosInstance.patch(`doctores/${selectedItem.id}/`, {
               especialidad: nuevaEsp.data.id,
@@ -1126,8 +1084,7 @@ function AdminDashboard() {
         if (!selectedItem?.id) {
           throw new Error('No se pudo obtener el ID de la enfermera')
         }
-        const response = await axiosInstance.patch(`${tipo}/${selectedItem.id}/`, enfermeraData)
-        console.log('Enfermera actualizada:', response.data)
+        await axiosInstance.patch(`${tipo}/${selectedItem.id}/`, enfermeraData)
         
         // Si se usó "otra_especialidad" y no se seleccionó una de la lista, crear la nueva especialidad
         if (formData.otra_especialidad && !formData.especialidad) {
@@ -1138,7 +1095,6 @@ function AdminDashboard() {
               tipo_especialidad: 'enfermeria',
               activo: true
             })
-            console.log('Nueva especialidad de enfermería creada:', nuevaEsp.data)
             // Actualizar la enfermera con la nueva especialidad
             await axiosInstance.patch(`enfermeras/${selectedItem.id}/`, {
               especialidad: nuevaEsp.data.id,
@@ -1184,8 +1140,7 @@ function AdminDashboard() {
         if (!selectedItem?.id) {
           throw new Error('No se pudo obtener el ID del paciente')
         }
-        const response = await axiosInstance.patch(`${tipo}/${selectedItem.id}/`, pacienteData)
-        console.log('✅ Paciente actualizado:', response.data)
+        await axiosInstance.patch(`${tipo}/${selectedItem.id}/`, pacienteData)
         mostrarMensaje('✅ ' + t('itemUpdated', { type: t('patient') }), 'success')
       }
       else if (tipo === 'imagenes-sitio') {
@@ -1201,10 +1156,9 @@ function AdminDashboard() {
         if (formData.imagenFile) {
           formDataObj.append('imagen', formData.imagenFile)
         }
-        const response = await axiosInstance.patch(`sitio-imagenes/${selectedItem.id}/`, formDataObj, {
+        await axiosInstance.patch(`sitio-imagenes/${selectedItem.id}/`, formDataObj, {
           headers: { 'Content-Type': 'multipart/form-data' }
         })
-        console.log('✅ Imagen actualizada:', response.data)
         mostrarMensaje('✅ ' + t('imageUpdated'), 'success')
       }
       else if (tipo === 'horarios') {
@@ -1220,15 +1174,14 @@ function AdminDashboard() {
           hora_fin: formData.hora_fin,
           activo: formData.activo
         }
-        const response = await axiosInstance.patch(`horarios/${selectedItem.id}/`, horarioData)
-        console.log('✅ Horario actualizado:', response.data)
+        await axiosInstance.patch(`horarios/${selectedItem.id}/`, horarioData)
         mostrarMensaje('✅ ' + t('itemUpdated', { type: t('schedule') }), 'success')
       }
       else if (tipo === 'usuarios') {
         if (!selectedItem?.id) {
           throw new Error('No se pudo obtener el ID del usuario')
         }
-        const response = await axiosInstance.patch(`${tipo}/${selectedItem.id}/`, formData)
+        await axiosInstance.patch(`${tipo}/${selectedItem.id}/`, formData)
 
         // Subir foto de perfil si se proporcionó
         if (formData.foto_perfil) {
@@ -1239,15 +1192,13 @@ function AdminDashboard() {
           })
         }
 
-        console.log('✅ Usuario actualizado:', response.data)
         if (!selectedItem?.id) {
           throw new Error('No se pudo obtener el ID del elemento')
         }
         mostrarMensaje('✅ ' + t('itemUpdated', { type: t('user') }), 'success')
       }
       else {
-        const response = await axiosInstance.patch(`${tipo}/${selectedItem.id}/`, formData)
-        console.log('✅ Actualizado:', response.data)
+        await axiosInstance.patch(`${tipo}/${selectedItem.id}/`, formData)
         mostrarMensaje('✅ ' + t('itemUpdated', { type: tipo }), 'success')
       }
     }
@@ -3304,7 +3255,7 @@ const styles = {
     maxWidth: '1400px',
     margin: '0 auto',
     backgroundColor: 'var(--bg-primary)',
-    minHeight: '100vh',
+    minHeight: 'var(--app-viewport-min-height, 100vh)',
     fontFamily: 'system-ui, -apple-system, sans-serif'
   },
   loadingContainer: {
@@ -3312,7 +3263,7 @@ const styles = {
     flexDirection: 'column',
     justifyContent: 'center',
     alignItems: 'center',
-    minHeight: '100vh',
+    minHeight: 'var(--app-viewport-min-height, 100vh)',
     backgroundColor: 'var(--bg-primary)'
   },
   loadingSpinner: {
@@ -3335,7 +3286,7 @@ const styles = {
     flexDirection: 'column',
     justifyContent: 'center',
     alignItems: 'center',
-    minHeight: '100vh',
+    minHeight: 'var(--app-viewport-min-height, 100vh)',
     backgroundColor: 'var(--bg-primary)',
     padding: '20px',
     textAlign: 'center'
@@ -3376,12 +3327,15 @@ const styles = {
     border: 'none',
     borderRadius: '8px',
     cursor: 'pointer',
-    fontSize: '14px'
+    fontSize: '14px',
+    flexShrink: 0
   },
   header: {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
+    flexWrap: 'wrap',
+    gap: '12px',
     marginBottom: '30px',
     backgroundColor: 'var(--bg-secondary)',
     padding: '25px',
@@ -3394,7 +3348,9 @@ const styles = {
   headerLeft: {
     display: 'flex',
     flexDirection: 'column',
-    gap: '5px'
+    gap: '5px',
+    flex: '1 1 220px',
+    minWidth: 0
   },
   title: {
     fontSize: '28px',
@@ -3515,11 +3471,13 @@ const styles = {
   sectionTitle: {
     fontSize: '20px',
     color: 'var(--text-primary)',
-    margin: '0 0 20px 0'
+    margin: '0 0 20px 0',
+    minWidth: 0,
+    overflowWrap: 'anywhere'
   },
   dashboardGrid: {
     display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 300px), 1fr))',
     gap: '20px'
   },
   dashboardCard: {
@@ -3541,6 +3499,8 @@ const styles = {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
+    flexWrap: 'wrap',
+    gap: '12px',
     marginBottom: '20px'
   },
   createButton: {
@@ -3986,8 +3946,3 @@ const styles = {
 
 
 export default AdminDashboard
-
-
-
-
-

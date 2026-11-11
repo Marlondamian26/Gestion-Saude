@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react'
 import axiosInstance from '../services/auth'
 import { useNavigate } from 'react-router-dom'
 import { useNotificaciones } from '../context/NotificacionesContext';
-import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
 import ChatIA from './ChatIA';
 import ReminderCards from './ReminderCards';
@@ -22,20 +21,16 @@ function Dashboard() {
   const [citasList, setCitasList] = useState([])
   const navigate = useNavigate()
   const { noLeidas } = useNotificaciones();
-  const { getToken } = useAuth();
-
   useEffect(() => {
     const fetchData = async () => {
       const token = localStorage.getItem('access_token')
       
       if (!token) {
-        console.log('No hay token, redirigiendo a login')
         navigate('/login')
         return
       }
 
       try {
-        console.log(t('loadingYourInfo'))
         const response = await axiosInstance.get('usuario-actual/')
         
         if (response.data && response.data.username) {
@@ -56,7 +51,6 @@ function Dashboard() {
           console.error('Status:', err.response.status)
           
           if (err.response.status === 401) {
-            console.log('Token inválido, eliminando...')
             localStorage.removeItem('access_token')
             localStorage.removeItem('refresh_token')
             setError(t('sessionExpired'))
@@ -123,7 +117,6 @@ function Dashboard() {
   }
 
   const handleLogout = () => {
-    console.log('Cerrando sesión...')
     localStorage.removeItem('access_token')
     localStorage.removeItem('refresh_token')
     // limpiar recordatorios de sesión
@@ -133,7 +126,6 @@ function Dashboard() {
   }
 
   const handleNavigation = (path) => {
-    console.log(`Navegando a: ${path}`)
     navigate(path)
   }
 
@@ -188,7 +180,7 @@ function Dashboard() {
   return (
     <div style={styles.container} className="dashboard-container">
       {/* Header con información del usuario */}
-      <div style={styles.header}>
+      <div style={styles.header} className="dashboard-header">
         <div style={styles.welcomeSection}>
           <h1 style={styles.welcomeTitle}>
             {t('welcomeBack')}{user?.username !== 'admin' && user?.first_name ? `, ${user.first_name}` : ''}!
@@ -352,14 +344,7 @@ function Dashboard() {
               {t('clickToSee')}
             </p>
             <div style={styles.notificacionCardActions}>
-              <button 
-                onClick={() => {
-                  // Opcional: abrir el dropdown de notificaciones
-                  // Esto requeriría una referencia al componente NotificacionesCampana
-                  console.log('Abrir notificaciones');
-                }}
-                style={styles.notificacionCardButton}
-              >
+              <button style={styles.notificacionCardButton}>
                 {t('seeNotifications')}
               </button>
             </div>
@@ -495,7 +480,7 @@ const styles = {
     maxWidth: '1200px',
     margin: '0 auto',
     backgroundColor: 'var(--bg-primary)',
-    minHeight: '100vh',
+    minHeight: 'var(--app-viewport-min-height, 100vh)',
     fontFamily: 'system-ui, -apple-system, sans-serif'
   },
   content: {
@@ -512,7 +497,7 @@ const styles = {
     flexDirection: 'column',
     justifyContent: 'center',
     alignItems: 'center',
-    minHeight: '100vh',
+    minHeight: 'var(--app-viewport-min-height, 100vh)',
     backgroundColor: 'var(--bg-primary)'
   },
   loadingSpinner: {
@@ -539,7 +524,7 @@ const styles = {
     flexDirection: 'column',
     justifyContent: 'center',
     alignItems: 'center',
-    minHeight: '100vh',
+    minHeight: 'var(--app-viewport-min-height, 100vh)',
     backgroundColor: 'var(--bg-primary)',
     padding: '20px',
     textAlign: 'center'
@@ -586,11 +571,13 @@ const styles = {
   // ============================================
   header: {
     display: 'flex',
+    flexWrap: 'wrap',
     justifyContent: 'space-between',
     alignItems: 'center',
+    rowGap: '12px',
     marginBottom: '30px',
     backgroundColor: 'var(--bg-secondary)',
-    padding: '25px',
+    padding: '25px clamp(65px, 8vw, 100px) 25px 25px',
     borderRadius: '15px',
     boxShadow: 'var(--box-shadow)',
     border: '1px solid var(--border-color)'
@@ -671,7 +658,7 @@ const styles = {
   // ============================================
   infoGrid: {
     display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 250px), 1fr))',
     gap: '20px'
   },
   infoItem: {
@@ -696,7 +683,7 @@ const styles = {
   // ============================================
   menuGrid: {
     display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 280px), 1fr))',
     gap: '20px'
   },
   menuItem: {

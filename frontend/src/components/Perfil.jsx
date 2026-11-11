@@ -103,7 +103,6 @@ function Perfil() {
       // Verificar token primero
       const token = localStorage.getItem('access_token')
       if (!token) {
-        console.log('No hay token, redirigiendo a login')
         navigate('/login')
         return
       }
@@ -116,7 +115,6 @@ function Perfil() {
         throw new Error(t('noUserDataReceived'))
       }
 
-      console.log('Usuario cargado:', userResponse.data)
       setUser(userResponse.data)
       
       setEditForm({
@@ -170,7 +168,6 @@ function Perfil() {
     const miPaciente = pacientesData.find(p => p.usuario?.id === usuarioId)
     
     if (miPaciente) {
-      console.log('Perfil de paciente cargado:', miPaciente)
       setPaciente(miPaciente)
       setEditForm(prev => ({
         ...prev,
@@ -187,7 +184,6 @@ function Perfil() {
     
     try {
       const doctorResponse = await axiosInstance.get('mi-perfil-doctor/')
-      console.log('Perfil de doctor cargado:', doctorResponse.data)
       setDoctor(doctorResponse.data)
       setEditForm(prev => ({
         ...prev,
@@ -209,7 +205,6 @@ function Perfil() {
     
     try {
       const enfermeraResponse = await axiosInstance.get('mi-perfil-enfermera/')
-      console.log('Perfil de enfermera cargado:', enfermeraResponse.data)
       setEnfermera(enfermeraResponse.data)
       setEditForm(prev => ({
         ...prev,
@@ -236,7 +231,6 @@ function Perfil() {
       c.estado === 'completada' || c.estado === 'cancelada' || c.estado === 'no_asistio'
     )
     
-    console.log(`Historial cargado: ${citasCompletadas.length} citas`)
     setHistorialCitas(citasCompletadas)
   }
 
@@ -1013,7 +1007,7 @@ const styles = {
     maxWidth: '1200px',
     margin: '0 auto',
     backgroundColor: 'var(--bg-primary)',
-    minHeight: '100vh',
+    minHeight: 'var(--app-viewport-min-height, 100vh)',
     fontFamily: 'system-ui, -apple-system, sans-serif'
   },
   loadingContainer: {
@@ -1021,7 +1015,7 @@ const styles = {
     flexDirection: 'column',
     justifyContent: 'center',
     alignItems: 'center',
-    minHeight: '100vh',
+    minHeight: 'var(--app-viewport-min-height, 100vh)',
     backgroundColor: 'var(--bg-primary)'
   },
   loadingSpinner: {
@@ -1043,6 +1037,8 @@ const styles = {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
+    flexWrap: 'wrap',
+    gap: '12px',
     marginBottom: '30px',
     backgroundColor: 'var(--bg-secondary)',
     padding: '25px',
@@ -1053,7 +1049,9 @@ const styles = {
   headerLeft: {
     display: 'flex',
     flexDirection: 'column',
-    gap: '5px'
+    gap: '5px',
+    flex: '1 1 220px',
+    minWidth: 0
   },
   title: {
     fontSize: '28px',
@@ -1078,7 +1076,8 @@ const styles = {
     border: 'none',
     borderRadius: '8px',
     cursor: 'pointer',
-    fontSize: '14px'
+    fontSize: '14px',
+    flexShrink: 0
   },
   successMessage: {
     backgroundColor: 'var(--color-success-bg)',
@@ -1108,7 +1107,7 @@ const styles = {
   },
   content: {
     display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 400px), 1fr))',
     gap: '20px'
   },
   leftColumn: {
@@ -1132,6 +1131,8 @@ const styles = {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
+    flexWrap: 'wrap',
+    gap: '10px',
     marginBottom: '20px',
     borderBottom: '1px solid var(--border-color)',
     paddingBottom: '15px'
@@ -1139,6 +1140,7 @@ const styles = {
   cardTitle: {
     display: 'flex',
     alignItems: 'center',
+    minWidth: 0,
     gap: '10px',
     color: 'var(--text-primary)'
   },
@@ -1156,7 +1158,10 @@ const styles = {
     display: 'flex',
     alignItems: 'center',
     gap: '5px',
-    fontSize: '13px'
+    fontSize: '13px',
+    maxWidth: '100%',
+    minWidth: 0,
+    whiteSpace: 'normal'
   },
   infoDisplay: {
     display: 'flex',
@@ -1245,8 +1250,7 @@ const styles = {
     borderRadius: '8px',
     fontSize: '16px',
     backgroundColor: 'var(--bg-primary)',
-    color: 'var(--text-primary)',
-    outline: 'none'
+    color: 'var(--text-primary)'
   },
   textarea: {
     padding: '10px',
@@ -1256,8 +1260,7 @@ const styles = {
     resize: 'vertical',
     minHeight: '80px',
     backgroundColor: 'var(--bg-primary)',
-    color: 'var(--text-primary)',
-    outline: 'none'
+    color: 'var(--text-primary)'
   },
   select: {
     padding: '10px',
@@ -1265,8 +1268,7 @@ const styles = {
     borderRadius: '8px',
     fontSize: '16px',
     backgroundColor: 'var(--bg-primary)',
-    color: 'var(--text-primary)',
-    outline: 'none'
+    color: 'var(--text-primary)'
   },
   editButtons: {
     display: 'flex',

@@ -3,8 +3,7 @@
 /* Container Styles */
 .component-container {
   width: 100%;
-  max-width: 100vw;
-  overflow-x: hidden;
+  max-width: 100%;
   padding: clamp(1rem, 3vw, 2rem);
 }
 
@@ -27,12 +26,13 @@
   font-weight: 500;
 }
 
-.form-field input,
+.form-field input:not([type="checkbox"]):not([type="radio"]),
 .form-field select,
 .form-field textarea {
   width: 100%;
   padding: clamp(0.75rem, 2vw, 1rem);
-  font-size: clamp(0.875rem, 2vw, 1rem);
+  font-size: 16px;
+  min-height: 44px;
   border-radius: var(--border-radius-md);
   border: 1px solid var(--border-color);
   box-sizing: border-box;
@@ -93,7 +93,6 @@ input[type="radio"] {
 /* Header/Nav Styles */
 .header-main {
   width: 100%;
-  overflow-x: hidden;
   padding: clamp(1rem, 2vw, 1.5rem) clamp(1rem, 3vw, 2rem);
 }
 
@@ -158,8 +157,8 @@ input[type="radio"] {
   }
 
   .btn-half {
-    width: 100% !important;
-    flex: none !important;
+    width: 100%;
+    flex: none;
   }
 
   .grid-responsive {
