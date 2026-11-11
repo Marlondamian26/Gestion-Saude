@@ -22,20 +22,10 @@ const ThemeToggle = () => {
     },
     button: {
       background: 'var(--bg-secondary)',
-      border: 'clamp(1px, 0.5vw, 2px) solid var(--border-color)',
-      borderRadius: '50%',
-      width: 'clamp(45px, 10vw, 55px)',
-      height: 'clamp(45px, 10vw, 55px)',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
       cursor: 'pointer',
       color: 'var(--text-primary)',
       transition: 'all 0.3s ease',
       boxShadow: 'var(--box-shadow)',
-      outline: 'none',
-      padding: 0,
-      minWidth: 'clamp(45px, 10vw, 55px)',
     },
     icon: {
       fontSize: 'clamp(14px, 3vw, 20px)',
@@ -56,8 +46,7 @@ const ThemeToggle = () => {
     tooltip: {
       position: 'absolute',
       bottom: 'clamp(50px, 10vw, 70px)',
-      left: '50%',
-      transform: 'translateX(-50%)',
+      right: 0,
       backgroundColor: 'var(--bg-secondary)',
       color: 'var(--text-primary)',
       padding: 'clamp(6px, 1vw, 8px) clamp(10px, 2vw, 12px)',
@@ -105,6 +94,7 @@ const ThemeToggle = () => {
   return (
     <div style={styles.container}>
       <button
+        className="topbar-control"
         onClick={toggleTheme}
         onContextMenu={handleRightClick}
         onMouseEnter={() => setIsHovered(true)}

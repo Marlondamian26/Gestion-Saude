@@ -16,6 +16,7 @@ const PromocionalToggle = () => {
 
   return (
     <button
+      className="topbar-control"
       onClick={handleGoToPromo}
       style={styles.button}
       title={t('viewPromoSite') || 'Ver sitio promocional'}
@@ -30,20 +31,11 @@ const PromocionalToggle = () => {
 
 const styles = {
   button: {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
     backgroundColor: 'var(--bg-secondary)',
-    border: 'clamp(1px, 0.5vw, 2px) solid var(--border-color)',
-    borderRadius: '50%',
-    width: 'clamp(45px, 10vw, 55px)',
-    height: 'clamp(45px, 10vw, 55px)',
     cursor: 'pointer',
     color: 'var(--text-primary)',
     transition: 'all 0.3s ease',
     boxShadow: 'var(--box-shadow)',
-    padding: 0,
-    minWidth: 'clamp(45px, 10vw, 55px)',
     textDecoration: 'none',
   },
   icon: {

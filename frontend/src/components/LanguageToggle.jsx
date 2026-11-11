@@ -35,6 +35,7 @@ const LanguageToggle = () => {
   return (
     <div style={styles.container} ref={dropdownRef}>
       <button 
+        className="topbar-control"
         onClick={() => setIsOpen(!isOpen)} 
         style={styles.button}
         title={t('changeLanguage')}
@@ -86,27 +87,18 @@ const styles = {
     display: 'inline-block',
   },
   button: {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
     backgroundColor: 'var(--bg-secondary)',
-    border: '2px solid var(--border-color)',
-    borderRadius: '50%',
-    width: 'clamp(45px, 10vw, 55px)',
-    height: 'clamp(45px, 10vw, 55px)',
-    minWidth: 'clamp(45px, 10vw, 55px)',
     cursor: 'pointer',
     color: 'var(--text-primary)',
     transition: 'all 0.3s ease',
     boxShadow: 'var(--box-shadow)',
-    padding: 0,
   },
   flag: {
-    fontSize: '24px',
+    fontSize: 'clamp(14px, 3vw, 20px)',
     color: '#8b5cf6', // Purple color for globe
   },
   icon: {
-    fontSize: '14px',
+    fontSize: 'clamp(14px, 3vw, 20px)',
     color: 'var(--text-muted)',
   },
   dropdown: {
