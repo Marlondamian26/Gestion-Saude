@@ -96,8 +96,74 @@ describe('gestión de usuarios y pacientes (sin regresión + búsqueda)', () => 
       const counter = screen.getByText('searchResults')
       expect(input).toHaveAttribute('aria-describedby', counter.id)
       expect(counter).toHaveAttribute('aria-live', 'polite')
-      // Sin texto, no hay botón limpiar
-      expect(screen.queryByRole('button', { name: 'Limpiar búsqueda' })).not.toBeInTheDocument()
+      // Sin texto, no hay botón limpiar (nombre accesible = clave de traducción en este entorno)
+      expect(screen.queryByRole('button', { name: 'clearSearch' })).not.toBeInTheDocument()
+    })
+
+    it('filtra en tiempo real al teclear en el input', async () => {
+      const user = userEvent.setup()
+      await renderDashboard()
+      await screen.findByRole('button', { name: /manageUsers/ })
+      await user.click(screen.getByRole('button', { name: /manageUsers/ }))
+
+      const input = screen.getByPlaceholderText('searchUsersPlaceholder')
+      await user.clear(input)
+      await user.type(input, 'ana')
+      await waitFor(() => {
+        expect(screen.getByText('Ana Ruiz')).toBeInTheDocument()
+        expect(screen.queryByText('Juan Pérez')).not.toBeInTheDocument()
+        expect(screen.queryByText('María Gómez')).not.toBeInTheDocument()
+        expect(screen.queryByText('José López')).not.toBeInTheDocument()
+      })
+    })
+
+    it('encuentra acento sin acento: "jose" encuentra "José"', async () => {
+      const user = userEvent.setup()
+      await renderDashboard()
+      await screen.findByRole('button', { name: /manageUsers/ })
+      await user.click(screen.getByRole('button', { name: /manageUsers/ }))
+
+      const input = screen.getByPlaceholderText('searchUsersPlaceholder')
+      await user.clear(input)
+      await user.type(input, 'jose')
+      await waitFor(() => {
+        expect(screen.getByText('José López')).toBeInTheDocument()
+        expect(screen.queryByText('Juan Pérez')).not.toBeInTheDocument()
+      })
+    })
+
+    it('limpiar búsqueda devuelve la lista completa', async () => {
+      const user = userEvent.setup()
+      await renderDashboard()
+      await screen.findByRole('button', { name: /manageUsers/ })
+      await user.click(screen.getByRole('button', { name: /manageUsers/ }))
+
+      const input = screen.getByPlaceholderText('searchUsersPlaceholder')
+      await user.clear(input)
+      await user.type(input, 'ana')
+      await waitFor(() => {
+        expect(screen.queryByText('María Gómez')).not.toBeInTheDocument()
+      })
+
+      await user.click(screen.getByRole('button', { name: 'clearSearch' }))
+      await waitFor(() => {
+        expect(screen.getByText('María Gómez')).toBeInTheDocument()
+        expect(screen.getByText('Ana Ruiz')).toBeInTheDocument()
+      })
+    })
+
+    it('muestra estado "sin resultados" diferenciado del vacío original', async () => {
+      const user = userEvent.setup()
+      await renderDashboard()
+      await screen.findByRole('button', { name: /manageUsers/ })
+      await user.click(screen.getByRole('button', { name: /manageUsers/ }))
+
+      const input = screen.getByPlaceholderText('searchUsersPlaceholder')
+      await user.clear(input)
+      await user.type(input, 'zzz')
+      await waitFor(() => {
+        expect(screen.getByText('searchNoResults')).toBeInTheDocument()
+      })
     })
 
     it('las acciones por fila siguen funcionando (ver detalle)', async () => {
@@ -132,6 +198,27 @@ describe('gestión de usuarios y pacientes (sin regresión + búsqueda)', () => 
 
       // María Gómez (doctor) está en la lista de usuarios pero NO entre los pacientes
       expect(screen.queryByText('María Gómez')).not.toBeInTheDocument()
+    })
+
+    it('filtra pacientes por nombre (solo pacientes, nunca un no-paciente)', async () => {
+      const user = userEvent.setup()
+      await renderDashboard()
+      await screen.findByRole('button', { name: /patientsTab/ })
+      await user.click(screen.getByRole('button', { name: /patientsTab/ }))
+
+      await waitFor(() => {
+        expect(screen.getByText('Juan Pérez')).toBeInTheDocument()
+        expect(screen.getByText('Luisa Martín')).toBeInTheDocument()
+      })
+
+      const input = screen.getByPlaceholderText('searchUsersPlaceholder')
+      await user.clear(input)
+      await user.type(input, 'luisa')
+      await waitFor(() => {
+        expect(screen.getByText('Luisa Martín')).toBeInTheDocument()
+        expect(screen.queryByText('Juan Pérez')).not.toBeInTheDocument()
+        expect(screen.queryByText('María Gómez')).not.toBeInTheDocument()
+      })
     })
   })
 

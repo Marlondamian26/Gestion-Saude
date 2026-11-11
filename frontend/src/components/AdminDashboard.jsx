@@ -1567,7 +1567,7 @@ function AdminDashboard() {
               <h2 style={styles.sectionTitle}>{t('userManagement')}</h2>
               <UserSearchBar
                 value={usuariosQuery}
-                onChange={(e) => setUsuariosQuery(e.target.value)}
+                onChange={(value) => setUsuariosQuery(value)}
                 onClear={() => setUsuariosQuery('')}
                 placeholder={t('searchUsersPlaceholder')}
                 resultCount={visibleUsuarios.length}
@@ -1752,7 +1752,7 @@ function AdminDashboard() {
               <h2 style={styles.sectionTitle}>{t('patientManagement')}</h2>
               <UserSearchBar
                 value={pacientesQuery}
-                onChange={(e) => setPacientesQuery(e.target.value)}
+                onChange={(value) => setPacientesQuery(value)}
                 onClear={() => setPacientesQuery('')}
                 placeholder={t('searchUsersPlaceholder')}
                 resultCount={visiblePacientes.length}

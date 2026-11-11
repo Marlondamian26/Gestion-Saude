@@ -67,6 +67,12 @@ const counter = {
  * Cuadro de búsqueda reutilizable para las secciones de gestión del
  * AdminDashboard. Accesible: label asociado, type="search",
  * aria-describedby con el contador y contador con aria-live="polite".
+ *
+ * Contrato:
+ * - `value` (string): valor controlado del input.
+ * - `onChange(value: string)`: se invoca con el string tecleado (no con el
+ *   evento nativo). El padre es responsable de actualizar `value`.
+ * - `onClear()`: se invoca al pulsar el botón limpiar.
  */
 const UserSearchBar = ({
   value = '',
