@@ -58,7 +58,9 @@ function Doctores() {
   const fetchHorarios = async (doctorId) => {
     try {
       const response = await axiosInstance.get(`horarios/?doctor=${doctorId}`)
-      const horariosData = Array.isArray(response.data) ? response.data : []
+      const horariosData = Array.isArray(response.data)
+        ? response.data
+        : response.data?.results ?? []
       setHorarios(horariosData)
     } catch (error) {
       console.error('Error cargando horarios:', error)
